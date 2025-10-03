@@ -208,13 +208,6 @@
 
 - [x] 18. Fix saved decks page error handling
 
-
-
-
-
-
-- [ ] 18. Fix saved decks page error handling
-
   - Update SavedDecks component to handle 404 errors with specific message
   - Implement retry button functionality to re-fetch decks
   - Show "Cannot connect to server" for network errors
@@ -235,9 +228,7 @@
   - _Requirements: 6.1, 6.2, 6.3, 6.4_
 -
 
-- [ ] 20. Create nginx configuration for frontend
-
-
+- [x] 20. Create nginx configuration for frontend
 
   - Create `frontend/nginx.conf` with SPA routing (serve index.html for all routes)
   - Add gzip compression configuration
@@ -245,9 +236,7 @@
   - Configure proxy for /api/ requests to backend service
   - _Requirements: 6.5_
 
-- [ ] 21. Create frontend .dockerignore file
-
-
+- [x] 21. Create frontend .dockerignore file
 
   - Create `frontend/.dockerignore` to exclude node_modules, build, .git, .env.local
   - Add other unnecessary files (coverage, .vscode, README.md)
@@ -270,20 +259,16 @@
 
 
 
-- [ ] 23. Implement runtime environment variable support
-
-
-
+- [x] 23. Implement runtime environment variable support
 
   - Create `frontend/public/env-config.js` template for runtime env vars
   - Update `frontend/public/index.html` to include env-config.js script
   - Create `frontend/src/config.ts` to read from window.ENV or process.env
   - Update api.ts to use config.ts for API_BASE_URL
-
-
   - _Requirements: 6.7_
 
-- [ ] 24. Add health check to frontend Dockerfile
+- [x] 24. Add health check to frontend Dockerfile
+
 
   - Add HEALTHCHECK directive to Dockerfile
   - Configure health check to wget localhost every 30s
