@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  database:
+    env_file:
+      - .env.local
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootpassword}
+      MYSQL_DATABASE: ${DB_NAME:-clash_deck_builder_dev}
+      MYSQL_USER: ${DB_USER:-clash_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-clash_password}
+    volumes:
+      # Include seed data for development
+      - ./database/init/03-seed-data.sql:/docker-entrypoint-initdb.d/03-seed-data.sql
+    ports:
+      - "3306:3306"  # Expose database port for development tools
+
+  backend:
+    env_file:
+      - .env.local
+    environment:
+      DATABASE_URL: mysql+pymysql://${DB_USER:-clash_user}:${DB_PASSWORD:-clash_password}@database:3306/${DB_NAME:-clash_deck_builder_dev}
+      DEBUG: "true"
+      LOG_LEVEL: "debug"
+      CORS_ORIGINS: "http://localhost:3000,http://127.0.0.1:3000"
+    volumes:
+      # Mount source code for hot reloading
+      - ./backend/src:/app/src
+      - ./backend/tests:/app/tests
+    command: uv run uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload --log-level debug
+    # Remove restart policy for development
+    restart: "no"

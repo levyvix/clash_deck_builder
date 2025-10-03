@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  database:
+    env_file:
+      - .env
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    restart: always
+    volumes:
+      # Production volumes - no seed data, read-only init scripts
+      - mysql_data:/var/lib/mysql
+      - ./database/init:/docker-entrypoint-initdb.d:ro
+      - ./database/backups:/backups
+    # Don't expose database port in production
+    ports: []
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD}"]
+      timeout: 10s
+      retries: 5
+      interval: 60s
+      start_period: 60s
+
+  backend:
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: mysql+pymysql://${DB_USER}:${DB_PASSWORD}@database:3306/${DB_NAME}
+      DEBUG: "false"
+      LOG_LEVEL: "warning"
+      CORS_ORIGINS: ${CORS_ORIGINS}
+    restart: always
+    # No volume mounts in production - use built image
+    volumes: []
+    command: uv run uvicorn src.main:app --host 0.0.0.0 --port 8000 --workers 4
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      timeout: 10s
+      retries: 3
+      interval: 60s
+      start_period: 60s
