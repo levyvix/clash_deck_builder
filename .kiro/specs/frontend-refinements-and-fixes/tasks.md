@@ -286,3 +286,92 @@
   - Verify frontend can connect to backend API
   - Test with docker-compose up to ensure all services work together
   - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5, 6.6_
+
+- [x] 26. Implement filter sorting controls
+
+
+
+
+
+
+
+
+
+  - Add SortConfig interface and state management to `frontend/src/components/DeckBuilder.tsx`
+  - Create SortControls component with ascending/descending buttons for name, elixir, rarity, arena
+  - Implement sortCards function with proper handling for numeric, string, and rarity hierarchy sorting
+  - Add sort icons (↑↓) and active state styling for sort buttons
+  - Integrate sort controls with existing filter system
+  - _Requirements: 9.1, 9.2, 9.3, 9.4, 9.5, 9.6, 9.7_
+
+- [ ] 27. Fix saved decks visual contrast
+
+
+
+
+  - Update `frontend/src/styles/SavedDecks.css` with high contrast colors
+  - Set deck names to dark gray (#212121) for visibility
+  - Set elixir cost to blue (#1976d2) and card count to green (#388e3c)
+  - Add proper hover states that maintain text visibility
+  - Test color contrast ratios meet accessibility standards
+  - _Requirements: 10.1, 10.2, 10.3, 10.4, 10.5_
+
+- [ ] 28. Fix card selection animation glitches
+
+
+
+
+  - Add AnimationState interface and state management to DeckBuilder
+  - Implement addCardWithAnimation function that prevents multiple animations on same card
+  - Update card animation CSS to prevent flickering (remove default transitions)
+  - Add animation state cleanup after animation completes
+  - Test that cards don't disappear during selection and timing is consistent
+  - _Requirements: 11.1, 11.2, 11.3, 11.4, 11.5_
+
+- [ ] 29. Fix card opacity issues
+
+
+
+
+  - Implement replaceCardInSlot function that clears animation states
+  - Add getCardOpacity function that ensures full opacity unless explicitly animating
+  - Update card rendering to use dynamic opacity calculation
+  - Test that replaced cards display with full opacity immediately
+  - Verify opacity states are properly managed during card swaps
+  - _Requirements: 12.1, 12.2, 12.3, 12.4, 12.5_
+
+- [ ] 30. Implement evolution card detection
+
+
+
+
+  - Create EVOLUTION_CAPABLE_CARDS set or integrate with API data
+  - Add canCardEvolve function to check evolution capability
+  - Update DeckSlot component to conditionally show evolution toggle
+  - Extend Card interface to include can_evolve field if available from API
+  - Test that evolution toggle only appears for evolution-capable cards
+  - _Requirements: 13.1, 13.2, 13.3, 13.4, 13.5_
+
+- [ ] 31. Implement automatic evolution for first two slots
+
+
+
+
+  - Create updateEvolutionStates function that auto-marks first two slots as evolution
+  - Update addCardToSlot function to call updateEvolutionStates
+  - Update swapCards function to recalculate evolution states after swap
+  - Modify drag and drop handlers to trigger evolution state updates
+  - Test that cards in positions 1-2 are automatically marked as evolution if capable
+  - _Requirements: 14.1, 14.2, 14.3, 14.4, 14.5, 14.6_
+
+- [ ] 32. Add blue outline styling to deck slots
+
+
+
+
+  - Update `frontend/src/styles/DeckSlot.css` with blue outline for empty slots
+  - Add drag-over state with darker blue and glow effect
+  - Add subtle blue outline for filled slots
+  - Add green outline when deck is complete
+  - Implement getDeckSlotClasses function for dynamic class application
+  - _Requirements: 15.1, 15.2, 15.3, 15.4, 15.5_

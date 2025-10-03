@@ -770,10 +770,457 @@ interface DeckPayload {
 - Safari (latest)
 - Edge (latest)
 
+### 9. Filter Sorting Controls
+
+#### Sort State Management
+
+```typescript
+interface SortConfig {
+  field: 'name' | 'elixir_cost' | 'rarity' | 'arena';
+  direction: 'asc' | 'desc';
+}
+
+const [sortConfig, setSortConfig] = useState<SortConfig>({ field: 'name', direction: 'asc' });
+
+// Sort function with proper type handling
+const sortCards = (cards: Card[], config: SortConfig): Card[] => {
+  return [...cards].sort((a, b) => {
+    let aValue: any = a[config.field];
+    let bValue: any = b[config.field];
+    
+    // Special handling for rarity hierarchy
+    if (config.field === 'rarity') {
+      const rarityOrder = { 'Common': 1, 'Rare': 2, 'Epic': 3, 'Legendary': 4, 'Champion': 5 };
+      aValue = rarityOrder[a.rarity as keyof typeof rarityOrder] || 0;
+      bValue = rarityOrder[b.rarity as keyof typeof rarityOrder] || 0;
+    }
+    
+    // Numeric comparison
+    if (typeof aValue === 'number' && typeof bValue === 'number') {
+      return config.direction === 'asc' ? aValue - bValue : bValue - aValue;
+    }
+    
+    // String comparison
+    const comparison = aValue.toString().localeCompare(bValue.toString());
+    return config.direction === 'asc' ? comparison : -comparison;
+  });
+};
+```
+
+#### Sort Controls UI
+
+```typescript
+const SortControls: React.FC<{ sortConfig: SortConfig; onSort: (config: SortConfig) => void }> = ({ sortConfig, onSort }) => {
+  const handleSort = (field: SortConfig['field']) => {
+    const newDirection = sortConfig.field === field && sortConfig.direction === 'asc' ? 'desc' : 'asc';
+    onSort({ field, direction: newDirection });
+  };
+
+  return (
+    <div className="sort-controls">
+      {[
+        { field: 'name' as const, label: 'Name' },
+        { field: 'elixir_cost' as const, label: 'Elixir' },
+        { field: 'rarity' as const, label: 'Rarity' },
+        { field: 'arena' as const, label: 'Arena' }
+      ].map(({ field, label }) => (
+        <button
+          key={field}
+          className={`sort-button ${sortConfig.field === field ? 'active' : ''}`}
+          onClick={() => handleSort(field)}
+        >
+          {label}
+          <span className="sort-icon">
+            {sortConfig.field === field ? (sortConfig.direction === 'asc' ? '↑' : '↓') : '↕'}
+          </span>
+        </button>
+      ))}
+    </div>
+  );
+};
+```
+
+### 10. Saved Decks Visual Fixes
+
+#### Color Contrast Solution
+
+```css
+/* SavedDecks.css */
+.saved-deck-card {
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: var(--elevation-2);
+}
+
+.saved-deck-card__name {
+  color: #212121; /* Dark gray for high contrast */
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.saved-deck-card__stats {
+  color: #424242; /* Medium gray for secondary text */
+  font-size: 0.875rem;
+  display: flex;
+  gap: 16px;
+}
+
+.saved-deck-card__elixir {
+  color: #1976d2; /* Blue for elixir cost */
+  font-weight: 500;
+}
+
+.saved-deck-card__count {
+  color: #388e3c; /* Green for card count */
+  font-weight: 500;
+}
+
+.saved-deck-card:hover {
+  box-shadow: var(--elevation-4);
+  border-color: #1976d2;
+}
+
+.saved-deck-card:hover .saved-deck-card__name {
+  color: #1976d2;
+}
+```
+
+### 11. Card Selection Animation Fixes
+
+#### Animation State Management
+
+```typescript
+interface AnimationState {
+  [cardId: number]: {
+    isAnimating: boolean;
+    animationType: 'entering' | 'leaving' | null;
+  };
+}
+
+const [animationStates, setAnimationStates] = useState<AnimationState>({});
+
+// Prevent multiple animations on same card
+const addCardWithAnimation = (card: Card, slotIndex: number) => {
+  const cardId = card.id;
+  
+  // Skip if already animating
+  if (animationStates[cardId]?.isAnimating) {
+    return;
+  }
+  
+  // Set animation state
+  setAnimationStates(prev => ({
+    ...prev,
+    [cardId]: { isAnimating: true, animationType: 'entering' }
+  }));
+  
+  // Add card immediately (no delay)
+  addCardToDeck(card, slotIndex);
+  
+  // Clear animation state after animation completes
+  setTimeout(() => {
+    setAnimationStates(prev => ({
+      ...prev,
+      [cardId]: { isAnimating: false, animationType: null }
+    }));
+  }, 300); // Match animation duration
+};
+```
+
+#### Fixed Animation CSS
+
+```css
+/* Prevent flickering by using opacity: 1 as default */
+.deck-slot__card {
+  opacity: 1;
+  transform: scale(1);
+  transition: none; /* No default transition to prevent conflicts */
+}
+
+/* Only animate when explicitly triggered */
+.deck-slot__card--entering {
+  animation: cardEnter 300ms var(--ease-decelerate) forwards;
+}
+
+.deck-slot__card--leaving {
+  animation: cardLeave 300ms var(--ease-accelerate) forwards;
+}
+
+@keyframes cardEnter {
+  0% {
+    opacity: 0;
+    transform: scale(0.8) translateY(-10px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes cardLeave {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.8) translateY(10px);
+  }
+}
+```
+
+### 12. Card Opacity and State Management
+
+#### Clean State Transitions
+
+```typescript
+const replaceCardInSlot = (newCard: Card, slotIndex: number) => {
+  // Clear any existing animation states for this slot
+  const oldCard = deck[slotIndex]?.card;
+  if (oldCard) {
+    setAnimationStates(prev => {
+      const newState = { ...prev };
+      delete newState[oldCard.id];
+      return newState;
+    });
+  }
+  
+  // Update deck with new card (full opacity immediately)
+  const newDeck = [...deck];
+  newDeck[slotIndex] = { card: newCard, isEvolution: false };
+  setDeck(newDeck);
+  
+  // Update cards in deck tracking
+  const newCardsInDeck = new Set(cardsInDeck);
+  if (oldCard) newCardsInDeck.delete(oldCard.id);
+  newCardsInDeck.add(newCard.id);
+  setCardsInDeck(newCardsInDeck);
+};
+
+// Ensure cards always render with full opacity unless explicitly animating
+const getCardOpacity = (card: Card): number => {
+  const animState = animationStates[card.id];
+  if (animState?.isAnimating && animState.animationType === 'leaving') {
+    return 0; // Only reduce opacity during leave animation
+  }
+  return 1; // Always full opacity otherwise
+};
+```
+
+### 13. Evolution Card Logic Enhancement
+
+#### Evolution Capability Detection
+
+```typescript
+// Define which cards support evolution (this would come from API or static data)
+const EVOLUTION_CAPABLE_CARDS = new Set([
+  // Add card IDs that support evolution
+  // This data should come from the Clash Royale API or be maintained as static data
+  1, 5, 12, 23, 34, // Example card IDs
+]);
+
+const canCardEvolve = (cardId: number): boolean => {
+  return EVOLUTION_CAPABLE_CARDS.has(cardId);
+};
+
+// Update DeckSlot component
+const DeckSlot: React.FC<DeckSlotProps> = ({ slot, onToggleEvolution, slotIndex }) => {
+  const showEvolutionToggle = slot?.card && canCardEvolve(slot.card.id);
+  
+  return (
+    <div className="deck-slot">
+      {slot?.card && (
+        <div className="deck-slot__card">
+          <CardDisplay card={slot.card} />
+          {showEvolutionToggle && (
+            <button
+              className={`evolution-toggle ${slot.isEvolution ? 'active' : ''}`}
+              onClick={() => onToggleEvolution(slotIndex)}
+            >
+              EVO
+            </button>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+```
+
+#### Evolution Data Integration
+
+```typescript
+// Extend Card interface to include evolution capability
+interface Card {
+  id: number;
+  name: string;
+  elixir_cost: number;
+  rarity: string;
+  arena: number;
+  image_url: string;
+  can_evolve?: boolean; // Add this field from API or static data
+}
+
+// Use can_evolve field if available, fallback to static list
+const canCardEvolve = (card: Card): boolean => {
+  if (card.can_evolve !== undefined) {
+    return card.can_evolve;
+  }
+  return EVOLUTION_CAPABLE_CARDS.has(card.id);
+};
+```
+
+### 14. Automatic Evolution for First Two Slots
+
+#### Auto-Evolution Logic
+
+```typescript
+const updateEvolutionStates = (newDeck: DeckSlot[]) => {
+  const updatedDeck = newDeck.map((slot, index) => {
+    if (!slot?.card) return slot;
+    
+    const shouldBeEvolution = index < 2 && canCardEvolve(slot.card);
+    return {
+      ...slot,
+      isEvolution: shouldBeEvolution
+    };
+  });
+  
+  setDeck(updatedDeck);
+};
+
+// Update when cards are added or moved
+const addCardToSlot = (card: Card, slotIndex: number) => {
+  const newDeck = [...deck];
+  newDeck[slotIndex] = { card, isEvolution: false }; // Will be updated by updateEvolutionStates
+  
+  updateEvolutionStates(newDeck);
+  
+  // Update tracking
+  const newCardsInDeck = new Set(cardsInDeck);
+  newCardsInDeck.add(card.id);
+  setCardsInDeck(newCardsInDeck);
+};
+
+// Update when cards are swapped
+const swapCards = (fromIndex: number, toIndex: number) => {
+  const newDeck = [...deck];
+  [newDeck[fromIndex], newDeck[toIndex]] = [newDeck[toIndex], newDeck[fromIndex]];
+  
+  updateEvolutionStates(newDeck);
+};
+```
+
+#### Drag and Drop Evolution Updates
+
+```typescript
+const handleDrop = (e: React.DragEvent, targetSlotIndex: number) => {
+  e.preventDefault();
+  const dragData: DragData = JSON.parse(e.dataTransfer.getData('application/json'));
+  
+  if (dragData.sourceType === 'gallery') {
+    const card = cards.find(c => c.id === dragData.cardId);
+    if (card && !cardsInDeck.has(card.id)) {
+      addCardToSlot(card, targetSlotIndex);
+    }
+  } else if (dragData.sourceType === 'deck' && dragData.sourceIndex !== undefined) {
+    if (dragData.sourceIndex !== targetSlotIndex) {
+      swapCards(dragData.sourceIndex, targetSlotIndex);
+    }
+  }
+};
+```
+
+### 15. Deck Slot Visual Enhancement
+
+#### Blue Outline Styling
+
+```css
+.deck-slot {
+  width: 80px;
+  height: 100px;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  position: relative;
+  transition: border-color var(--duration-short) var(--ease-standard);
+}
+
+/* Empty slot styling */
+.deck-slot--empty {
+  border-color: #2196f3; /* Blue outline */
+  background: linear-gradient(135deg, rgba(33, 150, 243, 0.1), rgba(33, 150, 243, 0.05));
+}
+
+.deck-slot--empty::before {
+  content: '+';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 24px;
+  color: #2196f3;
+  opacity: 0.6;
+}
+
+/* Drag over state */
+.deck-slot--drag-over {
+  border-color: #1976d2; /* Darker blue */
+  background: rgba(33, 150, 243, 0.2);
+  box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.3);
+}
+
+/* Filled slot */
+.deck-slot--filled {
+  border-color: rgba(33, 150, 243, 0.3); /* Subtle blue */
+}
+
+.deck-slot--filled:hover {
+  border-color: #2196f3;
+}
+
+/* Complete deck state */
+.deck-area--complete .deck-slot--filled {
+  border-color: #4caf50; /* Green when deck is complete */
+}
+```
+
+#### Dynamic Class Application
+
+```typescript
+const getDeckSlotClasses = (slot: DeckSlot | null, isDragOver: boolean, isDeckComplete: boolean) => {
+  const classes = ['deck-slot'];
+  
+  if (!slot?.card) {
+    classes.push('deck-slot--empty');
+  } else {
+    classes.push('deck-slot--filled');
+  }
+  
+  if (isDragOver) {
+    classes.push('deck-slot--drag-over');
+  }
+  
+  return classes.join(' ');
+};
+
+// In DeckSlot component
+<div 
+  className={getDeckSlotClasses(slot, isDragOver, isDeckComplete)}
+  onDragOver={handleDragOver}
+  onDragLeave={handleDragLeave}
+  onDrop={handleDrop}
+>
+```
+
 ## Performance Considerations
 
 - **Animation Performance**: Use `transform` and `opacity` for GPU acceleration
 - **Drag Preview**: Use lightweight ghost element
-- **Re-renders**: Memoize expensive calculations
+- **Re-renders**: Memoize expensive calculations with useMemo for sorting
 - **Image Loading**: Lazy load card images in gallery
 - **Docker Image Size**: Multi-stage build reduces final image size
+- **Evolution Checks**: Cache evolution capability results to avoid repeated lookups
+- **Animation State**: Clean up animation states to prevent memory leaks

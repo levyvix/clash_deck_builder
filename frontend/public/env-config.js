@@ -3,5 +3,5 @@
 // Values are replaced at container startup time for Docker deployments
 
 window.ENV = {
-  REACT_APP_API_BASE_URL: '${REACT_APP_API_BASE_URL}' || 'http://localhost:8000'
+  REACT_APP_API_BASE_URL: '${REACT_APP_API_BASE_URL}'
 };

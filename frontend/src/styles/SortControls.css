@@ -1,0 +1,92 @@
+.sort-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+.sort-controls__label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #424242;
+  white-space: nowrap;
+}
+
+.sort-controls__buttons {
+  display: flex;
+  gap: var(--spacing-xs);
+  flex-wrap: wrap;
+}
+
+.sort-button {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #424242;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--duration-short) var(--ease-standard);
+  user-select: none;
+}
+
+.sort-button:hover {
+  border-color: #2196f3;
+  background: rgba(33, 150, 243, 0.04);
+  color: #1976d2;
+}
+
+.sort-button--active {
+  border-color: #2196f3;
+  background: #2196f3;
+  color: #ffffff;
+  box-shadow: var(--elevation-2);
+}
+
+.sort-button--active:hover {
+  background: #1976d2;
+  border-color: #1976d2;
+  color: #ffffff;
+}
+
+.sort-button__label {
+  font-weight: inherit;
+}
+
+.sort-button__icon {
+  font-size: 0.75rem;
+  font-weight: bold;
+  opacity: 0.8;
+}
+
+.sort-button--active .sort-button__icon {
+  opacity: 1;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .sort-controls {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-sm);
+  }
+  
+  .sort-controls__buttons {
+    width: 100%;
+    justify-content: flex-start;
+  }
+  
+  .sort-button {
+    flex: 1;
+    min-width: 0;
+    justify-content: center;
+  }
+}

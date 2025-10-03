@@ -18,15 +18,15 @@ const getEnvVar = (key: string, defaultValue: string): string => {
   // Check window.ENV first (runtime configuration for Docker)
   if (typeof window !== 'undefined' && window.ENV && window.ENV[key as keyof typeof window.ENV]) {
     const value = window.ENV[key as keyof typeof window.ENV];
-    // Don't use the value if it's still a template string (not replaced)
-    if (value && !value.startsWith('${')) {
+    // Don't use the value if it's still a template string (not replaced) or empty
+    if (value && !value.startsWith('${') && value.trim() !== '') {
       return value;
     }
   }
   
   // Fall back to process.env (build-time configuration)
   const processEnvValue = process.env[key];
-  if (processEnvValue) {
+  if (processEnvValue && processEnvValue.trim() !== '') {
     return processEnvValue;
   }
   

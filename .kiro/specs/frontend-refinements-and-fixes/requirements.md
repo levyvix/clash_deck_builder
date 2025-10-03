@@ -116,3 +116,90 @@ This feature focuses on refining the Clash Royale Deck Builder frontend with Mat
 4. WHEN network errors occur THEN the frontend SHALL handle them gracefully
 5. WHEN the API endpoints are called THEN they SHALL match the backend route definitions exactly
 6. WHEN debugging API issues THEN console logs SHALL show the full request URL and payload
+
+### Requirement 9: Filter Sorting Controls
+
+**User Story:** As a user, I want to sort filtered results in ascending or descending order, so that I can find cards more efficiently.
+
+#### Acceptance Criteria
+
+1. WHEN filters are displayed THEN there SHALL be ascending/descending toggle buttons for sortable fields
+2. WHEN I click ascending sort THEN cards SHALL be sorted from lowest to highest value
+3. WHEN I click descending sort THEN cards SHALL be sorted from highest to lowest value
+4. WHEN sorting by elixir cost THEN cards SHALL be ordered numerically (1, 2, 3... or 10, 9, 8...)
+5. WHEN sorting by name THEN cards SHALL be ordered alphabetically (A-Z or Z-A)
+6. WHEN sorting by rarity THEN cards SHALL be ordered by rarity hierarchy (Common, Rare, Epic, Legendary, Champion)
+7. WHEN a sort direction is active THEN the corresponding button SHALL show visual feedback (highlighted/pressed state)
+
+### Requirement 10: Saved Decks Visual Fixes
+
+**User Story:** As a user, I want to clearly see my saved deck information, so that I can identify and select the right deck.
+
+#### Acceptance Criteria
+
+1. WHEN viewing saved decks THEN deck names SHALL be visible with sufficient color contrast
+2. WHEN viewing saved decks THEN average elixir cost SHALL be visible with sufficient color contrast
+3. WHEN viewing saved decks THEN card count SHALL be visible with sufficient color contrast
+4. WHEN saved deck text is displayed THEN it SHALL use dark colors on light background for readability
+5. WHEN hovering over saved decks THEN text SHALL remain clearly visible
+
+### Requirement 11: Card Selection Animation Fixes
+
+**User Story:** As a user, I want smooth card selection animations without visual glitches, so that the interface feels polished.
+
+#### Acceptance Criteria
+
+1. WHEN I click on a card THEN the card SHALL NOT disappear momentarily during selection
+2. WHEN adding cards to deck THEN each subsequent card SHALL animate consistently without increasing delay
+3. WHEN a card is selected THEN the animation SHALL complete smoothly without flickering
+4. WHEN multiple cards are added quickly THEN animations SHALL not interfere with each other
+5. WHEN the deck has more cards THEN new card animations SHALL maintain the same timing
+
+### Requirement 12: Card Opacity and State Management
+
+**User Story:** As a user, I want cards to display with proper opacity states, so that I can clearly see which cards are available.
+
+#### Acceptance Criteria
+
+1. WHEN I remove a card from the deck THEN the replacement card SHALL display with full opacity
+2. WHEN I add a card to fill an empty slot THEN the card SHALL display with full opacity immediately
+3. WHEN cards are swapped in deck slots THEN both cards SHALL maintain proper opacity
+4. WHEN a card is moved between slots THEN it SHALL not retain any opacity effects from previous states
+5. WHEN the deck is cleared THEN all replacement cards SHALL display with full opacity
+
+### Requirement 13: Evolution Card Logic Enhancement
+
+**User Story:** As a user, I want evolution marking to only work with cards that actually support evolution, so that I don't make invalid deck configurations.
+
+#### Acceptance Criteria
+
+1. WHEN a card does not support evolution THEN the evolution toggle SHALL NOT be available
+2. WHEN a card supports evolution THEN the evolution toggle SHALL be visible and functional
+3. WHEN displaying evolution options THEN the system SHALL first check if the card has evolution capability
+4. WHEN a non-evolution card is in deck THEN no evolution UI elements SHALL be shown for that card
+5. WHEN loading card data THEN the system SHALL identify which cards support evolution
+
+### Requirement 14: Automatic Evolution for First Two Slots
+
+**User Story:** As a user, I want the first two deck slots to automatically handle evolution states, so that deck building follows optimal patterns.
+
+#### Acceptance Criteria
+
+1. WHEN the first two slots are filled THEN those cards SHALL be automatically marked as evolution IF they support it
+2. WHEN I drag a card to slot 1 or 2 THEN it SHALL be automatically marked as evolution IF it supports evolution
+3. WHEN I drag a card from slot 1 or 2 to another slot THEN it SHALL be automatically unmarked as evolution
+4. WHEN I swap cards between slots 1-2 and slots 3-8 THEN evolution states SHALL update automatically
+5. WHEN a card in slot 1 or 2 doesn't support evolution THEN it SHALL remain unmarked
+6. WHEN cards are rearranged THEN only cards in positions 1 and 2 SHALL be eligible for automatic evolution marking
+
+### Requirement 15: Deck Slot Visual Enhancement
+
+**User Story:** As a user, I want clear visual indicators for deck slots, so that I can easily see where to place cards.
+
+#### Acceptance Criteria
+
+1. WHEN deck slots are empty THEN they SHALL display a blue outline border
+2. WHEN hovering over empty slots during drag THEN the blue outline SHALL become more prominent
+3. WHEN slots contain cards THEN the blue outline SHALL be subtle or hidden
+4. WHEN dragging cards over slots THEN the blue outline SHALL provide clear drop target feedback
+5. WHEN the deck is complete THEN slot outlines SHALL indicate the deck is full

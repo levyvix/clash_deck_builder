@@ -1,11 +1,13 @@
 import React, { useMemo } from 'react';
-import { Card, FilterState } from '../types';
+import { Card, FilterState, SortConfig } from '../types';
 import CardDisplay from './CardDisplay';
 import '../styles/CardGallery.css';
 
 interface CardGalleryProps {
   cards: Card[];
   filters: FilterState;
+  sortConfig: SortConfig;
+  sortCards: (cards: Card[], config: SortConfig) => Card[];
   onCardClick: (card: Card) => void;
   selectedCard: Card | null;
   onAddToDeck: (card: Card) => void;
@@ -16,15 +18,18 @@ interface CardGalleryProps {
 const CardGallery: React.FC<CardGalleryProps> = ({
   cards,
   filters,
+  sortConfig,
+  sortCards,
   onCardClick,
   selectedCard,
   onAddToDeck,
   loading = false,
   cardsInDeck = new Set(),
 }) => {
-  // Filter cards based on active filters
-  const filteredCards = useMemo(() => {
-    return cards.filter((card) => {
+  // Filter and sort cards based on active filters and sort configuration
+  const filteredAndSortedCards = useMemo(() => {
+    // First, filter the cards
+    const filtered = cards.filter((card) => {
       // Name filter (case-insensitive)
       if (filters.name && !card.name.toLowerCase().includes(filters.name.toLowerCase())) {
         return false;
@@ -47,7 +52,10 @@ const CardGallery: React.FC<CardGalleryProps> = ({
 
       return true;
     });
-  }, [cards, filters]);
+
+    // Then, sort the filtered cards
+    return sortCards(filtered, sortConfig);
+  }, [cards, filters, sortConfig, sortCards]);
 
   // Loading skeleton
   if (loading) {
@@ -71,7 +79,7 @@ const CardGallery: React.FC<CardGalleryProps> = ({
   }
 
   // Empty state
-  if (filteredCards.length === 0) {
+  if (filteredAndSortedCards.length === 0) {
     return (
       <div className="card-gallery">
         <div className="card-gallery__empty">
@@ -86,11 +94,11 @@ const CardGallery: React.FC<CardGalleryProps> = ({
     <div className="card-gallery">
       <div className="card-gallery__header">
         <p className="card-gallery__count">
-          {filteredCards.length} {filteredCards.length === 1 ? 'card' : 'cards'} found
+          {filteredAndSortedCards.length} {filteredAndSortedCards.length === 1 ? 'card' : 'cards'} found
         </p>
       </div>
       <div className="card-gallery__grid">
-        {filteredCards.map((card) => (
+        {filteredAndSortedCards.map((card) => (
           <CardDisplay
             key={card.id}
             card={card}

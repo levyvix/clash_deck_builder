@@ -34,6 +34,11 @@ export interface FilterState {
   type: string | null;
 }
 
+export interface SortConfig {
+  field: 'name' | 'elixir_cost' | 'rarity' | 'arena';
+  direction: 'asc' | 'desc';
+}
+
 export type NotificationType = 'success' | 'error' | 'info';
 
 export interface Notification {

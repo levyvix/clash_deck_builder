@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Card, DeckSlot as DeckSlotType, FilterState, Notification as NotificationType } from '../types';
+import { Card, DeckSlot as DeckSlotType, FilterState, SortConfig, Notification as NotificationType } from '../types';
 import { fetchCards, createDeck, ApiError } from '../services/api';
 import { 
   calculateAverageElixir, 
@@ -10,6 +10,7 @@ import {
 import DeckSlot from './DeckSlot';
 import CardGallery from './CardGallery';
 import CardFilters from './CardFilters';
+import SortControls from './SortControls';
 import Notification from './Notification';
 import RemoveDropZone from './RemoveDropZone';
 import '../styles/DeckBuilder.css';
@@ -30,6 +31,10 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ initialDeck, onDeckSaved }) =
     elixirCost: null,
     rarity: null,
     type: null,
+  });
+  const [sortConfig, setSortConfig] = useState<SortConfig>({
+    field: 'name',
+    direction: 'asc'
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -116,6 +121,50 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ initialDeck, onDeckSaved }) =
   const deckComplete = useMemo(() => {
     return isDeckComplete(currentDeck);
   }, [currentDeck]);
+
+  // Sort cards function with proper handling for different data types
+  const sortCards = useMemo(() => {
+    return (cards: Card[], config: SortConfig): Card[] => {
+      return [...cards].sort((a, b) => {
+        let aValue: any = a[config.field];
+        let bValue: any = b[config.field];
+        
+        // Special handling for rarity hierarchy
+        if (config.field === 'rarity') {
+          const rarityOrder = { 
+            'Common': 1, 
+            'Rare': 2, 
+            'Epic': 3, 
+            'Legendary': 4, 
+            'Champion': 5 
+          };
+          aValue = rarityOrder[a.rarity as keyof typeof rarityOrder] || 0;
+          bValue = rarityOrder[b.rarity as keyof typeof rarityOrder] || 0;
+        }
+        
+        // Handle arena field (convert to number if it's a string like "Arena 1")
+        if (config.field === 'arena') {
+          // Extract number from arena string or use 0 if not available
+          const getArenaNumber = (arena: string | undefined): number => {
+            if (!arena) return 0;
+            const match = arena.match(/\d+/);
+            return match ? parseInt(match[0], 10) : 0;
+          };
+          aValue = getArenaNumber(a.arena);
+          bValue = getArenaNumber(b.arena);
+        }
+        
+        // Numeric comparison
+        if (typeof aValue === 'number' && typeof bValue === 'number') {
+          return config.direction === 'asc' ? aValue - bValue : bValue - aValue;
+        }
+        
+        // String comparison (for name field)
+        const comparison = aValue.toString().localeCompare(bValue.toString());
+        return config.direction === 'asc' ? comparison : -comparison;
+      });
+    };
+  }, []);
 
   // Add notification helper
   const addNotification = (message: string, type: NotificationType['type']) => {
@@ -474,9 +523,15 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ initialDeck, onDeckSaved }) =
             onFilterChange={setFilters}
             onClearFilters={clearFilters}
           />
+          <SortControls
+            sortConfig={sortConfig}
+            onSort={setSortConfig}
+          />
           <CardGallery
             cards={cards}
             filters={filters}
+            sortConfig={sortConfig}
+            sortCards={sortCards}
             onCardClick={handleGalleryCardClick}
             selectedCard={selectedGalleryCard}
             onAddToDeck={addCardToDeck}
