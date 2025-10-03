@@ -48,6 +48,8 @@ services:
       # Migration settings
       MIGRATION_TIMEOUT: 300
       MIGRATION_LOG_LEVEL: info
+      MIGRATION_RETRY_COUNT: 3
+      MIGRATION_RETRY_DELAY: 5
     ports:
       - "${BACKEND_PORT:-8000}:8000"
     depends_on:

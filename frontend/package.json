@@ -20,8 +20,11 @@
   },
   "scripts": {
     "start": "react-scripts start",
+    "start:local": "cp .env.local .env && react-scripts start",
+    "start:docker": "cp .env.docker .env && react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
+    "test:run": "react-scripts test --run",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {

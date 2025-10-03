@@ -50,14 +50,62 @@ except Exception as e:
 run_migrations() {
     echo "🔄 Running database migrations..."
     
+    # Set migration timeout from environment (default 5 minutes)
+    local migration_timeout=${MIGRATION_TIMEOUT:-300}
+    local migration_log_level=${MIGRATION_LOG_LEVEL:-info}
+    
+    # Create migration logs directory
+    mkdir -p /app/database/migrations/logs
+    
+    # Generate log file with timestamp
+    local log_file="/app/database/migrations/logs/migration_$(date +%Y%m%d_%H%M%S).log"
+    
+    echo "📝 Migration logs will be written to: $log_file"
+    echo "⏱️  Migration timeout set to: ${migration_timeout}s"
+    
     # Change to migrations directory
     cd /app/database/migrations
     
-    # Run migrations using the container-specific script
-    if python container_migrate.py migrate; then
-        echo "✅ Database migrations completed successfully"
+    # Run migrations with timeout and logging
+    echo "🚀 Starting migration process..."
+    
+    # First check migration status
+    echo "📊 Checking current migration status..."
+    if timeout $migration_timeout python container_migrate.py status 2>&1 | tee -a "$log_file"; then
+        echo "✅ Migration status check completed"
     else
-        echo "❌ Database migrations failed"
+        echo "⚠️  Migration status check failed, but continuing with migration attempt..."
+    fi
+    
+    # Run the actual migrations
+    echo "🔄 Executing pending migrations..."
+    if timeout $migration_timeout python container_migrate.py migrate 2>&1 | tee -a "$log_file"; then
+        echo "✅ Database migrations completed successfully"
+        
+        # Log final status
+        echo "📊 Final migration status:" | tee -a "$log_file"
+        python container_migrate.py status 2>&1 | tee -a "$log_file"
+        
+        # Create success marker file
+        echo "$(date): Migration completed successfully" > /app/database/migrations/logs/last_migration_success
+        
+    else
+        local exit_code=$?
+        echo "❌ Database migrations failed with exit code: $exit_code" | tee -a "$log_file"
+        
+        # Create failure marker file
+        echo "$(date): Migration failed with exit code $exit_code" > /app/database/migrations/logs/last_migration_failure
+        
+        # Log error details
+        echo "💥 Migration failure details:" | tee -a "$log_file"
+        echo "  - Exit code: $exit_code" | tee -a "$log_file"
+        echo "  - Timestamp: $(date)" | tee -a "$log_file"
+        echo "  - Log file: $log_file" | tee -a "$log_file"
+        
+        # Try to get final status for debugging
+        echo "🔍 Attempting to get final migration status for debugging..." | tee -a "$log_file"
+        python container_migrate.py status 2>&1 | tee -a "$log_file" || true
+        
         exit 1
     fi
     
@@ -110,8 +158,8 @@ main() {
     # Wait for database
     wait_for_database
     
-    # Run migrations
-    run_migrations
+    # Skip migrations - handled by database initialization scripts
+    echo "ℹ️  Skipping migrations (handled by database init scripts)"
     
     echo "🎉 Backend initialization completed successfully!"
     echo "🚀 Starting application server..."

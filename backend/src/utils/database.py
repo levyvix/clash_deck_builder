@@ -240,17 +240,15 @@ class DatabaseManager:
                 self.initialize()
             
             with self.get_connection() as conn:
-                cursor = conn.cursor()
+                cursor = conn.cursor(dictionary=True)
                 
                 # Test basic connectivity
-                cursor.execute("SELECT 1 as test, NOW() as current_time, VERSION() as version")
+                cursor.execute("SELECT 1")
                 result = cursor.fetchone()
                 
                 if result:
                     health_status.update({
                         "status": "healthy",
-                        "current_time": str(result[1]),
-                        "mysql_version": result[2],
                         "connection_test": "passed"
                     })
                 

@@ -25,7 +25,7 @@ class Settings(BaseSettings):
     clash_royale_api_base_url: str = "https://api.clashroyale.com/v1"
     
     # CORS configuration
-    cors_origins: List[str] = ["http://localhost:3000"]
+    cors_origins: str = "http://localhost:3000"
     
     # Application configuration
     debug: bool = False
@@ -66,13 +66,13 @@ class Settings(BaseSettings):
                 raise ValueError("CLASH_ROYALE_API_KEY must be set in production")
         return v
     
-    @field_validator('cors_origins', mode='before')
-    @classmethod
-    def parse_cors_origins(cls, v):
-        if isinstance(v, str):
-            # Handle comma-separated string from environment variables
-            return [origin.strip() for origin in v.split(',') if origin.strip()]
-        return v
+    @computed_field
+    @property
+    def cors_origins_list(self) -> List[str]:
+        """Parse CORS origins from string to list."""
+        if isinstance(self.cors_origins, str):
+            return [origin.strip() for origin in self.cors_origins.split(',') if origin.strip()]
+        return [self.cors_origins] if self.cors_origins else []
     
     def get_database_config(self) -> dict:
         """Get database configuration dictionary for mysql-connector-python."""

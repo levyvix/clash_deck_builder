@@ -47,8 +47,11 @@ The entrypoint script orchestrates the container startup process:
 Specialized migration runner optimized for container environments:
 
 - Uses environment variables for configuration
-- Container-friendly logging to stdout
-- Simplified error handling and reporting
+- Container-friendly logging to stdout with enhanced formatting
+- Retry logic with configurable attempts and delays
+- Database readiness checking before migration execution
+- Success/failure marker files for health check integration
+- Comprehensive error handling and reporting
 - Integration with Docker health checks
 
 ### 3. Health Check System
@@ -92,6 +95,8 @@ DB_NAME=clash_deck_builder   # Database name
 # Optional Migration Settings
 MIGRATION_TIMEOUT=300        # Migration timeout in seconds
 MIGRATION_LOG_LEVEL=info     # Migration logging level
+MIGRATION_RETRY_COUNT=3      # Number of retry attempts on failure
+MIGRATION_RETRY_DELAY=5      # Delay between retries in seconds
 ```
 
 ### Docker Compose Integration
@@ -111,6 +116,8 @@ backend:
     # Migration settings
     MIGRATION_TIMEOUT: 300
     MIGRATION_LOG_LEVEL: info
+    MIGRATION_RETRY_COUNT: 3
+    MIGRATION_RETRY_DELAY: 5
   
   depends_on:
     database:

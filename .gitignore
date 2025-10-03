@@ -55,8 +55,22 @@ Thumbs.db
 *.db
 *.sqlite3
 
+# Database backups
+database/backups/*.sql
+database/backups/*.sql.gz
+database/backups/*.sql.zip
+database/backups/*_backup_*
+database/backups/*_rollback_*
+
 # Environment variables
+.env
 .env.local
+.env.docker
 .env.development.local
 .env.test.local
 .env.production.local
+frontend/.env
+frontend/.env.local
+frontend/.env.docker
+backend/.env
+backend/.env.local

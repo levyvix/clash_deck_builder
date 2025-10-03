@@ -1,0 +1,6 @@
+# This directory stores database backups
+# 
+# Backup files are automatically created by the backup scripts
+# and should not be committed to version control
+#
+# The .gitkeep file ensures this directory exists in the repository

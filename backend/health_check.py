@@ -74,6 +74,60 @@ def check_migrations_table():
         print(f"Migration table check failed: {e}")
         return False
 
+
+def check_migration_status():
+    """Check migration status and verify no failures occurred"""
+    try:
+        # Check for migration success/failure markers
+        success_marker = Path("/app/database/migrations/logs/migration_success")
+        failure_marker = Path("/app/database/migrations/logs/migration_failure")
+        
+        if failure_marker.exists():
+            print("Migration failure marker found - migrations failed during startup")
+            return False
+        
+        if success_marker.exists():
+            print("Migration success marker found - migrations completed successfully")
+            return True
+        
+        # If no markers exist, check if migrations are needed
+        # This could happen on first startup before migrations run
+        print("No migration markers found - checking if migrations are needed")
+        
+        # Try to connect and check migration status
+        conn = mysql.connector.connect(
+            host=os.getenv('DB_HOST', 'database'),
+            port=int(os.getenv('DB_PORT', '3306')),
+            user=os.getenv('DB_USER'),
+            password=os.getenv('DB_PASSWORD'),
+            database=os.getenv('DB_NAME')
+        )
+        
+        cursor = conn.cursor()
+        
+        # Check if migrations table exists
+        cursor.execute("""
+            SELECT COUNT(*) 
+            FROM information_schema.tables 
+            WHERE table_schema = %s AND table_name = 'schema_migrations'
+        """, (os.getenv('DB_NAME'),))
+        
+        table_exists = cursor.fetchone()[0] > 0
+        
+        if not table_exists:
+            print("Migrations table doesn't exist - migrations may not have run yet")
+            cursor.close()
+            conn.close()
+            return False
+        
+        cursor.close()
+        conn.close()
+        return True
+        
+    except Exception as e:
+        print(f"Migration status check failed: {e}")
+        return False
+
 def check_application_endpoint():
     """Check if application is responding"""
     try:
@@ -89,10 +143,13 @@ def main():
     checks = [
         ("Database Connection", check_database_connection),
         ("Migrations Table", check_migrations_table),
+        ("Migration Status", check_migration_status),
         ("Application Endpoint", check_application_endpoint)
     ]
     
     all_passed = True
+    
+    print("🔍 Running container health checks...")
     
     for check_name, check_func in checks:
         try:

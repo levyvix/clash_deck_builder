@@ -1,0 +1,73 @@
+version: '3.8'
+
+services:
+  test-database:
+    image: mysql:8.0
+    container_name: clash-test-db
+    environment:
+      MYSQL_ROOT_PASSWORD: test_root_password
+      MYSQL_DATABASE: clash_deck_builder_test
+      MYSQL_USER: test_user
+      MYSQL_PASSWORD: test_password
+      MYSQL_ALLOW_EMPTY_PASSWORD: "no"
+    ports:
+      - "3307:3306"  # Use different port to avoid conflicts
+    volumes:
+      - test_mysql_data:/var/lib/mysql
+      - ./database/init:/docker-entrypoint-initdb.d
+      - ./backend/tests/fixtures:/test-fixtures
+    networks:
+      - test-clash-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-ptest_root_password"]
+      timeout: 20s
+      retries: 10
+      interval: 10s
+      start_period: 30s
+    tmpfs:
+      - /var/lib/mysql:noexec,nosuid,size=1g  # Use tmpfs for faster test database
+    command: --innodb-buffer-pool-size=128M --innodb-log-file-size=32M --max-connections=50
+
+  test-backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: clash-test-backend
+    environment:
+      DATABASE_URL: mysql+pymysql://test_user:test_password@test-database:3306/clash_deck_builder_test
+      CLASH_ROYALE_API_KEY: test_api_key
+      DEBUG: "true"
+      LOG_LEVEL: "debug"
+      CORS_ORIGINS: "http://localhost:3000"
+      DB_HOST: test-database
+      DB_PORT: 3306
+      DB_NAME: clash_deck_builder_test
+      DB_USER: test_user
+      DB_PASSWORD: test_password
+      TESTING: "true"
+    ports:
+      - "8001:8000"  # Use different port to avoid conflicts
+    depends_on:
+      test-database:
+        condition: service_healthy
+    networks:
+      - test-clash-network
+    volumes:
+      - ./backend/src:/app/src
+      - ./backend/tests:/app/tests
+      - ./backend/tests/fixtures:/app/test-fixtures
+    command: uv run uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload
+    healthcheck:
+      test: ["CMD", "python", "/usr/local/bin/health_check.py"]
+      timeout: 30s
+      retries: 3
+      interval: 15s
+      start_period: 45s
+
+volumes:
+  test_mysql_data:
+    driver: local
+
+networks:
+  test-clash-network:
+    driver: bridge

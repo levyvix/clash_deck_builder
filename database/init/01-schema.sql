@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS decks (
     name VARCHAR(100) NOT NULL,
     user_id INT,
     cards JSON NOT NULL,
-    evolution_slots JSON DEFAULT '[]',
+    evolution_slots JSON,
     average_elixir DECIMAL(3,2) DEFAULT 0.00,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
