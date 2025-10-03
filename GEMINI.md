@@ -20,6 +20,7 @@ Python 3.x (Backend), JavaScript/TypeScript (Frontend): Follow standard conventi
 
 ## Recent Changes
 - 001-i-would-like: Added Python 3.x (Backend), JavaScript/TypeScript (Frontend) + Clash Royale API client, MySQL client, Python Web Framework (e.g., FastAPI/Flask), Frontend Framework (e.g., React/Vue/Svelte), UV
+- 001-i-would-like: Added Python 3.x (Backend), JavaScript/TypeScript (Frontend) + Clash Royale API client, MySQL client, Python Web Framework (e.g., FastAPI/Flask), Frontend Framework (e.g., React/Vue/Svelte), UV
 
 <!-- MANUAL ADDITIONS START -->
 <!-- MANUAL ADDITIONS END -->
