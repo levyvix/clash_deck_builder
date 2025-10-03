@@ -144,19 +144,27 @@
   - Map database, API, and validation errors to HTTP status codes
   - _Requirements: 5.1, 5.2, 5.3, 5.4_
 
-- [ ] 7. Update API endpoints with proper dependency injection
+- [x] 7. Update API endpoints with proper dependency injection
+
+
+
+
   - Integrate enhanced services with API endpoints
   - Add proper error handling to all endpoints
   - Ensure all endpoints use dependency injection
   - _Requirements: 1.2, 5.1, 5.3, 5.4, 6.1, 6.2, 6.3, 6.4_
 
-- [ ] 7.1 Update cards API endpoint
+- [x] 7.1 Update cards API endpoint
+
+
   - Modify `backend/src/api/cards.py` to use enhanced Clash API service
   - Add proper dependency injection for services
   - Implement comprehensive error handling
   - _Requirements: 1.2, 2.2, 5.2, 6.2, 6.3_
 
-- [ ] 7.2 Update decks API endpoints
+- [x] 7.2 Update decks API endpoints
+
+
   - Modify `backend/src/api/decks.py` to use enhanced deck service
   - Add proper dependency injection for database sessions
   - Implement comprehensive error handling for all CRUD operations
