@@ -3,11 +3,12 @@
 from fastapi import APIRouter, Depends, HTTPException
 from typing import List
 import logging
+from mysql.connector import Error as MySQLError
 
 from ..models.card import Card
-from ..services.clash_api_service import ClashRoyaleAPIService
-from ..utils.dependencies import get_clash_api_service
-from ..exceptions import ClashAPIError
+from ..services.card_service import CardService
+from ..utils.dependencies import get_card_service
+from ..exceptions import DatabaseError
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -15,53 +16,43 @@ router = APIRouter()
 
 @router.get("/cards", response_model=List[Card])
 async def get_all_cards(
-    clash_api: ClashRoyaleAPIService = Depends(get_clash_api_service),
+    card_service: CardService = Depends(get_card_service),
 ):
     """
-    Fetch all Clash Royale cards from the external API.
+    Fetch all Clash Royale cards from the database.
 
     Returns:
         List[Card]: List of all available cards with their properties
 
     Raises:
         HTTPException:
-            - 503 Service Unavailable: When Clash Royale API is unavailable
-            - 401 Unauthorized: When API key is invalid
-            - 429 Too Many Requests: When API rate limit is exceeded
-            - 500 Internal Server Error: For other unexpected errors
+            - 503 Service Unavailable: When database connection fails
+            - 500 Internal Server Error: For database query errors or unexpected errors
     """
     try:
-        logger.info("Fetching cards from Clash Royale API")
-        cards = await clash_api.get_cards()
-        logger.info(f"Successfully retrieved {len(cards)} cards")
+        logger.info("Fetching cards from database")
+        cards = await card_service.get_all_cards()
+        logger.info(f"Successfully retrieved {len(cards)} cards from database")
         return cards
 
-    except ClashAPIError as e:
-        logger.error(f"Clash API error: {e.message}")
+    except DatabaseError as e:
+        logger.error(f"Database error: {e.message}")
 
-        # Map ClashAPIError status codes to appropriate HTTP responses
-        if e.status_code == 401:
-            raise HTTPException(status_code=401, detail="Invalid Clash Royale API key")
-        elif e.status_code == 403:
-            raise HTTPException(
-                status_code=403, detail="Access forbidden to Clash Royale API"
-            )
-        elif e.status_code == 429:
-            raise HTTPException(
-                status_code=429,
-                detail="Clash Royale API rate limit exceeded. Please try again later.",
-            )
-        elif e.status_code and e.status_code >= 500:
-            raise HTTPException(
-                status_code=503,
-                detail="Clash Royale API is currently unavailable. Please try again later.",
-            )
-        else:
-            # For network errors, timeouts, and other API issues
-            raise HTTPException(
-                status_code=503,
-                detail="Unable to connect to Clash Royale API. Please try again later.",
-            )
+        # Check if it's a connection error by examining the original error
+        if e.original_error and isinstance(e.original_error, MySQLError):
+            # Connection-related MySQL error codes
+            connection_error_codes = [2003, 2006, 2013, 2055]  # Can't connect, server gone away, lost connection, etc.
+            if hasattr(e.original_error, 'errno') and e.original_error.errno in connection_error_codes:
+                raise HTTPException(
+                    status_code=503,
+                    detail="Database temporarily unavailable. Please try again later."
+                )
+        
+        # For all other database errors (query failures, data integrity issues, etc.)
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to retrieve cards from database"
+        )
 
     except Exception as e:
         logger.error(f"Unexpected error fetching cards: {str(e)}")

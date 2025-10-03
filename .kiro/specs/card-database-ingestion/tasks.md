@@ -41,7 +41,12 @@
   - Add error handling for file not found, invalid JSON, and database errors
   - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.3, 2.4, 6.1, 6.2, 6.3, 6.4_
 
-- [ ] 4. Update cards API endpoint to use database
+- [x] 4. Update cards API endpoint to use database
+
+
+
+
+
   - Modify `backend/src/api/cards.py` to remove ClashRoyaleAPIService dependency
   - Update `get_all_cards()` endpoint to use CardService instead
   - Update error handling to handle DatabaseError exceptions
@@ -49,7 +54,12 @@
   - Ensure response format remains unchanged for backward compatibility
   - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 5.1, 5.2_
 
-- [ ] 5. Run ingestion script and verify data
+- [x] 5. Run ingestion script and verify data
+
+
+
+
+
   - Execute `python backend/src/scripts/ingest_cards.py` to populate database
   - Verify cards are inserted into database with SQL query
   - Check that all required fields are populated correctly
@@ -57,7 +67,12 @@
   - Test re-running script to verify upsert behavior
   - _Requirements: 1.1, 1.2, 1.3, 1.4, 5.3, 5.4, 6.1, 6.2, 6.3, 6.4_
 
-- [ ] 6. Unit testing for card service
+- [x] 6. Unit testing for card service
+
+
+
+
+
   - Create `backend/tests/unit/test_card_service.py`
   - Write test for `get_all_cards()` with mock database returning multiple cards
   - Write test for `get_all_cards()` with empty database
