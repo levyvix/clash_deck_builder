@@ -74,3 +74,5 @@ frontend/.env.local
 frontend/.env.docker
 backend/.env
 backend/.env.local
+
+nul

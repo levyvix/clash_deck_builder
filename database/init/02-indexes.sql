@@ -17,6 +17,22 @@ CREATE INDEX idx_decks_average_elixir ON decks(average_elixir);
 CREATE INDEX idx_decks_user_created ON decks(user_id, created_at);
 CREATE INDEX idx_decks_user_name ON decks(user_id, name);
 
+-- Cards table indexes for filtering and searching
+CREATE INDEX idx_cards_name ON cards(name);
+CREATE INDEX idx_cards_rarity ON cards(rarity);
+CREATE INDEX idx_cards_elixir_cost ON cards(elixir_cost);
+CREATE INDEX idx_cards_type ON cards(type);
+CREATE INDEX idx_cards_arena ON cards(arena);
+CREATE INDEX idx_cards_updated_at ON cards(updated_at);
+
+-- Composite indexes for common filtering combinations
+CREATE INDEX idx_cards_rarity_elixir ON cards(rarity, elixir_cost);
+CREATE INDEX idx_cards_type_elixir ON cards(type, elixir_cost);
+CREATE INDEX idx_cards_rarity_type ON cards(rarity, type);
+
+-- Full-text search index for card names (for search functionality)
+CREATE FULLTEXT INDEX idx_cards_name_fulltext ON cards(name);
+
 -- Cards cache table indexes for filtering and searching
 CREATE INDEX idx_cards_cache_name ON cards_cache(name);
 CREATE INDEX idx_cards_cache_rarity ON cards_cache(rarity);
@@ -36,5 +52,6 @@ CREATE FULLTEXT INDEX idx_cards_cache_name_fulltext ON cards_cache(name);
 -- Index comments for documentation
 -- User indexes: Optimize user lookup and authentication queries
 -- Deck indexes: Optimize deck listing, filtering by user, and sorting operations
+-- Card indexes: Optimize card filtering, searching, and retrieval operations
 -- Card cache indexes: Optimize card filtering, searching, and API data refresh operations
 -- Composite indexes: Optimize complex queries that filter on multiple columns simultaneously

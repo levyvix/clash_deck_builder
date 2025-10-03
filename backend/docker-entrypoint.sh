@@ -161,6 +161,18 @@ main() {
     # Skip migrations - handled by database initialization scripts
     echo "ℹ️  Skipping migrations (handled by database init scripts)"
     
+    # Run card data ingestion
+    echo "📥 Running card data ingestion..."
+    if [ -f "/all_cards.json" ]; then
+        if python src/scripts/ingest_cards.py; then
+            echo "✅ Card data ingestion completed successfully"
+        else
+            echo "⚠️  Card data ingestion failed, but continuing startup..."
+        fi
+    else
+        echo "⚠️  all_cards.json not found, skipping card ingestion"
+    fi
+    
     echo "🎉 Backend initialization completed successfully!"
     echo "🚀 Starting application server..."
     

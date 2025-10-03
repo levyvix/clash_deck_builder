@@ -35,6 +35,27 @@ CREATE TABLE IF NOT EXISTS decks (
     CONSTRAINT chk_evolution_slots_limit CHECK (JSON_LENGTH(evolution_slots) <= 2)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Cards table for storing Clash Royale card data
+CREATE TABLE IF NOT EXISTS cards (
+    id INT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    elixir_cost INT NOT NULL,
+    rarity VARCHAR(20) NOT NULL,
+    type VARCHAR(20) NOT NULL,
+    arena VARCHAR(50),
+    image_url TEXT NOT NULL,
+    image_url_evo TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    -- Constraints
+    CONSTRAINT chk_cards_elixir_cost_range CHECK (elixir_cost >= 0 AND elixir_cost <= 10),
+    CONSTRAINT chk_cards_rarity_values CHECK (rarity IN ('Common', 'Rare', 'Epic', 'Legendary', 'Champion')),
+    CONSTRAINT chk_cards_type_values CHECK (type IN ('Troop', 'Spell', 'Building')),
+    CONSTRAINT chk_cards_name_not_empty CHECK (CHAR_LENGTH(name) > 0),
+    CONSTRAINT chk_cards_image_url_not_empty CHECK (CHAR_LENGTH(image_url) > 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- Cards cache table for storing Clash Royale API data
 CREATE TABLE IF NOT EXISTS cards_cache (
     id INT PRIMARY KEY,
@@ -48,14 +69,15 @@ CREATE TABLE IF NOT EXISTS cards_cache (
     last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     
     -- Constraints
-    CONSTRAINT chk_elixir_cost_range CHECK (elixir_cost >= 0 AND elixir_cost <= 10),
-    CONSTRAINT chk_rarity_values CHECK (rarity IN ('Common', 'Rare', 'Epic', 'Legendary', 'Champion')),
-    CONSTRAINT chk_type_values CHECK (type IN ('Troop', 'Spell', 'Building')),
-    CONSTRAINT chk_name_not_empty CHECK (CHAR_LENGTH(name) > 0),
-    CONSTRAINT chk_image_url_not_empty CHECK (CHAR_LENGTH(image_url) > 0)
+    CONSTRAINT chk_cache_elixir_cost_range CHECK (elixir_cost >= 0 AND elixir_cost <= 10),
+    CONSTRAINT chk_cache_rarity_values CHECK (rarity IN ('Common', 'Rare', 'Epic', 'Legendary', 'Champion')),
+    CONSTRAINT chk_cache_type_values CHECK (type IN ('Troop', 'Spell', 'Building')),
+    CONSTRAINT chk_cache_name_not_empty CHECK (CHAR_LENGTH(name) > 0),
+    CONSTRAINT chk_cache_image_url_not_empty CHECK (CHAR_LENGTH(image_url) > 0)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Add comments for documentation
 ALTER TABLE users COMMENT = 'User accounts for deck ownership and future authentication';
 ALTER TABLE decks COMMENT = 'User-created Clash Royale decks with card compositions and metadata';
+ALTER TABLE cards COMMENT = 'Primary card data table for Clash Royale cards';
 ALTER TABLE cards_cache COMMENT = 'Cached card data from Clash Royale API for performance optimization';
