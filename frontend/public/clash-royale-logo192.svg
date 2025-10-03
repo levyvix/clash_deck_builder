@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192">
+  <!-- Background circle -->
+  <circle cx="96" cy="96" r="96" fill="#FFD700"/>
+  
+  <!-- Inner circle -->
+  <circle cx="96" cy="96" r="80" fill="#FF6B35" stroke="#B8860B" stroke-width="4"/>
+  
+  <!-- Crown shape -->
+  <path d="M36 72 L60 48 L96 60 L132 48 L156 72 L144 120 L48 120 Z" fill="#FFD700" stroke="#B8860B" stroke-width="3"/>
+  
+  <!-- Crown jewels -->
+  <circle cx="72" cy="84" r="8" fill="#FF1744"/>
+  <circle cx="96" cy="72" r="10" fill="#2196F3"/>
+  <circle cx="120" cy="84" r="8" fill="#4CAF50"/>
+  
+  <!-- Crown base -->
+  <rect x="48" y="120" width="96" height="24" fill="#B8860B"/>
+  
+  <!-- Highlight -->
+  <path d="M48 72 L72 60 L96 66 L120 60 L144 72 L132 96 L60 96 Z" fill="#FFE082" opacity="0.7"/>
+  
+  <!-- Additional decorative elements -->
+  <circle cx="60" cy="96" r="4" fill="#FFEB3B"/>
+  <circle cx="132" cy="96" r="4" fill="#FFEB3B"/>
+  
+  <!-- Text "CR" -->
+  <text x="96" y="160" font-family="Arial, sans-serif" font-size="24" font-weight="bold" text-anchor="middle" fill="#B8860B">CR</text>
+</svg>

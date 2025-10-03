@@ -8,7 +8,7 @@ import json
 
 from .utils.config import settings
 from .utils.database import initialize_database, close_database, get_database_health
-from .api import cards, decks
+from .api import cards, decks, auth
 from .exceptions.handlers import EXCEPTION_HANDLERS
 
 
@@ -67,8 +67,9 @@ def create_app() -> FastAPI:
         app.add_exception_handler(exception_class, handler)
     
     # Register API routers
-    app.include_router(cards.router, prefix="/cards", tags=["cards"])
-    app.include_router(decks.router, prefix="/decks", tags=["decks"])
+    app.include_router(auth.router, prefix="/api/auth", tags=["authentication"])
+    app.include_router(cards.router, prefix="/api/cards", tags=["cards"])
+    app.include_router(decks.router, prefix="/api/decks", tags=["decks"])
     
     @app.get("/")
     async def root():

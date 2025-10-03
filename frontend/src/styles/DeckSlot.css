@@ -102,26 +102,7 @@
   display: block;
 }
 
-/* Evolution Badge */
-.deck-slot__evolution-badge {
-  position: absolute;
-  top: 4px;
-  right: 4px;
-  background-color: rgba(255, 215, 0, 0.95);
-  border-radius: 50%;
-  width: 24px;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-  z-index: 2;
-}
 
-.deck-slot__evolution-icon {
-  font-size: 14px;
-  line-height: 1;
-}
 
 /* Card Info */
 .deck-slot__info {
@@ -258,16 +239,7 @@
     font-size: 11px;
   }
 
-  .deck-slot__evolution-badge {
-    width: 22px;
-    height: 22px;
-    top: 6px;
-    right: 6px;
-  }
 
-  .deck-slot__evolution-icon {
-    font-size: 13px;
-  }
 
   .deck-slot__elixir {
     font-size: 13px;
@@ -293,16 +265,7 @@
     font-size: 10px;
   }
 
-  .deck-slot__evolution-badge {
-    width: 20px;
-    height: 20px;
-    top: 4px;
-    right: 4px;
-  }
 
-  .deck-slot__evolution-icon {
-    font-size: 12px;
-  }
 
   .deck-slot__elixir {
     font-size: 12px;

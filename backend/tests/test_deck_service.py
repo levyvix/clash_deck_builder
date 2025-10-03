@@ -38,7 +38,7 @@ def sample_deck(sample_cards):
     return Deck(
         id=1,
         name="Test Deck",
-        user_id=1,
+        user_id="test-user-id-123",
         cards=sample_cards,
         evolution_slots=[sample_cards[0]],  # Knight evolution
         average_elixir=3.5
@@ -48,7 +48,16 @@ def sample_deck(sample_cards):
 @pytest.fixture
 def sample_user():
     """Create a sample user for testing"""
-    return User(id=1)
+    from datetime import datetime
+    return User(
+        id="test-user-id-123",
+        google_id="google-123456789",
+        email="test@example.com",
+        name="Test User",
+        avatar="knight",
+        created_at=datetime.now(),
+        updated_at=datetime.now()
+    )
 
 
 @pytest.fixture
@@ -230,7 +239,7 @@ class TestDeckService:
         deck_row = {
             "id": 1,
             "name": "Test Deck",
-            "user_id": 1,
+            "user_id": "test-user-id-123",
             "cards": json.dumps([card.model_dump() for card in sample_cards]),
             "evolution_slots": json.dumps([sample_cards[0].model_dump()]),
             "average_elixir": 3.5
@@ -271,7 +280,7 @@ class TestDeckService:
         deck_row = {
             "id": 1,
             "name": "Test Deck",
-            "user_id": 1,
+            "user_id": "test-user-id-123",
             "cards": "invalid json",
             "evolution_slots": "[]",
             "average_elixir": 3.5
@@ -289,7 +298,7 @@ class TestDeckService:
             {
                 "id": 1,
                 "name": "Deck 1",
-                "user_id": 1,
+                "user_id": "test-user-id-123",
                 "cards": json.dumps([card.model_dump() for card in sample_cards]),
                 "evolution_slots": "[]",
                 "average_elixir": 3.5
@@ -297,7 +306,7 @@ class TestDeckService:
             {
                 "id": 2,
                 "name": "Deck 2",
-                "user_id": 1,
+                "user_id": "test-user-id-123",
                 "cards": json.dumps([card.model_dump() for card in sample_cards]),
                 "evolution_slots": json.dumps([sample_cards[0].model_dump()]),
                 "average_elixir": 4.0
@@ -328,7 +337,7 @@ class TestDeckService:
             {
                 "id": 1,
                 "name": "Valid Deck",
-                "user_id": 1,
+                "user_id": "test-user-id-123",
                 "cards": json.dumps([card.model_dump() for card in sample_cards]),
                 "evolution_slots": "[]",
                 "average_elixir": 3.5
@@ -336,7 +345,7 @@ class TestDeckService:
             {
                 "id": 2,
                 "name": "Invalid Deck",
-                "user_id": 1,
+                "user_id": "test-user-id-123",
                 "cards": "invalid json",
                 "evolution_slots": "[]",
                 "average_elixir": 4.0
@@ -357,7 +366,7 @@ class TestDeckService:
         existing_deck_row = {
             "id": 1,
             "name": "Old Name",
-            "user_id": 1,
+            "user_id": "test-user-id-123",
             "cards": json.dumps([card.model_dump() for card in sample_cards]),
             "evolution_slots": "[]",
             "average_elixir": 3.0
@@ -388,7 +397,7 @@ class TestDeckService:
         existing_deck_row = {
             "id": 1,
             "name": "Old Name",
-            "user_id": 1,
+            "user_id": "test-user-id-123",
             "cards": json.dumps([card.model_dump() for card in sample_cards]),
             "evolution_slots": "[]",
             "average_elixir": 3.0
@@ -406,7 +415,7 @@ class TestDeckService:
         existing_deck_row = {
             "id": 1,
             "name": "Test Deck",
-            "user_id": 1,
+            "user_id": "test-user-id-123",
             "cards": json.dumps([card.model_dump() for card in sample_cards]),
             "evolution_slots": "[]",
             "average_elixir": 3.5
@@ -437,7 +446,7 @@ class TestDeckService:
         existing_deck_row = {
             "id": 1,
             "name": "Test Deck",
-            "user_id": 1,
+            "user_id": "test-user-id-123",
             "cards": json.dumps([card.model_dump() for card in sample_cards]),
             "evolution_slots": "[]",
             "average_elixir": 3.5

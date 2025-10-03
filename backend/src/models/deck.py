@@ -8,7 +8,7 @@ from .card import Card
 class Deck(BaseModel):
     id: Optional[int] = Field(None, ge=1, description="Unique deck identifier")
     name: str = Field(..., min_length=1, max_length=100, description="Deck name")
-    user_id: Optional[int] = Field(None, ge=1, description="User who owns this deck")
+    user_id: Optional[str] = Field(None, description="User who owns this deck")
     cards: List[Card] = Field(..., description="List of cards in the deck")
     evolution_slots: List[Card] = Field(
         default_factory=list, description="Evolution card slots"

@@ -318,9 +318,6 @@ const SavedDecks: React.FC<SavedDecksProps> = ({ onSelectDeck, onNotification, r
                           target.src = 'https://via.placeholder.com/80x100?text=Card';
                         }}
                       />
-                      {slot.isEvolution && (
-                        <div className="deck-card__evolution-badge">⭐</div>
-                      )}
                     </>
                   ) : (
                     <div className="deck-card__card-empty">?</div>

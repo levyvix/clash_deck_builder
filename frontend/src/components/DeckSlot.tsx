@@ -190,11 +190,7 @@ const DeckSlot: React.FC<DeckSlotProps> = ({
         className={getCardAnimationClasses()}
       />
       
-      {slot.isEvolution && (
-        <div className="deck-slot__evolution-badge">
-          <span className="deck-slot__evolution-icon">⭐</span>
-        </div>
-      )}
+
 
       <div className="deck-slot__info">
         <div className="deck-slot__elixir">{slot.card.elixir_cost}</div>

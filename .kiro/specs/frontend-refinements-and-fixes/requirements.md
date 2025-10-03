@@ -203,3 +203,26 @@ This feature focuses on refining the Clash Royale Deck Builder frontend with Mat
 3. WHEN slots contain cards THEN the blue outline SHALL be subtle or hidden
 4. WHEN dragging cards over slots THEN the blue outline SHALL provide clear drop target feedback
 5. WHEN the deck is complete THEN slot outlines SHALL indicate the deck is full
+
+### Requirement 16: Page Branding and Title
+
+**User Story:** As a user, I want the browser tab to clearly identify this as a Clash Royale application, so that I can easily find it among my open tabs.
+
+#### Acceptance Criteria
+
+1. WHEN the application loads THEN the page title SHALL be "Clash Royale Deck Builder"
+2. WHEN viewing the application in browser tabs THEN the favicon SHALL display a Clash Royale-themed icon
+3. WHEN the favicon is displayed THEN it SHALL be clearly visible and recognizable as Clash Royale branding
+4. WHEN the page title is shown THEN it SHALL accurately reflect the application's purpose
+
+### Requirement 17: Card Data Filtering
+
+**User Story:** As a user, I want to only see cards that are actually playable in the game, so that I don't waste time with invalid cards.
+
+#### Acceptance Criteria
+
+1. WHEN the card gallery loads THEN cards with 0 elixir cost SHALL be filtered out and not displayed
+2. WHEN filtering cards by elixir cost THEN the minimum selectable elixir cost SHALL be 1
+3. WHEN viewing available cards THEN only cards with elixir costs 1-10 SHALL be shown
+4. WHEN the card data is processed THEN 0 elixir cards SHALL be excluded from all card operations (display, filtering, deck building)
+5. WHEN searching or filtering cards THEN 0 elixir cards SHALL not appear in any results

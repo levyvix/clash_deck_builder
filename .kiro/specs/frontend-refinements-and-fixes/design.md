@@ -1215,6 +1215,306 @@ const getDeckSlotClasses = (slot: DeckSlot | null, isDragOver: boolean, isDeckCo
 >
 ```
 
+### 16. Page Branding and Title
+
+#### HTML Document Head Updates
+
+```html
+<!-- public/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#000000" />
+    <meta name="description" content="Build and manage your Clash Royale decks with advanced filtering and evolution support" />
+    
+    <!-- Updated page title -->
+    <title>Clash Royale Deck Builder</title>
+    
+    <!-- Clash Royale themed favicon -->
+    <link rel="icon" type="image/x-icon" href="%PUBLIC_URL%/clash-royale-favicon.ico" />
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/clash-royale-logo192.png" />
+    
+    <!-- Additional meta tags for better SEO -->
+    <meta property="og:title" content="Clash Royale Deck Builder" />
+    <meta property="og:description" content="Build and manage your Clash Royale decks with advanced filtering and evolution support" />
+    <meta property="og:image" content="%PUBLIC_URL%/clash-royale-logo512.png" />
+    <meta property="og:type" content="website" />
+    
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+  </head>
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root"></div>
+  </body>
+</html>
+```
+
+#### Favicon Implementation
+
+**Favicon Requirements:**
+- 16x16, 32x32, 48x48 ICO format for `favicon.ico`
+- 192x192, 512x512 PNG format for mobile icons
+- Clash Royale themed design (crown, shield, or card-like appearance)
+
+**Manifest.json Updates:**
+
+```json
+{
+  "short_name": "CR Deck Builder",
+  "name": "Clash Royale Deck Builder",
+  "icons": [
+    {
+      "src": "clash-royale-favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "clash-royale-logo192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "clash-royale-logo512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#1976d2",
+  "background_color": "#ffffff",
+  "description": "Build and manage your Clash Royale decks with advanced filtering and evolution support"
+}
+```
+
+#### Dynamic Title Updates
+
+```typescript
+// hooks/useDocumentTitle.ts
+import { useEffect } from 'react';
+
+export const useDocumentTitle = (title: string) => {
+  useEffect(() => {
+    const previousTitle = document.title;
+    document.title = title;
+    
+    return () => {
+      document.title = previousTitle;
+    };
+  }, [title]);
+};
+
+// Usage in components
+const DeckBuilder: React.FC = () => {
+  useDocumentTitle('Clash Royale Deck Builder');
+  // ... component logic
+};
+
+const SavedDecks: React.FC = () => {
+  useDocumentTitle('Saved Decks - Clash Royale Deck Builder');
+  // ... component logic
+};
+```
+
+### 17. Card Data Filtering (Remove 0 Elixir Cards)
+
+#### Data Processing Pipeline
+
+```typescript
+// services/cardService.ts
+export const processCardData = (rawCards: Card[]): Card[] => {
+  return rawCards
+    .filter(card => card.elixir_cost > 0) // Remove 0 elixir cards
+    .map(card => ({
+      ...card,
+      // Additional processing if needed
+    }));
+};
+
+// In API service
+export const fetchCards = async (): Promise<Card[]> => {
+  const response = await fetchWithTimeout(`${API_BASE_URL}/cards/cards`);
+  const rawCards = await handleApiResponse(response);
+  
+  // Filter out 0 elixir cards before returning
+  const filteredCards = processCardData(rawCards);
+  
+  console.log(`Loaded ${filteredCards.length} cards (filtered out 0 elixir cards)`);
+  return filteredCards;
+};
+```
+
+#### Filter Component Updates
+
+```typescript
+// components/CardFilters.tsx
+const CardFilters: React.FC<CardFiltersProps> = ({ onFilterChange, cards }) => {
+  // Calculate min/max elixir from filtered cards (excluding 0)
+  const minElixir = useMemo(() => {
+    const costs = cards.map(card => card.elixir_cost).filter(cost => cost > 0);
+    return Math.min(...costs);
+  }, [cards]);
+  
+  const maxElixir = useMemo(() => {
+    const costs = cards.map(card => card.elixir_cost);
+    return Math.max(...costs);
+  }, [cards]);
+  
+  // Elixir filter should start from 1, not 0
+  const [elixirRange, setElixirRange] = useState<[number, number]>([minElixir, maxElixir]);
+  
+  return (
+    <div className="card-filters">
+      <div className="filter-group">
+        <label>Elixir Cost</label>
+        <div className="elixir-range">
+          <input
+            type="range"
+            min={minElixir} // Will be 1 instead of 0
+            max={maxElixir}
+            value={elixirRange[0]}
+            onChange={(e) => setElixirRange([parseInt(e.target.value), elixirRange[1]])}
+          />
+          <span>{elixirRange[0]} - {elixirRange[1]}</span>
+        </div>
+      </div>
+      {/* Other filters */}
+    </div>
+  );
+};
+```
+
+#### Validation and Error Handling
+
+```typescript
+// utils/cardValidation.ts
+export const validateCard = (card: Card): boolean => {
+  // Basic validation rules
+  if (!card.id || !card.name) return false;
+  if (card.elixir_cost < 1 || card.elixir_cost > 10) return false;
+  if (!card.rarity || !card.image_url) return false;
+  
+  return true;
+};
+
+export const filterValidCards = (cards: Card[]): Card[] => {
+  const validCards = cards.filter(validateCard);
+  const invalidCount = cards.length - validCards.length;
+  
+  if (invalidCount > 0) {
+    console.warn(`Filtered out ${invalidCount} invalid cards (including 0 elixir cards)`);
+  }
+  
+  return validCards;
+};
+```
+
+#### Search and Filter Logic Updates
+
+```typescript
+// hooks/useCardFiltering.ts
+export const useCardFiltering = (cards: Card[]) => {
+  const [filters, setFilters] = useState({
+    search: '',
+    elixirMin: 1, // Changed from 0 to 1
+    elixirMax: 10,
+    rarity: '',
+    arena: ''
+  });
+  
+  const filteredCards = useMemo(() => {
+    return cards.filter(card => {
+      // Elixir filter (1-10 range)
+      if (card.elixir_cost < filters.elixirMin || card.elixir_cost > filters.elixirMax) {
+        return false;
+      }
+      
+      // Search filter
+      if (filters.search && !card.name.toLowerCase().includes(filters.search.toLowerCase())) {
+        return false;
+      }
+      
+      // Rarity filter
+      if (filters.rarity && card.rarity !== filters.rarity) {
+        return false;
+      }
+      
+      // Arena filter
+      if (filters.arena && card.arena.toString() !== filters.arena) {
+        return false;
+      }
+      
+      return true;
+    });
+  }, [cards, filters]);
+  
+  return { filteredCards, filters, setFilters };
+};
+```
+
+#### Data Loading State Management
+
+```typescript
+// components/CardGallery.tsx
+const CardGallery: React.FC = () => {
+  const [cards, setCards] = useState<Card[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  
+  useEffect(() => {
+    const loadCards = async () => {
+      try {
+        setLoading(true);
+        const rawCards = await fetchCards();
+        
+        // Additional client-side filtering as safety net
+        const validCards = rawCards.filter(card => card.elixir_cost > 0);
+        
+        setCards(validCards);
+        console.log(`Displaying ${validCards.length} valid cards`);
+      } catch (err) {
+        setError('Failed to load cards');
+        console.error('Card loading error:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    loadCards();
+  }, []);
+  
+  if (loading) return <CardGallerySkeleton />;
+  if (error) return <ErrorMessage message={error} onRetry={loadCards} />;
+  
+  return (
+    <div className="card-gallery">
+      {/* Render filtered cards */}
+    </div>
+  );
+};
+```
+
+#### Backend Coordination (Optional)
+
+If backend filtering is preferred for performance:
+
+```typescript
+// services/api.ts
+export const fetchCards = async (includeZeroElixir: boolean = false): Promise<Card[]> => {
+  const params = new URLSearchParams();
+  if (!includeZeroElixir) {
+    params.append('min_elixir', '1');
+  }
+  
+  const url = `${API_BASE_URL}/cards/cards?${params.toString()}`;
+  const response = await fetchWithTimeout(url);
+  return await handleApiResponse(response);
+};
+```
+
 ## Performance Considerations
 
 - **Animation Performance**: Use `transform` and `opacity` for GPU acceleration
@@ -1224,3 +1524,6 @@ const getDeckSlotClasses = (slot: DeckSlot | null, isDragOver: boolean, isDeckCo
 - **Docker Image Size**: Multi-stage build reduces final image size
 - **Evolution Checks**: Cache evolution capability results to avoid repeated lookups
 - **Animation State**: Clean up animation states to prevent memory leaks
+- **Card Filtering**: Filter 0 elixir cards at data loading stage to improve performance
+- **Favicon Loading**: Use optimized ICO format for faster loading
+- **Title Updates**: Use React hooks to prevent unnecessary DOM manipulations

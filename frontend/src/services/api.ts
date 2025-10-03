@@ -186,6 +186,38 @@ export const verifyEndpoints = async (): Promise<void> => {
   console.log('========================================\n');
 };
 
+// Process card data to filter out invalid cards
+const processCardData = (cards: any[]): any[] => {
+  if (!Array.isArray(cards)) {
+    console.warn('⚠️ processCardData: Expected array, got:', typeof cards);
+    return [];
+  }
+
+  const originalCount = cards.length;
+  
+  // Filter out cards with 0 elixir cost
+  const filteredCards = cards.filter(card => {
+    // Ensure card has required properties and elixir_cost > 0
+    return card && 
+           typeof card.elixir_cost === 'number' && 
+           card.elixir_cost > 0;
+  });
+
+  const filteredCount = filteredCards.length;
+  const removedCount = originalCount - filteredCount;
+
+  console.log('🔍 Card Data Processing Results:');
+  console.log(`   📊 Original cards: ${originalCount}`);
+  console.log(`   ✅ Valid cards (elixir > 0): ${filteredCount}`);
+  console.log(`   ❌ Filtered out (0 elixir): ${removedCount}`);
+  
+  if (removedCount > 0) {
+    console.log(`   💡 Removed ${removedCount} cards with 0 elixir cost`);
+  }
+
+  return filteredCards;
+};
+
 export const fetchCards = async () => {
   return withRetry(async () => {
     try {
@@ -193,7 +225,14 @@ export const fetchCards = async () => {
       console.log('🃏 Fetching cards from:', url);
       const response = await fetchWithTimeout(url);
       console.log('✅ Cards response status:', response.status);
-      return await handleApiResponse(response);
+      
+      const rawData = await handleApiResponse(response);
+      
+      // Process and filter the card data
+      const processedCards = processCardData(rawData);
+      
+      console.log('🎯 Returning processed cards:', processedCards.length);
+      return processedCards;
     } catch (error) {
       console.error("❌ Error fetching cards:", error);
       console.error("   URL attempted:", `${API_BASE_URL}/cards/cards`);

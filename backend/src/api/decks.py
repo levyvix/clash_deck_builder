@@ -1,13 +1,15 @@
 # backend/src/api/decks.py
 
 from fastapi import APIRouter, Depends, HTTPException
-from typing import List
+from typing import List, Dict, Any
 import logging
+from datetime import datetime
 
 from ..models.deck import Deck
 from ..models.user import User
 from ..services.deck_service import DeckService
 from ..utils.dependencies import get_deck_service
+from ..middleware.auth_middleware import require_auth
 from ..exceptions import (
     DatabaseError,
     DeckNotFoundError,
@@ -20,14 +22,25 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
-# Placeholder for dependency injection of current user
-# TODO: Replace with proper authentication system
-async def get_current_user() -> User:
+async def get_current_user(user_data: Dict[str, Any] = Depends(require_auth)) -> User:
     """
-    Placeholder dependency for current user authentication.
-    In a real application, this would validate JWT tokens or session cookies.
+    Convert authenticated user data to User model.
+    
+    Args:
+        user_data: User information from JWT token
+        
+    Returns:
+        User: User model instance
     """
-    return User(id=1)  # Simulate a logged-in user
+    return User(
+        id=user_data['user_id'],
+        google_id=user_data['google_id'],
+        email=user_data['email'],
+        name=user_data['name'],
+        avatar=user_data.get('avatar'),
+        created_at=datetime.now(),  # This will be overridden by actual DB data if needed
+        updated_at=datetime.now()   # This will be overridden by actual DB data if needed
+    )
 
 
 @router.post("/decks", response_model=Deck, status_code=201)

@@ -121,6 +121,11 @@ class MigrationRunner:
         for file_path in sorted(self.migrations_dir.glob("*.sql")):
             filename = file_path.name
             
+            # Skip rollback files (they should end with .rollback.sql)
+            if filename.endswith('.rollback.sql'):
+                logger.debug(f"Skipping rollback file: {filename}")
+                continue
+            
             # Skip if it doesn't match expected pattern
             if not self._is_valid_migration_filename(filename):
                 logger.warning(f"Skipping invalid migration filename: {filename}")

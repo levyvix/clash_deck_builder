@@ -57,8 +57,7 @@
 
 /* Ensure all child elements are visible by default */
 .deck-slot--filled .deck-slot__image,
-.deck-slot--filled .deck-slot__info,
-.deck-slot--filled .deck-slot__evolution-badge {
+.deck-slot--filled .deck-slot__info {
   opacity: 1;
 }
 

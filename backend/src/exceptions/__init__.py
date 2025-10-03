@@ -17,7 +17,7 @@ class DatabaseError(Exception):
 class DeckNotFoundError(Exception):
     """Raised when a deck is not found."""
     
-    def __init__(self, deck_id: int, user_id: int = None):
+    def __init__(self, deck_id: int, user_id: str = None):
         self.deck_id = deck_id
         self.user_id = user_id
         if user_id:
@@ -48,7 +48,7 @@ class SerializationError(Exception):
 class DeckLimitExceededError(Exception):
     """Raised when user tries to create more than the maximum allowed decks."""
     
-    def __init__(self, user_id: int, max_decks: int = 20):
+    def __init__(self, user_id: str, max_decks: int = 20):
         self.user_id = user_id
         self.max_decks = max_decks
         message = f"User {user_id} has reached the maximum limit of {max_decks} decks"

@@ -1,0 +1,4 @@
+# PNG Placeholder - Favicon 16x16
+# This file should be replaced with a proper PNG conversion of clash-royale-favicon-16.svg
+# Use tools like ImageMagick, Sharp, or online converters to create the actual PNG file
+# Command: convert clash-royale-favicon-16.svg -resize 16x16 favicon-16x16.png

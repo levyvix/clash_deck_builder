@@ -46,7 +46,7 @@ class DeckService:
             logger.error(f"Failed to deserialize cards: {e}")
             raise SerializationError(f"Failed to deserialize cards: {e}", "cards")
     
-    async def _check_deck_limit(self, user_id: int) -> None:
+    async def _check_deck_limit(self, user_id: str) -> None:
         """Check if user has reached the maximum deck limit."""
         try:
             self.db_session.execute(

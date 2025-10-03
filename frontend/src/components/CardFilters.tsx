@@ -95,7 +95,7 @@ const CardFilters: React.FC<CardFiltersProps> = ({
             onChange={handleElixirChange}
           >
             <option value="all">All</option>
-            {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((cost) => (
+            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((cost) => (
               <option key={cost} value={cost}>
                 {cost}
               </option>

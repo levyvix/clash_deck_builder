@@ -1,0 +1,4 @@
+# PNG Placeholder - Android Chrome Icon (512x512)
+# This file should be replaced with a proper PNG conversion of clash-royale-logo512.svg
+# Use tools like ImageMagick, Sharp, or online converters to create the actual PNG file
+# Command: convert clash-royale-logo512.svg -resize 512x512 android-chrome-512x512.png

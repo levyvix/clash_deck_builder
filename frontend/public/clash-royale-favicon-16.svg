@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16">
+  <!-- Simplified crown for 16x16 -->
+  <rect width="16" height="16" fill="#FFD700" rx="2"/>
+  <path d="M3 6 L5 4 L8 5 L11 4 L13 6 L12 10 L4 10 Z" fill="#FF6B35" stroke="#B8860B" stroke-width="0.5"/>
+  <circle cx="6" cy="7" r="1" fill="#FF1744"/>
+  <circle cx="8" cy="6" r="1" fill="#2196F3"/>
+  <circle cx="10" cy="7" r="1" fill="#4CAF50"/>
+  <rect x="4" y="10" width="8" height="2" fill="#B8860B"/>
+</svg>

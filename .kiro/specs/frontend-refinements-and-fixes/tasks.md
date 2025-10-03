@@ -404,3 +404,87 @@
   - Add green outline when deck is complete
   - Implement getDeckSlotClasses function for dynamic class application
   - _Requirements: 15.1, 15.2, 15.3, 15.4, 15.5_
+
+- [x] 33. Update page title and HTML head metadata
+
+
+
+
+
+
+
+
+
+  - Update `frontend/public/index.html` to set title as "Clash Royale Deck Builder"
+  - Add proper meta description for SEO
+  - Add Open Graph meta tags for social sharing
+  - Update manifest.json with correct app name and description
+  - _Requirements: 16.1, 16.4_
+
+- [x] 34. Create and implement Clash Royale themed favicon
+
+
+
+
+
+
+
+
+
+  - Create or source Clash Royale themed favicon in ICO format (16x16, 32x32, 48x48)
+  - Create PNG icons for mobile (192x192, 512x512)
+  - Replace default favicon.ico in `frontend/public/` directory
+  - Add apple-touch-icon link in HTML head
+  - Update manifest.json with new icon paths
+  - _Requirements: 16.2, 16.3_
+
+- [ ] 35. Implement dynamic page title management
+
+
+
+
+  - Create `frontend/src/hooks/useDocumentTitle.ts` hook for title management
+  - Update DeckBuilder component to set title "Clash Royale Deck Builder"
+  - Update SavedDecks component to set title "Saved Decks - Clash Royale Deck Builder"
+  - Test that browser tab titles update correctly when navigating
+  - _Requirements: 16.1, 16.4_
+
+- [x] 36. Filter out 0 elixir cards from API data
+
+
+
+
+
+
+
+
+
+
+  - Update `frontend/src/services/api.ts` fetchCards function to filter elixir_cost > 0
+  - Create processCardData function to handle card filtering
+  - Add console logging to show how many cards were filtered out
+  - Test that 0 elixir cards don't appear in card gallery
+  - _Requirements: 17.1, 17.4_
+
+- [ ] 37. Update card filters to exclude 0 elixir range
+
+
+
+
+  - Update `frontend/src/components/CardFilters.tsx` to set minimum elixir to 1
+  - Calculate minElixir from filtered cards (excluding 0)
+  - Update elixir range slider to start from 1 instead of 0
+  - Update filter state initialization to use elixirMin: 1
+  - _Requirements: 17.2, 17.3_
+
+- [ ] 38. Add card validation and safety filtering
+
+
+
+
+  - Create `frontend/src/utils/cardValidation.ts` with validateCard and filterValidCards functions
+  - Add client-side validation to ensure elixir_cost is between 1-10
+  - Add validation for required fields (id, name, rarity, image_url)
+  - Implement safety filtering in CardGallery component as backup
+  - Add error logging for invalid cards
+  - _Requirements: 17.4, 17.5_

@@ -535,7 +535,7 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ initialDeck, onDeckSaved }) =
       
       <div className="deck-builder__container">
         {/* Deck Section */}
-        <div className="deck-builder__deck-section">
+        <div className="deck-builder__deck-section deck-builder__deck-section--sticky">
           <div className="deck-builder__deck-header">
             <h2 className="deck-builder__title">Build Your Deck</h2>
             <div className="deck-builder__stats">
