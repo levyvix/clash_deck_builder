@@ -1,14 +1,61 @@
 # backend/src/models/card.py
 
-from pydantic import BaseModel
+from pydantic import BaseModel, validator, Field
 from typing import Optional
 
 class Card(BaseModel):
-    id: int
-    name: str
-    elixir_cost: int
-    rarity: str
-    type: str
-    arena: Optional[str] = None
-    image_url: str
-    image_url_evo: Optional[str] = None # For evolved cards
+    id: int = Field(..., ge=1, description="Unique card identifier")
+    name: str = Field(..., min_length=1, max_length=100, description="Card name")
+    elixir_cost: int = Field(..., ge=0, le=10, description="Elixir cost of the card")
+    rarity: str = Field(..., description="Card rarity")
+    type: str = Field(..., description="Card type")
+    arena: Optional[str] = Field(None, max_length=50, description="Arena where card is unlocked")
+    image_url: str = Field(..., min_length=1, description="URL to card image")
+    image_url_evo: Optional[str] = Field(None, description="URL to evolved card image")
+
+    @validator('rarity')
+    def validate_rarity(cls, v):
+        """Validate that rarity is one of the allowed values"""
+        allowed_rarities = ['Common', 'Rare', 'Epic', 'Legendary', 'Champion']
+        if v not in allowed_rarities:
+            raise ValueError(f'Rarity must be one of {allowed_rarities}, got: {v}')
+        return v
+
+    @validator('type')
+    def validate_type(cls, v):
+        """Validate that type is one of the allowed values"""
+        allowed_types = ['Troop', 'Spell', 'Building']
+        if v not in allowed_types:
+            raise ValueError(f'Type must be one of {allowed_types}, got: {v}')
+        return v
+
+    @validator('name')
+    def validate_name(cls, v):
+        """Validate card name is not empty and properly formatted"""
+        if not v or not v.strip():
+            raise ValueError('Card name cannot be empty')
+        return v.strip()
+
+    @validator('image_url', 'image_url_evo')
+    def validate_image_urls(cls, v):
+        """Validate image URLs are properly formatted"""
+        if v is not None and not v.strip():
+            raise ValueError('Image URL cannot be empty string')
+        return v.strip() if v else v
+
+    class Config:
+        """Pydantic configuration"""
+        validate_assignment = True
+        use_enum_values = True
+        schema_extra = {
+            "example": {
+                "id": 26000000,
+                "name": "Knight",
+                "elixir_cost": 3,
+                "rarity": "Common",
+                "type": "Troop",
+                "arena": "Training Camp",
+                "image_url": "https://api-assets.clashroyale.com/cards/300/jAj1Q5rclXxU9kVImGqSJxa4wEMfEhvwNQ_4jiGUuqg.png",
+                "image_url_evo": None
+            }
+        }
