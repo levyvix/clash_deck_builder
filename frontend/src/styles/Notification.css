@@ -1,0 +1,159 @@
+/* Notification Component Styles */
+
+.notification-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm, 8px);
+  max-width: 400px;
+  pointer-events: none;
+}
+
+.notification {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-md, 16px);
+  border-radius: var(--border-radius, 8px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  background-color: white;
+  pointer-events: auto;
+  animation: slideIn 0.3s ease-out;
+  min-width: 300px;
+}
+
+.notification__message {
+  flex: 1;
+  font-size: var(--font-size-md, 14px);
+  font-family: var(--font-family, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif);
+  color: #333;
+  margin-right: var(--spacing-sm, 8px);
+}
+
+.notification__dismiss {
+  background: none;
+  border: none;
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+  color: #666;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--border-radius-sm, 4px);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.notification__dismiss:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+  color: #333;
+}
+
+.notification__dismiss:focus {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+/* Type-specific styling */
+.notification--success {
+  border-left: 4px solid var(--color-success, #4caf50);
+  background-color: #f1f8f4;
+}
+
+.notification--success .notification__message {
+  color: #2e7d32;
+}
+
+.notification--error {
+  border-left: 4px solid var(--color-error, #f44336);
+  background-color: #fef1f0;
+}
+
+.notification--error .notification__message {
+  color: #c62828;
+}
+
+.notification--info {
+  border-left: 4px solid var(--color-primary, #4a90e2);
+  background-color: #f0f7ff;
+}
+
+.notification--info .notification__message {
+  color: #1565c0;
+}
+
+/* Animations */
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Touch device support */
+@media (hover: none) and (pointer: coarse) {
+  .notification__dismiss {
+    width: 32px;
+    height: 32px;
+    font-size: 28px;
+  }
+
+  .notification__dismiss:hover {
+    background-color: transparent;
+  }
+
+  .notification__dismiss:active {
+    background-color: rgba(0, 0, 0, 0.15);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .notification-container {
+    top: 10px;
+    right: 10px;
+    left: 10px;
+    max-width: none;
+  }
+
+  .notification {
+    min-width: auto;
+    padding: var(--spacing-sm);
+  }
+
+  .notification__message {
+    font-size: var(--font-size-sm);
+  }
+}
+
+@media (max-width: 480px) {
+  .notification-container {
+    top: 8px;
+    right: 8px;
+    left: 8px;
+  }
+
+  .notification {
+    padding: var(--spacing-sm) var(--spacing-md);
+  }
+
+  .notification__message {
+    font-size: 13px;
+  }
+
+  .notification__dismiss {
+    font-size: 20px;
+    width: 28px;
+    height: 28px;
+  }
+}

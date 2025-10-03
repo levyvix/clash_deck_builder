@@ -1,0 +1,301 @@
+/* CardDisplay Component Styles */
+
+.card-display {
+  position: relative;
+  width: 120px;
+  background: #fff;
+  border-radius: var(--radius-md);
+  box-shadow: var(--elevation-2);
+  overflow: hidden;
+  transition: transform var(--duration-short) var(--ease-standard),
+              box-shadow var(--duration-short) var(--ease-standard);
+  border: 2px solid transparent;
+}
+
+.card-display--clickable {
+  cursor: pointer;
+}
+
+.card-display--clickable:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--elevation-4);
+}
+
+.card-display--clickable:active {
+  animation: pulse var(--duration-medium) var(--ease-standard);
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(0.98);
+  }
+}
+
+/* Image Container */
+.card-display__image-container {
+  width: 100%;
+  height: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+  overflow: hidden;
+}
+
+.card-display__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.card-display__placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #e0e0e0 0%, #c0c0c0 100%);
+  padding: var(--spacing-sm);
+}
+
+.card-display__placeholder-text {
+  font-size: var(--font-size-sm);
+  color: #666;
+  text-align: center;
+  font-weight: 600;
+  word-wrap: break-word;
+}
+
+/* Card Info */
+.card-display__info {
+  padding: var(--spacing-sm);
+  background: #fff;
+}
+
+.card-display__name {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  margin: 0 0 var(--spacing-xs) 0;
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.card-display__stats {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.card-display__elixir {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  font-size: var(--font-size-md);
+  font-weight: 700;
+  color: #9c27b0;
+}
+
+.card-display__elixir-icon {
+  font-size: 14px;
+}
+
+.card-display__rarity {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* Rarity Colors - Border and Badge */
+.card-display--common {
+  border-color: var(--color-common);
+}
+
+.card-display--rare {
+  border-color: var(--color-rare);
+}
+
+.card-display--epic {
+  border-color: var(--color-epic);
+}
+
+.card-display--legendary {
+  border-color: #ffd700;
+  background: linear-gradient(135deg, #fff9e6 0%, #ffffff 100%);
+}
+
+.card-display--champion {
+  border-color: var(--color-champion);
+  background: linear-gradient(135deg, #fffacd 0%, #ffffff 100%);
+}
+
+/* Rarity Badge Colors */
+.card-display__rarity--common {
+  background-color: var(--color-common);
+  color: #fff;
+}
+
+.card-display__rarity--rare {
+  background-color: var(--color-rare);
+  color: #fff;
+}
+
+.card-display__rarity--epic {
+  background-color: var(--color-epic);
+  color: #fff;
+}
+
+.card-display__rarity--legendary {
+  background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%);
+  color: #fff;
+  font-weight: 700;
+}
+
+.card-display__rarity--champion {
+  background-color: var(--color-champion);
+  color: #333;
+  font-weight: 700;
+}
+
+/* Action Buttons */
+.card-display__actions {
+  padding: var(--spacing-sm);
+  background: #f9f9f9;
+  border-top: 1px solid #e0e0e0;
+}
+
+.card-display__button {
+  width: 100%;
+  padding: var(--spacing-sm);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.02857em;
+  cursor: pointer;
+  box-shadow: var(--elevation-1);
+  transition: background-color var(--duration-short) var(--ease-standard),
+              box-shadow var(--duration-short) var(--ease-standard),
+              transform var(--duration-short) var(--ease-standard);
+  position: relative;
+  overflow: hidden;
+}
+
+.card-display__button:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--elevation-2);
+}
+
+.card-display__button:active {
+  transform: scale(0.98);
+}
+
+.card-display__button--add {
+  background-color: var(--color-success);
+  color: #fff;
+}
+
+.card-display__button--add:hover {
+  background-color: #45a049;
+}
+
+.card-display__button--remove {
+  background-color: var(--color-error);
+  color: #fff;
+}
+
+.card-display__button--remove:hover {
+  background-color: #da190b;
+}
+
+/* Touch device support */
+@media (hover: none) and (pointer: coarse) {
+  .card-display--clickable:hover {
+    transform: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .card-display--clickable:active {
+    transform: scale(0.98);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  }
+
+  .card-display__button {
+    min-height: 44px; /* Touch-friendly size */
+    font-size: var(--font-size-md);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .card-display {
+    width: 100%;
+    max-width: 140px;
+  }
+
+  .card-display__image-container {
+    height: 160px;
+  }
+
+  .card-display__name {
+    font-size: 12px;
+  }
+
+  .card-display__elixir {
+    font-size: var(--font-size-sm);
+  }
+
+  .card-display__rarity {
+    font-size: 10px;
+    padding: 2px 5px;
+  }
+
+  .card-display__button {
+    padding: var(--spacing-md);
+    font-size: var(--font-size-md);
+  }
+}
+
+@media (max-width: 480px) {
+  .card-display {
+    width: 100%;
+  }
+
+  .card-display__image-container {
+    height: 140px;
+  }
+
+  .card-display__info {
+    padding: var(--spacing-xs);
+  }
+
+  .card-display__name {
+    font-size: 11px;
+  }
+
+  .card-display__stats {
+    gap: var(--spacing-xs);
+  }
+
+  .card-display__elixir {
+    font-size: 12px;
+  }
+
+  .card-display__rarity {
+    font-size: 9px;
+    padding: 1px 3px;
+  }
+}

@@ -1,89 +1,112 @@
-// frontend/src/App.tsx
-
-import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
+import { useState } from 'react';
+import { BrowserRouter as Router, Route, Routes, Link, useNavigate } from 'react-router-dom';
 import DeckBuilder from './components/DeckBuilder';
 import SavedDecks from './components/SavedDecks';
-import { fetchDecks, createDeck, updateDeck, deleteDeck } from './services/api';
-import './App.css'; // Assuming some basic styling
+import Notification from './components/Notification';
+import ErrorBoundary from './components/ErrorBoundary';
+import { Deck, DeckSlot, Notification as NotificationType } from './types';
+import './App.css';
 
-function App() {
-  const [savedDecks, setSavedDecks] = useState<any[]>([]);
-  const [error, setError] = useState<string | null>(null);
+function AppContent() {
+  const navigate = useNavigate();
+  
+  // Global state for notifications
+  const [notifications, setNotifications] = useState<NotificationType[]>([]);
+  
+  // Global state for current deck (persists across navigation)
+  const [currentDeck, setCurrentDeck] = useState<DeckSlot[]>(
+    Array(8).fill(null).map(() => ({ card: null, isEvolution: false }))
+  );
 
-  useEffect(() => {
-    const getDecks = async () => {
-      try {
-        const decks = await fetchDecks();
-        setSavedDecks(decks);
-      } catch (error: any) {
-        setError(error.message || "Failed to fetch decks.");
-        console.error("Failed to fetch decks:", error);
-      }
-    };
-    getDecks();
-  }, []);
-
-  const handleSelectDeck = (id: number) => {
-    console.log('Select deck', id);
-    // Logic to load selected deck into DeckBuilder
+  // Add notification with auto-dismiss after 3 seconds
+  const addNotification = (message: string, type: 'success' | 'error' | 'info') => {
+    const id = `${Date.now()}-${Math.random()}`;
+    const notification: NotificationType = { id, message, type };
+    setNotifications(prev => [...prev, notification]);
+    
+    // Auto-dismiss after 3 seconds
+    setTimeout(() => {
+      setNotifications(prev => prev.filter(n => n.id !== id));
+    }, 3000);
   };
 
-  const handleRenameDeck = async (id: number, newName: string) => {
-    try {
-      const deckToUpdate = savedDecks.find(deck => deck.id === id);
-      if (deckToUpdate) {
-        const updatedDeck = { ...deckToUpdate, name: newName };
-        await updateDeck(id, updatedDeck);
-        setSavedDecks(savedDecks.map(deck => (deck.id === id ? updatedDeck : deck)));
-      }
-    } catch (error: any) {
-      setError(error.message || "Failed to rename deck.");
-      console.error("Failed to rename deck:", error);
-    }
+  // Dismiss notification manually
+  const handleDismissNotification = (id: string) => {
+    setNotifications(prev => prev.filter(n => n.id !== id));
   };
 
-  const handleDeleteDeck = async (id: number) => {
-    try {
-      await deleteDeck(id);
-      setSavedDecks(savedDecks.filter(deck => deck.id !== id));
-    } catch (error: any) {
-      setError(error.message || "Failed to delete deck.");
-      console.error("Failed to delete deck:", error);
-    }
+  // Load deck into builder from saved decks
+  const loadDeckIntoBuilder = (deck: Deck) => {
+    setCurrentDeck(deck.slots);
+    navigate('/');
+    addNotification(`Loaded deck: ${deck.name}`, 'success');
+  };
+
+  // Handle deck saved callback
+  const handleDeckSaved = () => {
+    addNotification('Deck saved successfully!', 'success');
   };
 
   return (
-    <Router>
-      <div className="App">
-        <nav>
-          <ul>
-            <li>
-              <Link to="/">Deck Builder</Link>
+    <div className="app">
+      {/* Navigation */}
+      <nav className="app__nav">
+        <div className="app__nav-container">
+          <h1 className="app__title">Clash Royale Deck Builder</h1>
+          <ul className="app__nav-list">
+            <li className="app__nav-item">
+              <Link to="/" className="app__nav-link">Deck Builder</Link>
             </li>
-            <li>
-              <Link to="/saved-decks">Saved Decks</Link>
+            <li className="app__nav-item">
+              <Link to="/saved-decks" className="app__nav-link">Saved Decks</Link>
             </li>
           </ul>
-        </nav>
+        </div>
+      </nav>
 
-        {error && <div className="error-message">Error: {error}</div>}
+      {/* Global Notifications */}
+      <Notification 
+        notifications={notifications}
+        onDismiss={handleDismissNotification}
+      />
 
-        <Routes>
-          <Route path="/" element={<DeckBuilder />} />
-          <Route
-            path="/saved-decks"
-            element={
-              <SavedDecks
-                decks={savedDecks}
-                onSelectDeck={handleSelectDeck}
-                onRenameDeck={handleRenameDeck}
-                onDeleteDeck={handleDeleteDeck}
-              />
-            }
-          />
-        </Routes>
-      </div>
+      {/* Main Content */}
+      <main className="app__main">
+        <ErrorBoundary>
+          <Routes>
+            <Route 
+              path="/" 
+              element={
+                <ErrorBoundary>
+                  <DeckBuilder 
+                    initialDeck={currentDeck}
+                    onDeckSaved={handleDeckSaved}
+                  />
+                </ErrorBoundary>
+              } 
+            />
+            <Route
+              path="/saved-decks"
+              element={
+                <ErrorBoundary>
+                  <SavedDecks
+                    onSelectDeck={loadDeckIntoBuilder}
+                    onNotification={addNotification}
+                  />
+                </ErrorBoundary>
+              }
+            />
+          </Routes>
+        </ErrorBoundary>
+      </main>
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <AppContent />
     </Router>
   );
 }

@@ -1,0 +1,189 @@
+.card-filters {
+  background-color: #ffffff;
+  border-radius: var(--radius-md);
+  padding: var(--spacing-lg, 24px);
+  margin-bottom: var(--spacing-lg, 24px);
+  box-shadow: var(--elevation-2);
+}
+
+.card-filters__header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm, 8px);
+  margin-bottom: var(--spacing-md, 16px);
+}
+
+.card-filters__title {
+  margin: 0;
+  font-size: var(--font-size-xl, 20px);
+  font-weight: 600;
+  color: #333;
+}
+
+.card-filters__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 var(--spacing-xs, 4px);
+  background-color: var(--color-primary, #4a90e2);
+  color: white;
+  border-radius: 12px;
+  font-size: var(--font-size-sm, 12px);
+  font-weight: 600;
+}
+
+.card-filters__controls {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-md, 16px);
+  margin-bottom: var(--spacing-md, 16px);
+}
+
+.card-filters__control {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs, 4px);
+}
+
+.card-filters__label {
+  font-size: var(--font-size-sm, 12px);
+  font-weight: 600;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.card-filters__input,
+.card-filters__select {
+  padding: var(--spacing-sm, 8px) var(--spacing-md, 16px);
+  border: 1px solid #d0d0d0;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-md, 14px);
+  font-family: var(--font-family, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif);
+  transition: border-color var(--duration-short) var(--ease-standard),
+              box-shadow var(--duration-short) var(--ease-standard);
+}
+
+.card-filters__input:focus,
+.card-filters__select:focus {
+  outline: none;
+  border-color: var(--color-primary, #4a90e2);
+  box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+}
+
+.card-filters__input::placeholder {
+  color: #999;
+}
+
+.card-filters__select {
+  cursor: pointer;
+  background-color: white;
+}
+
+.card-filters__clear-button {
+  padding: var(--spacing-sm, 8px) var(--spacing-lg, 24px);
+  background-color: transparent;
+  color: var(--color-primary, #4a90e2);
+  border: 1px solid rgba(74, 144, 226, 0.5);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.02857em;
+  cursor: pointer;
+  transition: background-color var(--duration-short) var(--ease-standard),
+              border-color var(--duration-short) var(--ease-standard);
+  position: relative;
+  overflow: hidden;
+}
+
+.card-filters__clear-button:hover:not(:disabled) {
+  background-color: rgba(74, 144, 226, 0.04);
+  border-color: var(--color-primary, #4a90e2);
+}
+
+.card-filters__clear-button:active:not(:disabled) {
+  background-color: rgba(74, 144, 226, 0.12);
+}
+
+.card-filters__clear-button:disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Touch device support */
+@media (hover: none) and (pointer: coarse) {
+  .card-filters__input,
+  .card-filters__select,
+  .card-filters__clear-button {
+    min-height: 44px; /* Touch-friendly size */
+    font-size: var(--font-size-md);
+  }
+
+  .card-filters__clear-button:hover:not(:disabled) {
+    background-color: #f5f5f5;
+  }
+
+  .card-filters__clear-button:active:not(:disabled) {
+    background-color: #e0e0e0;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+  .card-filters__controls {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .card-filters {
+    padding: var(--spacing-md, 16px);
+  }
+
+  .card-filters__controls {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-sm);
+  }
+
+  .card-filters__clear-button {
+    width: 100%;
+    padding: var(--spacing-md);
+  }
+
+  .card-filters__header {
+    margin-bottom: var(--spacing-sm);
+  }
+
+  .card-filters__title {
+    font-size: var(--font-size-lg);
+  }
+}
+
+@media (max-width: 480px) {
+  .card-filters {
+    padding: var(--spacing-sm);
+  }
+
+  .card-filters__title {
+    font-size: var(--font-size-md);
+  }
+
+  .card-filters__badge {
+    min-width: 20px;
+    height: 20px;
+    font-size: 11px;
+  }
+
+  .card-filters__label {
+    font-size: 11px;
+  }
+
+  .card-filters__input,
+  .card-filters__select {
+    font-size: var(--font-size-sm);
+  }
+}

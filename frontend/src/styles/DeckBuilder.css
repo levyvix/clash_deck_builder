@@ -1,0 +1,468 @@
+/* DeckBuilder Component Styles */
+
+.deck-builder {
+  width: 100%;
+  min-height: 100vh;
+  padding: var(--spacing-lg, 24px);
+  background-color: #f5f5f5;
+}
+
+.deck-builder__container {
+  display: flex;
+  gap: var(--spacing-xl, 32px);
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+/* Loading State */
+.deck-builder__loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: var(--spacing-md, 16px);
+}
+
+.deck-builder__spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid #e0e0e0;
+  border-top-color: var(--color-primary, #4a90e2);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Error State */
+.deck-builder__error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: var(--spacing-md, 16px);
+  padding: var(--spacing-xl, 32px);
+  background-color: #fff;
+  border-radius: var(--radius-md);
+  box-shadow: var(--elevation-2);
+}
+
+.deck-builder__error-message {
+  color: var(--color-error, #f44336);
+  font-size: var(--font-size-lg, 16px);
+  text-align: center;
+}
+
+.deck-builder__error-button {
+  padding: var(--spacing-sm, 8px) var(--spacing-lg, 24px);
+  background-color: var(--color-primary, #4a90e2);
+  color: white;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.02857em;
+  cursor: pointer;
+  box-shadow: var(--elevation-2);
+  transition: background-color var(--duration-short) var(--ease-standard),
+              box-shadow var(--duration-short) var(--ease-standard),
+              transform var(--duration-short) var(--ease-standard);
+}
+
+.deck-builder__error-button:hover {
+  background-color: #3a7bc8;
+  box-shadow: var(--elevation-4);
+}
+
+/* Deck Section */
+.deck-builder__deck-section {
+  flex: 0 0 600px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg, 24px);
+}
+
+.deck-builder__deck-header {
+  background-color: white;
+  padding: var(--spacing-lg, 24px);
+  border-radius: var(--radius-md);
+  box-shadow: var(--elevation-2);
+}
+
+.deck-builder__title {
+  margin: 0 0 var(--spacing-md, 16px) 0;
+  font-size: var(--font-size-xl, 20px);
+  font-weight: 600;
+  color: #333;
+}
+
+.deck-builder__stats {
+  display: flex;
+  gap: var(--spacing-xl, 32px);
+}
+
+.deck-builder__stat {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm, 8px);
+}
+
+.deck-builder__stat-label {
+  font-size: var(--font-size-md, 14px);
+  color: #666;
+  font-weight: 500;
+}
+
+.deck-builder__stat-value {
+  font-size: var(--font-size-lg, 16px);
+  font-weight: 700;
+  color: var(--color-primary, #4a90e2);
+}
+
+/* Deck Slots Grid - 2 rows of 4 */
+.deck-builder__slots {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: var(--spacing-md, 16px);
+  background-color: white;
+  padding: var(--spacing-lg, 24px);
+  border-radius: var(--radius-md);
+  box-shadow: var(--elevation-2);
+}
+
+/* Actions */
+.deck-builder__actions {
+  display: flex;
+  justify-content: center;
+}
+
+.deck-builder__save-button {
+  padding: var(--spacing-md, 16px) var(--spacing-xl, 32px);
+  background-color: var(--color-success, #4caf50);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 16px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.02857em;
+  cursor: pointer;
+  box-shadow: var(--elevation-2);
+  transition: background-color var(--duration-short) var(--ease-standard),
+              box-shadow var(--duration-short) var(--ease-standard),
+              transform var(--duration-short) var(--ease-standard);
+  position: relative;
+  overflow: hidden;
+}
+
+.deck-builder__save-button:hover:not(:disabled) {
+  background-color: #45a049;
+  transform: translateY(-2px);
+  box-shadow: var(--elevation-4);
+}
+
+.deck-builder__save-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+  opacity: 0.38;
+  box-shadow: none;
+}
+
+/* Save Dialog */
+.deck-builder__dialog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.deck-builder__dialog {
+  background-color: white;
+  padding: var(--spacing-xl, 32px);
+  border-radius: var(--radius-md);
+  box-shadow: var(--elevation-5);
+  min-width: 400px;
+  max-width: 90%;
+}
+
+.deck-builder__dialog-title {
+  margin: 0 0 var(--spacing-lg, 24px) 0;
+  font-size: var(--font-size-xl, 20px);
+  font-weight: 600;
+  color: #333;
+}
+
+.deck-builder__dialog-input {
+  width: 100%;
+  padding: var(--spacing-md, 16px);
+  border: 2px solid #e0e0e0;
+  border-radius: var(--border-radius-sm, 4px);
+  font-size: var(--font-size-md, 14px);
+  margin-bottom: var(--spacing-lg, 24px);
+  transition: border-color 0.2s;
+}
+
+.deck-builder__dialog-input:focus {
+  outline: none;
+  border-color: var(--color-primary, #4a90e2);
+}
+
+.deck-builder__dialog-actions {
+  display: flex;
+  gap: var(--spacing-md, 16px);
+  justify-content: flex-end;
+}
+
+.deck-builder__dialog-button {
+  padding: var(--spacing-sm, 8px) var(--spacing-lg, 24px);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.02857em;
+  cursor: pointer;
+  transition: background-color var(--duration-short) var(--ease-standard),
+              box-shadow var(--duration-short) var(--ease-standard),
+              transform var(--duration-short) var(--ease-standard);
+  position: relative;
+  overflow: hidden;
+}
+
+.deck-builder__dialog-button--cancel {
+  background-color: transparent;
+  color: var(--color-primary, #4a90e2);
+  border: 1px solid rgba(74, 144, 226, 0.5);
+}
+
+.deck-builder__dialog-button--cancel:hover:not(:disabled) {
+  background-color: rgba(74, 144, 226, 0.04);
+  border-color: var(--color-primary, #4a90e2);
+}
+
+.deck-builder__dialog-button--cancel:active:not(:disabled) {
+  background-color: rgba(74, 144, 226, 0.12);
+}
+
+.deck-builder__dialog-button--save {
+  background-color: var(--color-success, #4caf50);
+  color: white;
+  box-shadow: var(--elevation-2);
+}
+
+.deck-builder__dialog-button--save:hover:not(:disabled) {
+  background-color: #45a049;
+  box-shadow: var(--elevation-4);
+}
+
+.deck-builder__dialog-button--save:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.deck-builder__dialog-button:disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Gallery Section */
+.deck-builder__gallery-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg, 24px);
+  min-width: 0;
+}
+
+/* Touch device support */
+@media (hover: none) and (pointer: coarse) {
+  .deck-builder__save-button,
+  .deck-builder__error-button,
+  .deck-builder__dialog-button {
+    min-height: 44px; /* Touch-friendly size */
+  }
+
+  .deck-builder__save-button:hover:not(:disabled) {
+    transform: none;
+  }
+
+  .deck-builder__save-button:active:not(:disabled) {
+    transform: scale(0.98);
+  }
+
+  .deck-builder__dialog-input {
+    min-height: 44px;
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .deck-builder__container {
+    flex-direction: column;
+  }
+
+  .deck-builder__deck-section {
+    flex: 1;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .deck-builder__gallery-section {
+    width: 100%;
+  }
+
+  .deck-builder__slots {
+    grid-template-columns: repeat(4, 1fr);
+    max-width: 600px;
+    margin: 0 auto;
+  }
+}
+
+@media (max-width: 768px) {
+  .deck-builder {
+    padding: var(--spacing-md, 16px);
+  }
+
+  .deck-builder__container {
+    gap: var(--spacing-lg, 24px);
+  }
+
+  .deck-builder__deck-section {
+    flex: 1;
+  }
+
+  .deck-builder__slots {
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--spacing-sm, 8px);
+    padding: var(--spacing-md, 16px);
+    max-width: 100%;
+  }
+
+  .deck-builder__deck-header {
+    padding: var(--spacing-md, 16px);
+  }
+
+  .deck-builder__title {
+    font-size: var(--font-size-lg);
+  }
+
+  .deck-builder__stats {
+    gap: var(--spacing-md, 16px);
+    flex-wrap: wrap;
+  }
+
+  .deck-builder__stat-label {
+    font-size: var(--font-size-sm);
+  }
+
+  .deck-builder__stat-value {
+    font-size: var(--font-size-md);
+  }
+
+  .deck-builder__dialog {
+    min-width: 300px;
+    max-width: calc(100% - 32px);
+    padding: var(--spacing-lg, 24px);
+  }
+
+  .deck-builder__dialog-title {
+    font-size: var(--font-size-lg);
+  }
+
+  .deck-builder__save-button {
+    font-size: var(--font-size-md);
+    padding: var(--spacing-md, 16px) var(--spacing-lg, 24px);
+  }
+}
+
+@media (max-width: 480px) {
+  .deck-builder {
+    padding: var(--spacing-sm);
+  }
+
+  .deck-builder__container {
+    gap: var(--spacing-md);
+  }
+
+  .deck-builder__slots {
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(4, 1fr);
+    gap: var(--spacing-xs);
+    padding: var(--spacing-sm);
+  }
+
+  .deck-builder__deck-header {
+    padding: var(--spacing-sm);
+  }
+
+  .deck-builder__title {
+    font-size: var(--font-size-md);
+    margin-bottom: var(--spacing-sm);
+  }
+
+  .deck-builder__stats {
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    align-items: flex-start;
+  }
+
+  .deck-builder__stat {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .deck-builder__save-button {
+    width: 100%;
+    padding: var(--spacing-md);
+  }
+
+  .deck-builder__dialog {
+    min-width: auto;
+    width: calc(100% - 16px);
+    padding: var(--spacing-md);
+  }
+
+  .deck-builder__dialog-title {
+    font-size: var(--font-size-md);
+    margin-bottom: var(--spacing-md);
+  }
+
+  .deck-builder__dialog-input {
+    padding: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
+  }
+
+  .deck-builder__dialog-actions {
+    gap: var(--spacing-sm);
+  }
+
+  .deck-builder__dialog-button {
+    flex: 1;
+    padding: var(--spacing-sm) var(--spacing-md);
+  }
+
+  .deck-builder__loading,
+  .deck-builder__error {
+    min-height: 300px;
+    padding: var(--spacing-lg);
+  }
+
+  .deck-builder__spinner {
+    width: 40px;
+    height: 40px;
+  }
+}

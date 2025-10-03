@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Responsive Design Test - Clash Royale Deck Builder</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 40px;
+            color: #333;
+        }
+
+        .section {
+            background: white;
+            padding: 24px;
+            margin-bottom: 24px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .section h2 {
+            margin-bottom: 16px;
+            color: #2c3e50;
+        }
+
+        /* Card Gallery Grid Test */
+        .card-grid {
+            display: grid;
+            gap: 16px;
+            grid-template-columns: repeat(6, 1fr);
+        }
+
+        .card {
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 8px;
+            text-align: center;
+            aspect-ratio: 3/4;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: #666;
+        }
+
+        /* Deck Slots Test */
+        .deck-slots {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(2, 1fr);
+            gap: 16px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .deck-slot {
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            aspect-ratio: 5/7;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            color: #999;
+            min-height: 100px;
+        }
+
+        /* Breakpoint Indicator */
+        .breakpoint-indicator {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: #2c3e50;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-weight: bold;
+            z-index: 1000;
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 1200px) {
+            .card-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+
+            .breakpoint-indicator::after {
+                content: ' - Tablet (≤1200px)';
+            }
+        }
+
+        @media (max-width: 768px) {
+            .card-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
+            }
+
+            .section {
+                padding: 16px;
+            }
+
+            .breakpoint-indicator::after {
+                content: ' - Mobile (≤768px)';
+            }
+        }
+
+        @media (max-width: 480px) {
+            .card-grid {
+                gap: 4px;
+            }
+
+            .deck-slots {
+                grid-template-columns: repeat(2, 1fr);
+                grid-template-rows: repeat(4, 1fr);
+                gap: 8px;
+            }
+
+            .section {
+                padding: 12px;
+            }
+
+            .breakpoint-indicator::after {
+                content: ' - Small Mobile (≤480px)';
+            }
+        }
+
+        @media (min-width: 1201px) {
+            .breakpoint-indicator::after {
+                content: ' - Desktop (>1200px)';
+            }
+        }
+
+        /* Rarity Colors Test */
+        .rarity-test {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 16px;
+        }
+
+        .rarity-card {
+            padding: 16px;
+            border-radius: 8px;
+            text-align: center;
+            border: 2px solid;
+        }
+
+        .rarity-card.common {
+            border-color: #808080;
+        }
+
+        .rarity-card.rare {
+            border-color: #ff8c00;
+        }
+
+        .rarity-card.epic {
+            border-color: #9370db;
+        }
+
+        .rarity-card.legendary {
+            border-color: #ffd700;
+            background: linear-gradient(135deg, #fff9e6 0%, #ffffff 100%);
+        }
+
+        .rarity-card.champion {
+            border-color: #ffd700;
+            background: linear-gradient(135deg, #fffacd 0%, #ffffff 100%);
+        }
+
+        .rarity-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+            margin-top: 8px;
+        }
+
+        .rarity-badge.common {
+            background-color: #808080;
+        }
+
+        .rarity-badge.rare {
+            background-color: #ff8c00;
+        }
+
+        .rarity-badge.epic {
+            background-color: #9370db;
+        }
+
+        .rarity-badge.legendary {
+            background: linear-gradient(135deg, #ffd700, #ff8c00);
+        }
+
+        .rarity-badge.champion {
+            background-color: #ffd700;
+            color: #333;
+        }
+
+        /* Touch Target Test */
+        .touch-test {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .touch-button {
+            padding: 12px 24px;
+            background: #4a90e2;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            min-height: 44px;
+        }
+
+        @media (hover: none) and (pointer: coarse) {
+            .touch-indicator {
+                display: block !important;
+                background: #4caf50;
+                color: white;
+                padding: 12px;
+                border-radius: 4px;
+                margin-bottom: 16px;
+                text-align: center;
+            }
+        }
+
+        .touch-indicator {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="breakpoint-indicator">Current Breakpoint</div>
+
+    <div class="container">
+        <h1>🎮 Responsive Design Test</h1>
+
+        <div class="touch-indicator">
+            ✅ Touch Device Detected - Touch optimizations active
+        </div>
+
+        <div class="section">
+            <h2>1. Card Gallery Grid (6 → 4 → 2 columns)</h2>
+            <div class="card-grid">
+                <div class="card">Card 1</div>
+                <div class="card">Card 2</div>
+                <div class="card">Card 3</div>
+                <div class="card">Card 4</div>
+                <div class="card">Card 5</div>
+                <div class="card">Card 6</div>
+                <div class="card">Card 7</div>
+                <div class="card">Card 8</div>
+                <div class="card">Card 9</div>
+                <div class="card">Card 10</div>
+                <div class="card">Card 11</div>
+                <div class="card">Card 12</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>2. Deck Slots (2×4 → 4×2 on mobile)</h2>
+            <div class="deck-slots">
+                <div class="deck-slot">+</div>
+                <div class="deck-slot">+</div>
+                <div class="deck-slot">+</div>
+                <div class="deck-slot">+</div>
+                <div class="deck-slot">+</div>
+                <div class="deck-slot">+</div>
+                <div class="deck-slot">+</div>
+                <div class="deck-slot">+</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>3. Rarity Colors</h2>
+            <div class="rarity-test">
+                <div class="rarity-card common">
+                    <div>Common</div>
+                    <div class="rarity-badge common">COMMON</div>
+                </div>
+                <div class="rarity-card rare">
+                    <div>Rare</div>
+                    <div class="rarity-badge rare">RARE</div>
+                </div>
+                <div class="rarity-card epic">
+                    <div>Epic</div>
+                    <div class="rarity-badge epic">EPIC</div>
+                </div>
+                <div class="rarity-card legendary">
+                    <div>Legendary</div>
+                    <div class="rarity-badge legendary">LEGENDARY</div>
+                </div>
+                <div class="rarity-card champion">
+                    <div>Champion</div>
+                    <div class="rarity-badge champion">CHAMPION</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>4. Touch Targets (min 44px height)</h2>
+            <div class="touch-test">
+                <button class="touch-button">Button 1 (44px min height)</button>
+                <button class="touch-button">Button 2 (44px min height)</button>
+                <button class="touch-button">Button 3 (44px min height)</button>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Testing Instructions</h2>
+            <ol style="line-height: 1.8;">
+                <li>Resize your browser window to test different breakpoints</li>
+                <li>Check the breakpoint indicator in the top-right corner</li>
+                <li>Verify card grid adjusts: 6 cols (desktop) → 4 cols (tablet) → 2 cols (mobile)</li>
+                <li>Verify deck slots adjust: 2×4 (desktop/tablet) → 4×2 (small mobile)</li>
+                <li>Verify rarity colors display correctly with proper borders and badges</li>
+                <li>On touch devices, verify the green "Touch Device Detected" banner appears</li>
+                <li>Test on actual devices: desktop, tablet, and mobile phone</li>
+            </ol>
+        </div>
+
+        <div class="section" style="background: #e3f2fd;">
+            <h2>✅ Responsive Checklist</h2>
+            <ul style="line-height: 1.8;">
+                <li>☐ Desktop (>1200px): 6-column grid, side-by-side layout</li>
+                <li>☐ Tablet (768-1200px): 4-column grid, stacked layout</li>
+                <li>☐ Mobile (<768px): 2-column grid, vertical stack</li>
+                <li>☐ Small Mobile (<480px): 2-column grid, 4×2 deck slots</li>
+                <li>☐ No horizontal scrolling at any breakpoint</li>
+                <li>☐ All text readable at all sizes</li>
+                <li>☐ Touch targets ≥44px on touch devices</li>
+                <li>☐ Rarity colors display correctly</li>
+                <li>☐ Smooth transitions between breakpoints</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Log current viewport size
+        function logViewportSize() {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            console.log(`Viewport: ${width}×${height}`);
+
+            let breakpoint = 'Desktop';
+            if (width <= 480) breakpoint = 'Small Mobile';
+            else if (width <= 768) breakpoint = 'Mobile';
+            else if (width <= 1200) breakpoint = 'Tablet';
+
+            console.log(`Breakpoint: ${breakpoint}`);
+        }
+
+        window.addEventListener('resize', logViewportSize);
+        logViewportSize();
+
+        // Test touch detection
+        const isTouchDevice = ('ontouchstart' in window) ||
+            (navigator.maxTouchPoints > 0) ||
+            (navigator.msMaxTouchPoints > 0);
+        console.log('Touch Device:', isTouchDevice);
+    </script>
+</body>
+
+</html>

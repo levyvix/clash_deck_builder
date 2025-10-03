@@ -1,0 +1,159 @@
+/* CSS Custom Properties for Clash Royale Deck Builder */
+
+:root {
+  /* Rarity Colors */
+  --color-common: #808080;
+  --color-rare: #ff8c00;
+  --color-epic: #9370db;
+  --color-legendary: #ffd700;
+  --color-champion: #ffd700;
+  
+  /* Legendary gradient for special effects */
+  --gradient-legendary: linear-gradient(135deg, #ffd700, #ff8c00);
+  
+  /* Primary UI Colors */
+  --color-primary: #4a90e2;
+  --color-primary-hover: #357abd;
+  --color-primary-active: #2868a8;
+  
+  /* Feedback Colors */
+  --color-success: #4caf50;
+  --color-success-light: #81c784;
+  --color-error: #f44336;
+  --color-error-light: #e57373;
+  --color-warning: #ff9800;
+  --color-info: #2196f3;
+  
+  /* Neutral Colors */
+  --color-background: #f5f5f5;
+  --color-surface: #ffffff;
+  --color-border: #e0e0e0;
+  --color-text-primary: #212121;
+  --color-text-secondary: #757575;
+  --color-text-disabled: #bdbdbd;
+  
+  /* Spacing Scale */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-xxl: 48px;
+  
+  /* Typography */
+  --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  --font-family-mono: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+  
+  --font-size-xs: 12px;
+  --font-size-sm: 14px;
+  --font-size-md: 16px;
+  --font-size-lg: 18px;
+  --font-size-xl: 20px;
+  --font-size-xxl: 24px;
+  
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  
+  --line-height-tight: 1.2;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
+  
+  /* Border Radius */
+  --border-radius-sm: 4px;
+  --border-radius: 8px;
+  --border-radius-lg: 12px;
+  --border-radius-xl: 16px;
+  --border-radius-full: 9999px;
+  
+  /* Borders */
+  --border-width: 1px;
+  --border-width-thick: 2px;
+  --border-style: solid;
+  
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  
+  /* Transitions */
+  --transition-fast: 150ms ease-in-out;
+  --transition-base: 200ms ease-in-out;
+  --transition-slow: 300ms ease-in-out;
+  
+  /* Z-Index Scale */
+  --z-index-dropdown: 1000;
+  --z-index-sticky: 1020;
+  --z-index-fixed: 1030;
+  --z-index-modal-backdrop: 1040;
+  --z-index-modal: 1050;
+  --z-index-popover: 1060;
+  --z-index-tooltip: 1070;
+  --z-index-notification: 1080;
+  
+  /* Responsive Breakpoints (for use in media queries) */
+  --breakpoint-mobile: 480px;
+  --breakpoint-tablet: 768px;
+  --breakpoint-desktop: 1200px;
+  --breakpoint-wide: 1600px;
+  
+  /* Component-Specific Variables */
+  
+  /* Card Display */
+  --card-width: 120px;
+  --card-height: auto;
+  --card-border-width: 2px;
+  
+  /* Deck Slot */
+  --deck-slot-width: 100px;
+  --deck-slot-height: 140px;
+  
+  /* Grid Columns (responsive) */
+  --grid-columns-mobile: 2;
+  --grid-columns-tablet: 4;
+  --grid-columns-desktop: 6;
+  --grid-gap: 16px;
+}
+
+/* Responsive Breakpoint Media Queries */
+/* These can be imported and used in component CSS files */
+
+/* Mobile: < 480px (default styles) */
+
+/* Tablet: 768px - 1199px */
+@media (min-width: 768px) {
+  :root {
+    --grid-columns: var(--grid-columns-tablet);
+  }
+}
+
+/* Desktop: >= 1200px */
+@media (min-width: 1200px) {
+  :root {
+    --grid-columns: var(--grid-columns-desktop);
+  }
+}
+
+/* Wide screens: >= 1600px */
+@media (min-width: 1600px) {
+  :root {
+    --spacing-xl: 40px;
+    --spacing-xxl: 64px;
+  }
+}
+
+/* Dark mode support (optional, for future enhancement) */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-background: #121212;
+    --color-surface: #1e1e1e;
+    --color-border: #333333;
+    --color-text-primary: #ffffff;
+    --color-text-secondary: #b0b0b0;
+    --color-text-disabled: #666666;
+  }
+}

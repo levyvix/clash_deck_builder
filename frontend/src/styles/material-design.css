@@ -1,0 +1,266 @@
+/* Material Design System */
+
+/* ============================================
+   ELEVATION SHADOWS
+   ============================================ */
+:root {
+  /* Elevation levels - Material Design shadow system */
+  --elevation-0: none;
+  --elevation-1: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+  --elevation-2: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+  --elevation-3: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
+  --elevation-4: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
+  --elevation-5: 0 19px 38px rgba(0, 0, 0, 0.30), 0 15px 12px rgba(0, 0, 0, 0.22);
+
+  /* ============================================
+     MOTION CURVES (Easing Functions)
+     ============================================ */
+  /* Standard easing - most common, for elements entering and exiting */
+  --ease-standard: cubic-bezier(0.4, 0.0, 0.2, 1);
+  
+  /* Deceleration - for elements entering the screen */
+  --ease-decelerate: cubic-bezier(0.0, 0.0, 0.2, 1);
+  
+  /* Acceleration - for elements exiting the screen */
+  --ease-accelerate: cubic-bezier(0.4, 0.0, 1, 1);
+  
+  /* Sharp - for elements that may return to the screen at any time */
+  --ease-sharp: cubic-bezier(0.4, 0.0, 0.6, 1);
+
+  /* ============================================
+     DURATIONS
+     ============================================ */
+  --duration-shortest: 150ms;
+  --duration-short: 200ms;
+  --duration-medium: 300ms;
+  --duration-long: 400ms;
+  --duration-longest: 500ms;
+
+  /* ============================================
+     SPACING (8px Grid System)
+     ============================================ */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-xxl: 40px;
+  --spacing-xxxl: 48px;
+
+  /* ============================================
+     BORDER RADIUS
+     ============================================ */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-round: 50%;
+}
+
+/* ============================================
+   BUTTON STYLES - Material Design Patterns
+   ============================================ */
+
+/* Base button styles */
+.md-button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 64px;
+  padding: var(--spacing-sm) var(--spacing-md);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.75;
+  letter-spacing: 0.02857em;
+  text-transform: uppercase;
+  border-radius: var(--radius-sm);
+  transition: background-color var(--duration-short) var(--ease-standard),
+              box-shadow var(--duration-short) var(--ease-standard),
+              transform var(--duration-short) var(--ease-standard);
+  cursor: pointer;
+  user-select: none;
+  overflow: hidden;
+}
+
+.md-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.38;
+  pointer-events: none;
+}
+
+/* Contained Button (Primary) */
+.md-button--contained {
+  background-color: var(--color-primary, #1976d2);
+  color: white;
+  box-shadow: var(--elevation-2);
+}
+
+.md-button--contained:hover {
+  background-color: var(--color-primary-hover, #1565c0);
+  box-shadow: var(--elevation-4);
+}
+
+.md-button--contained:active {
+  box-shadow: var(--elevation-8, var(--elevation-5));
+  transform: scale(0.98);
+}
+
+/* Outlined Button */
+.md-button--outlined {
+  background-color: transparent;
+  color: var(--color-primary, #1976d2);
+  border: 1px solid rgba(25, 118, 210, 0.5);
+}
+
+.md-button--outlined:hover {
+  background-color: rgba(25, 118, 210, 0.04);
+  border-color: var(--color-primary, #1976d2);
+}
+
+.md-button--outlined:active {
+  background-color: rgba(25, 118, 210, 0.12);
+}
+
+/* Text Button */
+.md-button--text {
+  background-color: transparent;
+  color: var(--color-primary, #1976d2);
+  padding: var(--spacing-sm) var(--spacing-sm);
+}
+
+.md-button--text:hover {
+  background-color: rgba(25, 118, 210, 0.04);
+}
+
+.md-button--text:active {
+  background-color: rgba(25, 118, 210, 0.12);
+}
+
+/* ============================================
+   RIPPLE EFFECT
+   ============================================ */
+
+/* Ripple container */
+.md-ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Ripple animation */
+@keyframes ripple {
+  0% {
+    transform: scale(0);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+.md-ripple::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  background-color: currentColor;
+  border-radius: var(--radius-round);
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0);
+  pointer-events: none;
+}
+
+.md-ripple:active::after {
+  animation: ripple var(--duration-long) var(--ease-standard);
+}
+
+/* Ripple for light backgrounds */
+.md-ripple--light::after {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Ripple for dark backgrounds */
+.md-ripple--dark::after {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+/* ============================================
+   CARD STYLES - Material Design
+   ============================================ */
+
+.md-card {
+  background-color: white;
+  border-radius: var(--radius-md);
+  box-shadow: var(--elevation-2);
+  transition: box-shadow var(--duration-short) var(--ease-standard),
+              transform var(--duration-short) var(--ease-standard);
+}
+
+.md-card:hover {
+  box-shadow: var(--elevation-4);
+}
+
+.md-card--interactive {
+  cursor: pointer;
+}
+
+.md-card--interactive:hover {
+  transform: translateY(-2px);
+}
+
+.md-card--interactive:active {
+  transform: translateY(0);
+  box-shadow: var(--elevation-2);
+}
+
+/* ============================================
+   INTERACTIVE ELEMENT STATES
+   ============================================ */
+
+/* Focus visible for keyboard navigation */
+.md-button:focus-visible,
+.md-card--interactive:focus-visible {
+  outline: 2px solid var(--color-primary, #1976d2);
+  outline-offset: 2px;
+}
+
+/* Remove default focus outline */
+.md-button:focus,
+.md-card--interactive:focus {
+  outline: none;
+}
+
+/* ============================================
+   UTILITY CLASSES
+   ============================================ */
+
+/* Elevation utilities */
+.elevation-0 { box-shadow: var(--elevation-0); }
+.elevation-1 { box-shadow: var(--elevation-1); }
+.elevation-2 { box-shadow: var(--elevation-2); }
+.elevation-3 { box-shadow: var(--elevation-3); }
+.elevation-4 { box-shadow: var(--elevation-4); }
+.elevation-5 { box-shadow: var(--elevation-5); }
+
+/* Spacing utilities */
+.spacing-xs { padding: var(--spacing-xs); }
+.spacing-sm { padding: var(--spacing-sm); }
+.spacing-md { padding: var(--spacing-md); }
+.spacing-lg { padding: var(--spacing-lg); }
+.spacing-xl { padding: var(--spacing-xl); }
+
+/* Transition utilities */
+.transition-standard {
+  transition: all var(--duration-short) var(--ease-standard);
+}
+
+.transition-decelerate {
+  transition: all var(--duration-short) var(--ease-decelerate);
+}
+
+.transition-accelerate {
+  transition: all var(--duration-short) var(--ease-accelerate);
+}

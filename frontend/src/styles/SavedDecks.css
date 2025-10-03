@@ -1,0 +1,330 @@
+/* SavedDecks Component Styles */
+
+.saved-decks {
+  padding: var(--spacing-lg);
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.saved-decks h2 {
+  font-size: var(--font-size-xl);
+  margin-bottom: var(--spacing-lg);
+  color: var(--color-text-primary);
+}
+
+/* Loading State */
+.saved-decks__loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xl);
+  gap: var(--spacing-md);
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(74, 144, 226, 0.2);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Error State */
+.saved-decks__error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-xl);
+  background-color: rgba(244, 67, 54, 0.1);
+  border: 1px solid var(--color-error);
+  border-radius: var(--border-radius);
+}
+
+.saved-decks__error p {
+  color: var(--color-error);
+  margin: 0;
+}
+
+/* Empty State */
+.saved-decks__empty {
+  text-align: center;
+  padding: var(--spacing-xl);
+  background-color: rgba(74, 144, 226, 0.05);
+  border: 2px dashed rgba(74, 144, 226, 0.3);
+  border-radius: var(--border-radius);
+}
+
+.saved-decks__empty p {
+  margin: var(--spacing-sm) 0;
+  font-size: var(--font-size-lg);
+}
+
+.saved-decks__empty-hint {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-md) !important;
+}
+
+/* Deck Grid */
+.saved-decks__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--spacing-lg);
+}
+
+/* Deck Card */
+.deck-card {
+  position: relative;
+  background-color: white;
+  border: 1px solid #e0e0e0;
+  border-radius: var(--border-radius);
+  padding: var(--spacing-md);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.deck-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Deck Card Header */
+.deck-card__header {
+  margin-bottom: var(--spacing-md);
+  min-height: 32px;
+}
+
+.deck-card__name {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  color: var(--color-text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Rename Input */
+.deck-card__rename {
+  display: flex;
+  gap: var(--spacing-xs);
+  align-items: center;
+}
+
+.deck-card__rename-input {
+  flex: 1;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border: 1px solid var(--color-primary);
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-md);
+  outline: none;
+}
+
+.deck-card__rename-actions {
+  display: flex;
+  gap: var(--spacing-xs);
+}
+
+/* Card Thumbnails Grid */
+.deck-card__cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--spacing-xs);
+  margin-bottom: var(--spacing-md);
+}
+
+.deck-card__card-thumbnail {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  border-radius: var(--border-radius-sm);
+  overflow: hidden;
+  background-color: #f5f5f5;
+  border: 1px solid #e0e0e0;
+}
+
+.deck-card__card-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.deck-card__card-empty {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-xl);
+  color: #ccc;
+  background-color: #fafafa;
+}
+
+.deck-card__evolution-badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  background-color: rgba(255, 215, 0, 0.9);
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+/* Deck Stats */
+.deck-card__stats {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--spacing-sm);
+  background-color: #f9f9f9;
+  border-radius: var(--border-radius-sm);
+  margin-bottom: var(--spacing-md);
+  font-size: var(--font-size-sm);
+}
+
+.deck-card__stat {
+  color: var(--color-text-secondary);
+}
+
+.deck-card__stat strong {
+  color: var(--color-text-primary);
+}
+
+/* Actions */
+.deck-card__actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.deck-card__secondary-actions {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+/* Confirmation Dialog */
+.deck-card__confirm-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--border-radius);
+  z-index: 10;
+}
+
+.deck-card__confirm-dialog {
+  background-color: white;
+  padding: var(--spacing-lg);
+  border-radius: var(--border-radius);
+  text-align: center;
+  max-width: 250px;
+}
+
+.deck-card__confirm-dialog p {
+  margin: 0 0 var(--spacing-md) 0;
+  font-size: var(--font-size-md);
+  color: var(--color-text-primary);
+}
+
+.deck-card__confirm-actions {
+  display: flex;
+  gap: var(--spacing-sm);
+  justify-content: center;
+}
+
+/* Button Styles */
+.btn {
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: none;
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-md);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: var(--font-family);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn--primary {
+  background-color: var(--color-primary);
+  color: white;
+}
+
+.btn--primary:hover:not(:disabled) {
+  background-color: #3a7bc8;
+}
+
+.btn--secondary {
+  background-color: #757575;
+  color: white;
+}
+
+.btn--secondary:hover:not(:disabled) {
+  background-color: #616161;
+}
+
+.btn--danger {
+  background-color: var(--color-error);
+  color: white;
+}
+
+.btn--danger:hover:not(:disabled) {
+  background-color: #d32f2f;
+}
+
+.btn--success {
+  background-color: var(--color-success);
+  color: white;
+}
+
+.btn--success:hover:not(:disabled) {
+  background-color: #388e3c;
+}
+
+.btn--small {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  font-size: var(--font-size-sm);
+  flex: 1;
+}
+
+.btn--full-width {
+  width: 100%;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .saved-decks__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .deck-card__cards {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .saved-decks {
+    padding: var(--spacing-md);
+  }
+
+  .deck-card__cards {
+    gap: 4px;
+  }
+}

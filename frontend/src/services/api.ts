@@ -9,6 +9,19 @@ const API_CONFIG = {
   retryDelay: 1000, // 1 second
 };
 
+// Custom error class for API errors
+export class ApiError extends Error {
+  constructor(
+    message: string,
+    public statusCode?: number,
+    public isTimeout: boolean = false,
+    public isNetworkError: boolean = false
+  ) {
+    super(message);
+    this.name = 'ApiError';
+  }
+}
+
 // Enhanced fetch with timeout and retry logic
 const fetchWithTimeout = async (url: string, options: RequestInit = {}, timeout = API_CONFIG.timeout): Promise<Response> => {
   const controller = new AbortController();
@@ -27,8 +40,47 @@ const fetchWithTimeout = async (url: string, options: RequestInit = {}, timeout 
     return response;
   } catch (error) {
     clearTimeout(timeoutId);
+    
+    // Handle timeout errors
+    if ((error as any)?.name === 'AbortError') {
+      throw new ApiError('Request timed out', undefined, true, false);
+    }
+    
+    // Handle network errors
+    if (error instanceof TypeError) {
+      throw new ApiError('Cannot connect to server', undefined, false, true);
+    }
+    
     throw error;
   }
+};
+
+// Handle API response and extract error messages
+const handleApiResponse = async (response: Response): Promise<any> => {
+  if (!response.ok) {
+    let errorMessage = 'An error occurred';
+    
+    try {
+      const errorData = await response.json();
+      errorMessage = errorData.detail || errorData.message || errorMessage;
+    } catch {
+      // If response is not JSON, use status text
+      errorMessage = response.statusText || errorMessage;
+    }
+    
+    // Categorize errors by status code
+    if (response.status >= 400 && response.status < 500) {
+      // 4xx errors - client errors, use response message
+      throw new ApiError(errorMessage, response.status);
+    } else if (response.status >= 500) {
+      // 5xx errors - server errors
+      throw new ApiError('Server error, please try again', response.status);
+    } else {
+      throw new ApiError(errorMessage, response.status);
+    }
+  }
+  
+  return response.json();
 };
 
 // Retry wrapper for API calls
@@ -63,12 +115,8 @@ export const checkBackendHealth = async (): Promise<boolean> => {
 export const fetchCards = async () => {
   return withRetry(async () => {
     try {
-      const response = await fetchWithTimeout(`${API_BASE_URL}/cards`);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const data = await response.json();
-      return data;
+      const response = await fetchWithTimeout(`${API_BASE_URL}/cards/cards`);
+      return await handleApiResponse(response);
     } catch (error) {
       console.error("Error fetching cards:", error);
       throw error;
@@ -80,11 +128,7 @@ export const fetchDecks = async () => {
   return withRetry(async () => {
     try {
       const response = await fetchWithTimeout(`${API_BASE_URL}/decks`);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const data = await response.json();
-      return data;
+      return await handleApiResponse(response);
     } catch (error) {
       console.error("Error fetching decks:", error);
       throw error;
@@ -99,11 +143,7 @@ export const createDeck = async (deckData: any) => {
         method: 'POST',
         body: JSON.stringify(deckData),
       });
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const data = await response.json();
-      return data;
+      return await handleApiResponse(response);
     } catch (error) {
       console.error("Error creating deck:", error);
       throw error;
@@ -118,11 +158,7 @@ export const updateDeck = async (deckId: number, deckData: any) => {
         method: 'PUT',
         body: JSON.stringify(deckData),
       });
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const data = await response.json();
-      return data;
+      return await handleApiResponse(response);
     } catch (error) {
       console.error("Error updating deck:", error);
       throw error;
@@ -136,9 +172,11 @@ export const deleteDeck = async (deckId: number) => {
       const response = await fetchWithTimeout(`${API_BASE_URL}/decks/${deckId}`, {
         method: 'DELETE',
       });
+      
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        await handleApiResponse(response);
       }
+      
       return true;
     } catch (error) {
       console.error("Error deleting deck:", error);

@@ -14,7 +14,7 @@ wait_for_database() {
     local attempt=1
     
     while [ $attempt -le $max_attempts ]; do
-        if python -c "
+        if uv run python -c "
 import mysql.connector
 import os
 import sys
@@ -71,7 +71,7 @@ run_migrations() {
     
     # First check migration status
     echo "📊 Checking current migration status..."
-    if timeout $migration_timeout python container_migrate.py status 2>&1 | tee -a "$log_file"; then
+    if timeout $migration_timeout uv run python container_migrate.py status 2>&1 | tee -a "$log_file"; then
         echo "✅ Migration status check completed"
     else
         echo "⚠️  Migration status check failed, but continuing with migration attempt..."
@@ -79,12 +79,12 @@ run_migrations() {
     
     # Run the actual migrations
     echo "🔄 Executing pending migrations..."
-    if timeout $migration_timeout python container_migrate.py migrate 2>&1 | tee -a "$log_file"; then
+    if timeout $migration_timeout uv run python container_migrate.py migrate 2>&1 | tee -a "$log_file"; then
         echo "✅ Database migrations completed successfully"
         
         # Log final status
         echo "📊 Final migration status:" | tee -a "$log_file"
-        python container_migrate.py status 2>&1 | tee -a "$log_file"
+        uv run python container_migrate.py status 2>&1 | tee -a "$log_file"
         
         # Create success marker file
         echo "$(date): Migration completed successfully" > /app/database/migrations/logs/last_migration_success
@@ -104,7 +104,7 @@ run_migrations() {
         
         # Try to get final status for debugging
         echo "🔍 Attempting to get final migration status for debugging..." | tee -a "$log_file"
-        python container_migrate.py status 2>&1 | tee -a "$log_file" || true
+        uv run python container_migrate.py status 2>&1 | tee -a "$log_file" || true
         
         exit 1
     fi
@@ -164,7 +164,7 @@ main() {
     # Run card data ingestion
     echo "📥 Running card data ingestion..."
     if [ -f "/all_cards.json" ]; then
-        if python src/scripts/ingest_cards.py; then
+        if uv run python src/scripts/ingest_cards.py; then
             echo "✅ Card data ingestion completed successfully"
         else
             echo "⚠️  Card data ingestion failed, but continuing startup..."

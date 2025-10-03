@@ -1,0 +1,274 @@
+/* DeckSlot Component Styles */
+
+.deck-slot {
+  width: 100px;
+  height: 140px;
+  border-radius: var(--border-radius, 8px);
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  overflow: hidden;
+}
+
+.deck-slot:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Empty Slot Styles */
+.deck-slot--empty {
+  border: 2px dashed #ccc;
+  background-color: #f5f5f5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: default;
+}
+
+.deck-slot--empty:hover {
+  transform: none;
+  box-shadow: none;
+  border-color: #999;
+}
+
+.deck-slot__empty-icon {
+  font-size: 32px;
+  color: #999;
+  font-weight: 300;
+  line-height: 1;
+}
+
+.deck-slot__empty-text {
+  font-size: 12px;
+  color: #999;
+  margin-top: 8px;
+  font-weight: 500;
+}
+
+/* Filled Slot Styles */
+.deck-slot--filled {
+  background-color: #fff;
+  border: 2px solid #ddd;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.deck-slot__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Evolution Badge */
+.deck-slot__evolution-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background-color: rgba(255, 215, 0, 0.95);
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  z-index: 2;
+}
+
+.deck-slot__evolution-icon {
+  font-size: 14px;
+  line-height: 1;
+}
+
+/* Card Info */
+.deck-slot__info {
+  position: absolute;
+  bottom: 4px;
+  left: 4px;
+  z-index: 2;
+}
+
+.deck-slot__elixir {
+  background-color: rgba(138, 43, 226, 0.9);
+  color: white;
+  font-weight: bold;
+  font-size: 14px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  min-width: 20px;
+  text-align: center;
+}
+
+/* Options Menu */
+.deck-slot__options {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.85);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px;
+  z-index: 10;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.deck-slot__option-btn {
+  width: 100%;
+  padding: 6px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  text-align: center;
+}
+
+.deck-slot__option-btn:hover:not(:disabled) {
+  transform: scale(1.05);
+}
+
+.deck-slot__option-btn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.deck-slot__option-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.deck-slot__option-btn--remove {
+  background-color: #f44336;
+  color: white;
+}
+
+.deck-slot__option-btn--remove:hover:not(:disabled) {
+  background-color: #d32f2f;
+}
+
+.deck-slot__option-btn--evolution {
+  background-color: #ffd700;
+  color: #333;
+}
+
+.deck-slot__option-btn--evolution:hover:not(:disabled) {
+  background-color: #ffed4e;
+}
+
+/* Touch device support */
+@media (hover: none) and (pointer: coarse) {
+  .deck-slot:hover {
+    transform: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .deck-slot:active {
+    transform: scale(0.98);
+  }
+
+  .deck-slot__option-btn {
+    min-height: 44px; /* Touch-friendly size */
+    font-size: 12px;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+  .deck-slot {
+    width: 90px;
+    height: 126px;
+  }
+
+  .deck-slot__option-btn {
+    font-size: 11px;
+    padding: 6px 8px;
+  }
+}
+
+@media (max-width: 768px) {
+  .deck-slot {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 5/7;
+    min-height: 100px;
+  }
+
+  .deck-slot__empty-icon {
+    font-size: 28px;
+  }
+
+  .deck-slot__empty-text {
+    font-size: 11px;
+  }
+
+  .deck-slot__evolution-badge {
+    width: 22px;
+    height: 22px;
+    top: 6px;
+    right: 6px;
+  }
+
+  .deck-slot__evolution-icon {
+    font-size: 13px;
+  }
+
+  .deck-slot__elixir {
+    font-size: 13px;
+    padding: 3px 6px;
+  }
+
+  .deck-slot__option-btn {
+    font-size: 11px;
+    padding: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .deck-slot {
+    min-height: 120px;
+  }
+
+  .deck-slot__empty-icon {
+    font-size: 24px;
+  }
+
+  .deck-slot__empty-text {
+    font-size: 10px;
+  }
+
+  .deck-slot__evolution-badge {
+    width: 20px;
+    height: 20px;
+    top: 4px;
+    right: 4px;
+  }
+
+  .deck-slot__evolution-icon {
+    font-size: 12px;
+  }
+
+  .deck-slot__elixir {
+    font-size: 12px;
+    padding: 2px 5px;
+  }
+
+  .deck-slot__option-btn {
+    font-size: 10px;
+    padding: 6px;
+  }
+}
