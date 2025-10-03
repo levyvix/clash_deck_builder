@@ -108,13 +108,18 @@
   - Implement error handling for API failures
   - _Requirements: 2.1, 2.2, 2.3, 2.4, 5.2_
 
-- [ ] 5. Enhance deck service with proper database operations
+- [x] 5. Enhance deck service with proper database operations
+
+
+
   - Implement transactional CRUD operations
   - Add proper JSON serialization for card data
   - Handle database errors gracefully
   - _Requirements: 3.2, 3.3, 7.1, 7.2, 7.3, 7.4_
 
-- [ ] 5.1 Update deck service with proper database integration
+- [x] 5.1 Update deck service with proper database integration
+
+
   - Modify `backend/src/services/deck_service.py` to use dependency injection
   - Implement proper transaction handling
   - Fix JSON serialization/deserialization for card objects

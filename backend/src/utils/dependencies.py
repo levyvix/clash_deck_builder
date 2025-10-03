@@ -7,6 +7,7 @@ from mysql.connector.cursor import MySQLCursor
 from .config import settings
 from .database import get_db_session
 from ..services.clash_api_service import ClashAPIService
+from ..services.deck_service import DeckService
 
 
 def get_database_session() -> Generator[MySQLCursor, None, None]:
@@ -23,6 +24,12 @@ def get_clash_api_service() -> ClashAPIService:
     )
 
 
+def get_deck_service(db_session: MySQLCursor = Depends(get_database_session)) -> DeckService:
+    """FastAPI dependency for deck service with database session injection."""
+    return DeckService(db_session)
+
+
 # Dependency aliases for easier imports
 DatabaseDep = Depends(get_database_session)
 ClashAPIDep = Depends(get_clash_api_service)
+DeckServiceDep = Depends(get_deck_service)
