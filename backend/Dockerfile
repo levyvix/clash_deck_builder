@@ -25,16 +25,31 @@ RUN uv sync --frozen
 # Copy application code
 COPY . .
 
+# Copy and setup entrypoint and health check scripts
+COPY docker-entrypoint.sh /usr/local/bin/
+COPY health_check.py /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh \
+    && chmod +x /usr/local/bin/health_check.py
+
 # Create non-root user for security
 RUN useradd --create-home --shell /bin/bash app \
-    && chown -R app:app /app
+    && chown -R app:app /app \
+    && mkdir -p /app/logs \
+    && chown -R app:app /app/logs
+
+# Create migrations directory and copy migration files
+RUN mkdir -p /app/database/migrations
+COPY ../database/migrations/ /app/database/migrations/
+RUN chown -R app:app /app/database
+
 USER app
 
-# Health check endpoint
-HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:8000/health || exit 1
+# Health check with migration verification
+HEALTHCHECK --interval=30s --timeout=30s --start-period=60s --retries=3 \
+    CMD python /usr/local/bin/health_check.py || exit 1
 
 EXPOSE 8000
 
-# Use UV to run the application
+# Set entrypoint and default command
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 CMD ["uv", "run", "uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000"]
