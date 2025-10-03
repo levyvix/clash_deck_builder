@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes, Link, useNavigate } from 'react-router-dom';
 import DeckBuilder from './components/DeckBuilder';
 import SavedDecks from './components/SavedDecks';
 import Notification from './components/Notification';
 import ErrorBoundary from './components/ErrorBoundary';
 import { Deck, DeckSlot, Notification as NotificationType } from './types';
+import { verifyEndpoints } from './services/api';
 import './App.css';
 
 function AppContent() {
@@ -17,6 +18,19 @@ function AppContent() {
   const [currentDeck, setCurrentDeck] = useState<DeckSlot[]>(
     Array(8).fill(null).map(() => ({ card: null, isEvolution: false }))
   );
+  
+  // State to trigger refresh of saved decks list
+  const [refreshSavedDecks, setRefreshSavedDecks] = useState(0);
+
+  // Verify API endpoints on app initialization (development only)
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🚀 App initialized - Running endpoint verification...');
+      verifyEndpoints().catch(error => {
+        console.error('Endpoint verification failed:', error);
+      });
+    }
+  }, []);
 
   // Add notification with auto-dismiss after 3 seconds
   const addNotification = (message: string, type: 'success' | 'error' | 'info') => {
@@ -42,9 +56,10 @@ function AppContent() {
     addNotification(`Loaded deck: ${deck.name}`, 'success');
   };
 
-  // Handle deck saved callback
+  // Handle deck saved callback - trigger refresh of saved decks list
   const handleDeckSaved = () => {
-    addNotification('Deck saved successfully!', 'success');
+    // Increment refresh counter to trigger SavedDecks to reload
+    setRefreshSavedDecks(prev => prev + 1);
   };
 
   return (
@@ -92,6 +107,7 @@ function AppContent() {
                   <SavedDecks
                     onSelectDeck={loadDeckIntoBuilder}
                     onNotification={addNotification}
+                    refreshTrigger={refreshSavedDecks}
                   />
                 </ErrorBoundary>
               }

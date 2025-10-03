@@ -1,6 +1,11 @@
 // frontend/src/services/api.ts
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000';
+import { API_BASE_URL } from '../config';
+
+// Debug: Log API base URL on module load
+console.log('🔧 API Service Initialized');
+console.log('📍 API_BASE_URL:', API_BASE_URL);
+console.log('🌍 Environment:', process.env.NODE_ENV);
 
 // API configuration
 const API_CONFIG = {
@@ -68,9 +73,15 @@ const handleApiResponse = async (response: Response): Promise<any> => {
       errorMessage = response.statusText || errorMessage;
     }
     
-    // Categorize errors by status code
-    if (response.status >= 400 && response.status < 500) {
-      // 4xx errors - client errors, use response message
+    // Categorize errors by status code with specific handling
+    if (response.status === 404) {
+      // 404 - Endpoint not found
+      throw new ApiError('Endpoint not found - check API configuration', response.status);
+    } else if (response.status === 400) {
+      // 400 - Validation error, use specific message from backend
+      throw new ApiError(errorMessage, response.status);
+    } else if (response.status >= 400 && response.status < 500) {
+      // Other 4xx errors - client errors, use response message
       throw new ApiError(errorMessage, response.status);
     } else if (response.status >= 500) {
       // 5xx errors - server errors
@@ -112,13 +123,80 @@ export const checkBackendHealth = async (): Promise<boolean> => {
   }
 };
 
+// Verify all API endpoints for debugging
+export const verifyEndpoints = async (): Promise<void> => {
+  console.log('\n🔍 ===== API ENDPOINT VERIFICATION =====');
+  console.log('Base URL:', API_BASE_URL);
+  console.log('Timestamp:', new Date().toISOString());
+  console.log('========================================\n');
+
+  const endpoints = [
+    { name: 'Health Check', method: 'GET', url: `${API_BASE_URL}/health` },
+    { name: 'Fetch Cards', method: 'GET', url: `${API_BASE_URL}/cards/cards` },
+    { name: 'Fetch Decks', method: 'GET', url: `${API_BASE_URL}/decks/decks` },
+    { name: 'Create Deck', method: 'POST', url: `${API_BASE_URL}/decks/decks` },
+  ];
+
+  for (const endpoint of endpoints) {
+    try {
+      console.log(`\n📡 Testing: ${endpoint.name}`);
+      console.log(`   Method: ${endpoint.method}`);
+      console.log(`   URL: ${endpoint.url}`);
+      
+      const startTime = performance.now();
+      const response = await fetch(endpoint.url, {
+        method: endpoint.method === 'POST' ? 'OPTIONS' : endpoint.method, // Use OPTIONS for POST to avoid creating data
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      const endTime = performance.now();
+      const duration = (endTime - startTime).toFixed(2);
+      
+      console.log(`   ✅ Status: ${response.status} ${response.statusText}`);
+      console.log(`   ⏱️  Duration: ${duration}ms`);
+      console.log(`   📦 Content-Type: ${response.headers.get('content-type')}`);
+      
+      // Try to read response for GET requests
+      if (endpoint.method === 'GET' && response.ok) {
+        try {
+          const data = await response.json();
+          if (Array.isArray(data)) {
+            console.log(`   📊 Response: Array with ${data.length} items`);
+          } else if (typeof data === 'object') {
+            console.log(`   📊 Response: Object with keys: ${Object.keys(data).join(', ')}`);
+          } else {
+            console.log(`   📊 Response: ${typeof data}`);
+          }
+        } catch (e) {
+          console.log(`   ⚠️  Could not parse response as JSON`);
+        }
+      }
+    } catch (error) {
+      console.log(`   ❌ Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      if (error instanceof TypeError) {
+        console.log(`   🔌 Network Error: Cannot connect to ${endpoint.url}`);
+        console.log(`   💡 Tip: Check if backend is running and CORS is configured`);
+      }
+    }
+  }
+
+  console.log('\n========================================');
+  console.log('✅ Endpoint verification complete');
+  console.log('========================================\n');
+};
+
 export const fetchCards = async () => {
   return withRetry(async () => {
     try {
-      const response = await fetchWithTimeout(`${API_BASE_URL}/cards/cards`);
+      const url = `${API_BASE_URL}/cards/cards`;
+      console.log('🃏 Fetching cards from:', url);
+      const response = await fetchWithTimeout(url);
+      console.log('✅ Cards response status:', response.status);
       return await handleApiResponse(response);
     } catch (error) {
-      console.error("Error fetching cards:", error);
+      console.error("❌ Error fetching cards:", error);
+      console.error("   URL attempted:", `${API_BASE_URL}/cards/cards`);
       throw error;
     }
   });
@@ -127,25 +205,117 @@ export const fetchCards = async () => {
 export const fetchDecks = async () => {
   return withRetry(async () => {
     try {
-      const response = await fetchWithTimeout(`${API_BASE_URL}/decks`);
-      return await handleApiResponse(response);
+      // Note: Backend has prefix="/decks" and route="/decks", so full path is /decks/decks
+      const url = `${API_BASE_URL}/decks/decks`;
+      console.log('\n🔍 ===== FETCH DECKS REQUEST =====');
+      console.log('📍 Full URL:', url);
+      console.log('🌐 Method: GET');
+      console.log('⏰ Timestamp:', new Date().toISOString());
+      console.log('💡 Note: Using /decks/decks due to backend router prefix');
+      console.log('=====================================\n');
+      
+      const response = await fetchWithTimeout(url);
+      
+      console.log('\n✅ ===== FETCH DECKS RESPONSE =====');
+      console.log('📊 Status:', response.status, response.statusText);
+      console.log('📦 Content-Type:', response.headers.get('content-type'));
+      console.log('🔗 Response URL:', response.url);
+      console.log('=====================================\n');
+      
+      const data = await handleApiResponse(response);
+      
+      console.log('📚 Decks received:', Array.isArray(data) ? `${data.length} decks` : typeof data);
+      if (Array.isArray(data) && data.length > 0) {
+        console.log('📄 First deck sample (backend format):', JSON.stringify(data[0], null, 2));
+      }
+      
+      // Transform backend format to frontend format
+      // Backend: { cards: Card[], evolution_slots: Card[] }
+      // Frontend: { slots: DeckSlot[] } where DeckSlot = { card: Card, isEvolution: boolean }
+      const transformedDecks = data.map((deck: any) => {
+        // Create evolution slot IDs set for quick lookup
+        const evolutionCardIds = new Set(
+          (deck.evolution_slots || []).map((card: any) => card.id)
+        );
+        
+        // Transform cards into slots
+        const slots = (deck.cards || []).map((card: any) => ({
+          card: card,
+          isEvolution: evolutionCardIds.has(card.id)
+        }));
+        
+        return {
+          ...deck,
+          slots: slots
+        };
+      });
+      
+      console.log('🔄 Transformed decks to frontend format');
+      if (transformedDecks.length > 0) {
+        console.log('📄 First deck sample (frontend format):', JSON.stringify(transformedDecks[0], null, 2));
+      }
+      
+      return transformedDecks;
     } catch (error) {
-      console.error("Error fetching decks:", error);
+      console.error('\n❌ ===== FETCH DECKS ERROR =====');
+      console.error('URL attempted:', `${API_BASE_URL}/decks/decks`);
+      console.error('Error type:', error instanceof ApiError ? 'ApiError' : error instanceof Error ? 'Error' : typeof error);
+      console.error('Error details:', error);
+      if (error instanceof ApiError) {
+        console.error('Status code:', error.statusCode);
+        console.error('Is timeout:', error.isTimeout);
+        console.error('Is network error:', error.isNetworkError);
+      }
+      console.error('================================\n');
       throw error;
     }
   });
 };
 
-export const createDeck = async (deckData: any) => {
+export interface DeckPayload {
+  name: string;
+  cards: any[]; // Full card objects
+  evolution_slots?: any[]; // Full card objects
+  average_elixir?: number;
+}
+
+export const createDeck = async (deckData: DeckPayload) => {
   return withRetry(async () => {
     try {
-      const response = await fetchWithTimeout(`${API_BASE_URL}/decks`, {
+      // Note: Backend has prefix="/decks" and route="/decks", so full path is /decks/decks
+      const url = `${API_BASE_URL}/decks/decks`;
+      
+      // Log the payload before sending
+      console.log('\n🔍 ===== CREATE DECK REQUEST =====');
+      console.log('📍 URL:', url);
+      console.log('💡 Note: Using /decks/decks due to backend router prefix');
+      console.log('📦 Payload Structure:');
+      console.log('   - name:', deckData.name);
+      console.log('   - cards count:', deckData.cards?.length || 0);
+      console.log('   - evolution_slots count:', deckData.evolution_slots?.length || 0);
+      console.log('   - average_elixir:', deckData.average_elixir);
+      console.log('\n📄 Full Payload:');
+      console.log(JSON.stringify(deckData, null, 2));
+      console.log('=====================================\n');
+      
+      const response = await fetchWithTimeout(url, {
         method: 'POST',
         body: JSON.stringify(deckData),
       });
+      
+      console.log('✅ Create deck response status:', response.status);
+      
+      if (response.status === 201) {
+        console.log('🎉 Deck created successfully!');
+      }
+      
       return await handleApiResponse(response);
     } catch (error) {
-      console.error("Error creating deck:", error);
+      console.error('\n❌ ===== CREATE DECK ERROR =====');
+      console.error('URL attempted:', `${API_BASE_URL}/decks/decks`);
+      console.error('Error details:', error);
+      console.error('Payload that failed:', JSON.stringify(deckData, null, 2));
+      console.error('================================\n');
       throw error;
     }
   });
@@ -154,13 +324,21 @@ export const createDeck = async (deckData: any) => {
 export const updateDeck = async (deckId: number, deckData: any) => {
   return withRetry(async () => {
     try {
-      const response = await fetchWithTimeout(`${API_BASE_URL}/decks/${deckId}`, {
+      // Note: Backend has prefix="/decks" and route="/decks/{deck_id}", so full path is /decks/decks/{deck_id}
+      const url = `${API_BASE_URL}/decks/decks/${deckId}`;
+      console.log('✏️  Updating deck at:', url);
+      console.log('💡 Note: Using /decks/decks/{id} due to backend router prefix');
+      console.log('📦 Payload:', JSON.stringify(deckData, null, 2));
+      const response = await fetchWithTimeout(url, {
         method: 'PUT',
         body: JSON.stringify(deckData),
       });
+      console.log('✅ Update deck response status:', response.status);
       return await handleApiResponse(response);
     } catch (error) {
-      console.error("Error updating deck:", error);
+      console.error("❌ Error updating deck:", error);
+      console.error("   URL attempted:", `${API_BASE_URL}/decks/decks/${deckId}`);
+      console.error("   Payload:", deckData);
       throw error;
     }
   });
@@ -169,9 +347,14 @@ export const updateDeck = async (deckId: number, deckData: any) => {
 export const deleteDeck = async (deckId: number) => {
   return withRetry(async () => {
     try {
-      const response = await fetchWithTimeout(`${API_BASE_URL}/decks/${deckId}`, {
+      // Note: Backend has prefix="/decks" and route="/decks/{deck_id}", so full path is /decks/decks/{deck_id}
+      const url = `${API_BASE_URL}/decks/decks/${deckId}`;
+      console.log('🗑️  Deleting deck at:', url);
+      console.log('💡 Note: Using /decks/decks/{id} due to backend router prefix');
+      const response = await fetchWithTimeout(url, {
         method: 'DELETE',
       });
+      console.log('✅ Delete deck response status:', response.status);
       
       if (!response.ok) {
         await handleApiResponse(response);
@@ -179,7 +362,8 @@ export const deleteDeck = async (deckId: number) => {
       
       return true;
     } catch (error) {
-      console.error("Error deleting deck:", error);
+      console.error("❌ Error deleting deck:", error);
+      console.error("   URL attempted:", `${API_BASE_URL}/decks/decks/${deckId}`);
       throw error;
     }
   });

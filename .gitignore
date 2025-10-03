@@ -76,3 +76,4 @@ backend/.env
 backend/.env.local
 
 nul
+backend/src/utils/__pycache__/dependencies.cpython-311.pyc

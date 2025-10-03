@@ -8,9 +8,10 @@ import '../styles/SavedDecks.css';
 interface SavedDecksProps {
   onSelectDeck: (deck: Deck) => void;
   onNotification?: (message: string, type: 'success' | 'error' | 'info') => void;
+  refreshTrigger?: number; // Increment this to trigger a refresh
 }
 
-const SavedDecks: React.FC<SavedDecksProps> = ({ onSelectDeck, onNotification }) => {
+const SavedDecks: React.FC<SavedDecksProps> = ({ onSelectDeck, onNotification, refreshTrigger }) => {
   const [decks, setDecks] = useState<Deck[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -21,6 +22,14 @@ const SavedDecks: React.FC<SavedDecksProps> = ({ onSelectDeck, onNotification })
   useEffect(() => {
     loadDecks();
   }, []);
+  
+  // Refresh decks when refreshTrigger changes
+  useEffect(() => {
+    if (refreshTrigger !== undefined && refreshTrigger > 0) {
+      console.log('🔄 Refreshing saved decks list due to trigger change');
+      loadDecks();
+    }
+  }, [refreshTrigger]);
 
   const loadDecks = async () => {
     setLoading(true);
@@ -34,10 +43,13 @@ const SavedDecks: React.FC<SavedDecksProps> = ({ onSelectDeck, onNotification })
       let errorMessage = 'Failed to load decks';
       
       if (err instanceof ApiError) {
-        if (err.isTimeout) {
+        if (err.statusCode === 404) {
+          // Specific handling for 404 - endpoint not found
+          errorMessage = 'Endpoint not found. Please verify the API configuration and ensure the backend is running correctly.';
+        } else if (err.isTimeout) {
           errorMessage = 'Request timed out. Please try again.';
         } else if (err.isNetworkError) {
-          errorMessage = 'Cannot connect to server. Please check your connection.';
+          errorMessage = 'Cannot connect to server. Please check your connection and ensure the backend is running.';
         } else if (err.statusCode && err.statusCode >= 500) {
           errorMessage = 'Server error, please try again later.';
         } else {
@@ -82,7 +94,33 @@ const SavedDecks: React.FC<SavedDecksProps> = ({ onSelectDeck, onNotification })
     }
 
     try {
-      await updateDeck(deckId, { name: editingName.trim() });
+      // Find the deck being renamed
+      const deckToUpdate = decks.find(deck => deck.id === deckId);
+      if (!deckToUpdate) {
+        throw new Error('Deck not found');
+      }
+
+      // Transform frontend format back to backend format for the API call
+      // Frontend: { slots: DeckSlot[] } -> Backend: { cards: Card[], evolution_slots: Card[] }
+      const cards = deckToUpdate.slots
+        .filter(slot => slot.card !== null)
+        .map(slot => slot.card!);
+      
+      const evolution_slots = deckToUpdate.slots
+        .filter(slot => slot.card !== null && slot.isEvolution)
+        .map(slot => slot.card!);
+
+      const updatePayload = {
+        id: deckId,
+        name: editingName.trim(),
+        cards: cards,
+        evolution_slots: evolution_slots,
+        average_elixir: deckToUpdate.average_elixir
+      };
+
+      console.log('🔄 Renaming deck - payload:', JSON.stringify(updatePayload, null, 2));
+
+      await updateDeck(deckId, updatePayload);
       setDecks(decks.map(deck => 
         deck.id === deckId ? { ...deck, name: editingName.trim() } : deck
       ));

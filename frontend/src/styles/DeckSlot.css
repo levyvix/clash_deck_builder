@@ -32,6 +32,30 @@
   border-color: #999;
 }
 
+/* Dragging State */
+.deck-slot--dragging {
+  opacity: 0.5;
+  cursor: grabbing !important;
+}
+
+/* Drag Over State */
+.deck-slot--drag-over {
+  border-color: #4CAF50 !important;
+  border-width: 3px !important;
+  background-color: rgba(76, 175, 80, 0.1) !important;
+  box-shadow: 0 0 12px rgba(76, 175, 80, 0.4) !important;
+}
+
+.deck-slot--drag-over .deck-slot__empty-icon {
+  color: #4CAF50;
+  transform: scale(1.2);
+}
+
+.deck-slot--drag-over .deck-slot__empty-text {
+  color: #4CAF50;
+  font-weight: 600;
+}
+
 .deck-slot__empty-icon {
   font-size: 32px;
   color: #999;
@@ -51,6 +75,11 @@
   background-color: #fff;
   border: 2px solid #ddd;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  cursor: grab;
+}
+
+.deck-slot--filled:active {
+  cursor: grabbing;
 }
 
 .deck-slot__image {

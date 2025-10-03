@@ -10,6 +10,16 @@ interface CardDisplayProps {
   onAddToDeck?: () => void;
   onRemoveFromDeck?: () => void;
   inDeck?: boolean;
+  disabled?: boolean;
+  draggable?: boolean;
+  sourceType?: 'gallery' | 'deck';
+  sourceIndex?: number;
+}
+
+interface DragData {
+  cardId: number;
+  sourceType: 'gallery' | 'deck';
+  sourceIndex?: number;
 }
 
 const CardDisplay: React.FC<CardDisplayProps> = ({
@@ -20,8 +30,13 @@ const CardDisplay: React.FC<CardDisplayProps> = ({
   onAddToDeck,
   onRemoveFromDeck,
   inDeck = false,
+  disabled = false,
+  draggable = false,
+  sourceType = 'gallery',
+  sourceIndex,
 }) => {
   const [imageError, setImageError] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
 
   // Use evolution image if available and isEvolution is true
   const imageUrl = isEvolution && card.image_url_evo ? card.image_url_evo : card.image_url;
@@ -39,10 +54,49 @@ const CardDisplay: React.FC<CardDisplayProps> = ({
     }
   };
 
+  const handleDragStart = (e: React.DragEvent<HTMLDivElement>) => {
+    // Set drag data
+    const dragData: DragData = {
+      cardId: card.id,
+      sourceType,
+      sourceIndex,
+    };
+    e.dataTransfer.setData('application/json', JSON.stringify(dragData));
+    e.dataTransfer.effectAllowed = 'move';
+
+    // Create ghost element for drag preview
+    const ghostElement = e.currentTarget.cloneNode(true) as HTMLElement;
+    ghostElement.style.position = 'absolute';
+    ghostElement.style.top = '-9999px';
+    ghostElement.style.width = '120px';
+    ghostElement.style.opacity = '0.8';
+    ghostElement.style.transform = 'rotate(-5deg)';
+    document.body.appendChild(ghostElement);
+
+    // Set the ghost element as drag image
+    e.dataTransfer.setDragImage(ghostElement, 60, 70);
+
+    // Clean up ghost element after drag starts
+    setTimeout(() => {
+      document.body.removeChild(ghostElement);
+    }, 0);
+
+    // Add dragging class
+    setIsDragging(true);
+  };
+
+  const handleDragEnd = () => {
+    // Remove dragging class
+    setIsDragging(false);
+  };
+
   return (
     <div
-      className={`card-display ${rarityClass} ${onClick ? 'card-display--clickable' : ''}`}
+      className={`card-display ${rarityClass} ${onClick ? 'card-display--clickable' : ''} ${inDeck || disabled ? 'card-display--in-deck' : ''} ${isDragging ? 'card-display--dragging' : ''}`}
       onClick={handleClick}
+      draggable={draggable && !inDeck && !disabled}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
     >
       <div className="card-display__image-container">
         {imageError ? (
@@ -63,7 +117,7 @@ const CardDisplay: React.FC<CardDisplayProps> = ({
         <h3 className="card-display__name">{card.name}</h3>
         <div className="card-display__stats">
           <span className="card-display__elixir">
-            <span className="card-display__elixir-icon">⚡</span>
+            <span className="card-display__elixir-icon">💧</span>
             {card.elixir_cost}
           </span>
           <span className={`card-display__rarity card-display__rarity--${card.rarity.toLowerCase()}`}>

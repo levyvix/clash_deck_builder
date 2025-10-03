@@ -11,6 +11,7 @@ import DeckSlot from './DeckSlot';
 import CardGallery from './CardGallery';
 import CardFilters from './CardFilters';
 import Notification from './Notification';
+import RemoveDropZone from './RemoveDropZone';
 import '../styles/DeckBuilder.css';
 
 interface DeckBuilderProps {
@@ -38,6 +39,7 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ initialDeck, onDeckSaved }) =
   const [savingDeck, setSavingDeck] = useState(false);
   const [deckName, setDeckName] = useState('');
   const [showSaveDialog, setShowSaveDialog] = useState(false);
+  const [cardsInDeck, setCardsInDeck] = useState<Set<number>>(new Set());
 
   // Fetch cards on component mount
   useEffect(() => {
@@ -78,8 +80,27 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ initialDeck, onDeckSaved }) =
   useEffect(() => {
     if (initialDeck) {
       setCurrentDeck(initialDeck);
+      // Update cardsInDeck set based on initialDeck
+      const cardIds = new Set<number>();
+      initialDeck.forEach(slot => {
+        if (slot.card) {
+          cardIds.add(slot.card.id);
+        }
+      });
+      setCardsInDeck(cardIds);
     }
   }, [initialDeck]);
+
+  // Initialize cardsInDeck set from currentDeck on mount
+  useEffect(() => {
+    const cardIds = new Set<number>();
+    currentDeck.forEach(slot => {
+      if (slot.card) {
+        cardIds.add(slot.card.id);
+      }
+    });
+    setCardsInDeck(cardIds);
+  }, []);
 
   // Calculate average elixir in real-time
   const averageElixir = useMemo(() => {
@@ -109,6 +130,12 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ initialDeck, onDeckSaved }) =
 
   // Add card to deck
   const addCardToDeck = (card: Card) => {
+    // Check if card is already in deck
+    if (cardsInDeck.has(card.id)) {
+      addNotification('Card already in deck', 'error');
+      return;
+    }
+
     const emptySlotIndex = getEmptySlotIndex(currentDeck);
     
     if (emptySlotIndex === -1) {
@@ -119,7 +146,46 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ initialDeck, onDeckSaved }) =
     const newDeck = [...currentDeck];
     newDeck[emptySlotIndex] = { card, isEvolution: false };
     setCurrentDeck(newDeck);
+    
+    // Add card ID to cardsInDeck set
+    const newCardsInDeck = new Set(cardsInDeck);
+    newCardsInDeck.add(card.id);
+    setCardsInDeck(newCardsInDeck);
+    
     setSelectedGalleryCard(null);
+    addNotification(`${card.name} added to deck`, 'success');
+  };
+
+  // Add card to specific slot (for drag and drop)
+  const addCardToSlot = (cardId: number, slotIndex: number) => {
+    // Find the card
+    const card = cards.find(c => c.id === cardId);
+    if (!card) {
+      addNotification('Card not found', 'error');
+      return;
+    }
+
+    // Check if card is already in deck
+    if (cardsInDeck.has(card.id)) {
+      addNotification('Card already in deck', 'error');
+      return;
+    }
+
+    // Check if slot is empty
+    if (currentDeck[slotIndex].card) {
+      addNotification('Slot is already occupied', 'error');
+      return;
+    }
+
+    const newDeck = [...currentDeck];
+    newDeck[slotIndex] = { card, isEvolution: false };
+    setCurrentDeck(newDeck);
+    
+    // Add card ID to cardsInDeck set
+    const newCardsInDeck = new Set(cardsInDeck);
+    newCardsInDeck.add(card.id);
+    setCardsInDeck(newCardsInDeck);
+    
     addNotification(`${card.name} added to deck`, 'success');
   };
 
@@ -128,11 +194,33 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ initialDeck, onDeckSaved }) =
     const slot = currentDeck[slotIndex];
     if (!slot.card) return;
 
+    const cardId = slot.card.id;
+    const cardName = slot.card.name;
+
     const newDeck = [...currentDeck];
     newDeck[slotIndex] = { card: null, isEvolution: false };
     setCurrentDeck(newDeck);
+    
+    // Remove card ID from cardsInDeck set
+    const newCardsInDeck = new Set(cardsInDeck);
+    newCardsInDeck.delete(cardId);
+    setCardsInDeck(newCardsInDeck);
+    
     setSelectedDeckSlot(null);
-    addNotification(`${slot.card.name} removed from deck`, 'success');
+    addNotification(`${cardName} removed from deck`, 'success');
+  };
+
+  // Swap cards between deck slots
+  const swapCards = (sourceIndex: number, targetIndex: number) => {
+    if (sourceIndex === targetIndex) return;
+
+    const newDeck = [...currentDeck];
+    const temp = newDeck[sourceIndex];
+    newDeck[sourceIndex] = newDeck[targetIndex];
+    newDeck[targetIndex] = temp;
+    
+    setCurrentDeck(newDeck);
+    addNotification('Cards swapped', 'success');
   };
 
   // Toggle evolution status
@@ -169,21 +257,30 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ initialDeck, onDeckSaved }) =
     try {
       setSavingDeck(true);
       
-      // Prepare deck data for API
+      // Prepare deck data for API - backend expects full card objects, not just IDs
       const deckData = {
         name: deckName.trim(),
-        cards: currentDeck.map(slot => slot.card!.id),
+        cards: currentDeck.map(slot => slot.card!), // Send full card objects
         evolution_slots: currentDeck
           .filter(slot => slot.isEvolution)
-          .map(slot => slot.card!.id),
+          .map(slot => slot.card!), // Send full card objects
         average_elixir: averageElixir,
       };
 
-      await createDeck(deckData);
-      addNotification('Deck saved successfully!', 'success');
+      const response = await createDeck(deckData);
+      
+      // Success handling for 201 response
+      console.log('✅ Deck saved successfully, response:', response);
+      addNotification('Deck saved successfully', 'success');
+      
+      // Close the save dialog
       setShowSaveDialog(false);
       setDeckName('');
       
+      // Keep the current deck (don't clear it) so user can continue building or modify
+      // This provides better UX as they can see what they just saved
+      
+      // Refresh saved decks list if callback provided
       if (onDeckSaved) {
         onDeckSaved();
       }
@@ -193,13 +290,21 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ initialDeck, onDeckSaved }) =
       let errorMessage = 'Failed to save deck. Please try again.';
       
       if (err instanceof ApiError) {
+        // Handle specific error types
         if (err.isTimeout) {
           errorMessage = 'Request timed out. Please try again.';
         } else if (err.isNetworkError) {
-          errorMessage = 'Cannot connect to server. Please check your connection.';
+          errorMessage = 'Cannot connect to server';
+        } else if (err.statusCode === 404) {
+          // Endpoint not found - configuration issue
+          errorMessage = 'Endpoint not found - check API configuration';
+        } else if (err.statusCode === 400) {
+          // Validation error - show specific message from backend
+          errorMessage = err.message || 'Invalid deck data. Please check your deck.';
         } else if (err.statusCode && err.statusCode >= 500) {
           errorMessage = 'Server error, please try again later.';
         } else {
+          // Use the error message from the API
           errorMessage = err.message;
         }
       }
@@ -301,16 +406,21 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ initialDeck, onDeckSaved }) =
                 onCardClick={handleDeckSlotClick}
                 onRemoveCard={removeCardFromDeck}
                 onToggleEvolution={toggleEvolution}
+                onAddCardToSlot={addCardToSlot}
+                onSwapCards={swapCards}
                 canAddEvolution={canAddEvolution(currentDeck)}
                 showOptions={selectedDeckSlot === index}
               />
             ))}
           </div>
 
+          {/* Remove Drop Zone */}
+          <RemoveDropZone onRemoveCard={removeCardFromDeck} />
+
           {/* Save Deck Button */}
           <div className="deck-builder__actions">
             <button
-              className="deck-builder__save-button"
+              className={`deck-builder__save-button ${deckComplete ? 'save-button--ready' : ''}`}
               onClick={handleSaveClick}
               disabled={!deckComplete}
               title={!deckComplete ? 'Add 8 cards to save deck' : 'Save deck'}
@@ -371,6 +481,7 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ initialDeck, onDeckSaved }) =
             selectedCard={selectedGalleryCard}
             onAddToDeck={addCardToDeck}
             loading={false}
+            cardsInDeck={cardsInDeck}
           />
         </div>
       </div>

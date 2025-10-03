@@ -1,0 +1,112 @@
+/* RemoveDropZone Component Styles */
+
+.remove-drop-zone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm, 8px);
+  padding: var(--spacing-lg, 24px);
+  background-color: white;
+  border: 2px dashed #e0e0e0;
+  border-radius: var(--radius-md, 8px);
+  box-shadow: var(--elevation-1);
+  transition: all var(--duration-short, 200ms) var(--ease-standard);
+  cursor: pointer;
+  min-height: 100px;
+  position: relative;
+  overflow: hidden;
+}
+
+.remove-drop-zone__icon {
+  font-size: 32px;
+  transition: transform var(--duration-short, 200ms) var(--ease-standard);
+  opacity: 0.6;
+}
+
+.remove-drop-zone__text {
+  font-size: var(--font-size-md, 14px);
+  color: #666;
+  font-weight: 500;
+  text-align: center;
+  transition: color var(--duration-short, 200ms) var(--ease-standard);
+}
+
+/* Drag over state - highlight with red theme */
+.remove-drop-zone--drag-over {
+  border-color: var(--color-error, #f44336);
+  background-color: rgba(244, 67, 54, 0.05);
+  box-shadow: var(--elevation-3);
+  transform: scale(1.02);
+}
+
+.remove-drop-zone--drag-over .remove-drop-zone__icon {
+  transform: scale(1.2);
+  opacity: 1;
+  animation: shake 0.5s ease-in-out;
+}
+
+.remove-drop-zone--drag-over .remove-drop-zone__text {
+  color: var(--color-error, #f44336);
+  font-weight: 600;
+}
+
+/* Shake animation for trash icon */
+@keyframes shake {
+  0%, 100% {
+    transform: scale(1.2) rotate(0deg);
+  }
+  25% {
+    transform: scale(1.2) rotate(-10deg);
+  }
+  75% {
+    transform: scale(1.2) rotate(10deg);
+  }
+}
+
+/* Hover state (when not dragging) */
+.remove-drop-zone:hover {
+  border-color: #bdbdbd;
+}
+
+.remove-drop-zone:hover .remove-drop-zone__icon {
+  opacity: 0.8;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .remove-drop-zone {
+    padding: var(--spacing-md, 16px);
+    min-height: 80px;
+  }
+
+  .remove-drop-zone__icon {
+    font-size: 28px;
+  }
+
+  .remove-drop-zone__text {
+    font-size: var(--font-size-sm, 12px);
+  }
+}
+
+@media (max-width: 480px) {
+  .remove-drop-zone {
+    padding: var(--spacing-sm, 8px);
+    min-height: 60px;
+  }
+
+  .remove-drop-zone__icon {
+    font-size: 24px;
+  }
+
+  .remove-drop-zone__text {
+    font-size: var(--font-size-xs, 11px);
+  }
+}
+
+/* Touch device support */
+@media (hover: none) and (pointer: coarse) {
+  .remove-drop-zone {
+    min-height: 88px; /* Touch-friendly size */
+  }
+}

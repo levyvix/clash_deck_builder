@@ -4,6 +4,9 @@
 /* Import Material Design System */
 @import './styles/material-design.css';
 
+/* Import Animations */
+@import './styles/animations.css';
+
 /* Base Styles */
 * {
   box-sizing: border-box;

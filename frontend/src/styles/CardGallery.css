@@ -25,6 +25,54 @@
   grid-template-columns: repeat(6, 1fr);
 }
 
+/* Staggered fade-in animation for gallery cards */
+.card-gallery__grid > * {
+  animation: fadeInStagger 300ms var(--ease-standard) both;
+}
+
+/* Stagger delay for first 30 items */
+.card-gallery__grid > *:nth-child(1) { animation-delay: 0ms; }
+.card-gallery__grid > *:nth-child(2) { animation-delay: 30ms; }
+.card-gallery__grid > *:nth-child(3) { animation-delay: 60ms; }
+.card-gallery__grid > *:nth-child(4) { animation-delay: 90ms; }
+.card-gallery__grid > *:nth-child(5) { animation-delay: 120ms; }
+.card-gallery__grid > *:nth-child(6) { animation-delay: 150ms; }
+.card-gallery__grid > *:nth-child(7) { animation-delay: 180ms; }
+.card-gallery__grid > *:nth-child(8) { animation-delay: 210ms; }
+.card-gallery__grid > *:nth-child(9) { animation-delay: 240ms; }
+.card-gallery__grid > *:nth-child(10) { animation-delay: 270ms; }
+.card-gallery__grid > *:nth-child(11) { animation-delay: 300ms; }
+.card-gallery__grid > *:nth-child(12) { animation-delay: 330ms; }
+.card-gallery__grid > *:nth-child(13) { animation-delay: 360ms; }
+.card-gallery__grid > *:nth-child(14) { animation-delay: 390ms; }
+.card-gallery__grid > *:nth-child(15) { animation-delay: 420ms; }
+.card-gallery__grid > *:nth-child(16) { animation-delay: 450ms; }
+.card-gallery__grid > *:nth-child(17) { animation-delay: 480ms; }
+.card-gallery__grid > *:nth-child(18) { animation-delay: 510ms; }
+.card-gallery__grid > *:nth-child(19) { animation-delay: 540ms; }
+.card-gallery__grid > *:nth-child(20) { animation-delay: 570ms; }
+.card-gallery__grid > *:nth-child(21) { animation-delay: 600ms; }
+.card-gallery__grid > *:nth-child(22) { animation-delay: 630ms; }
+.card-gallery__grid > *:nth-child(23) { animation-delay: 660ms; }
+.card-gallery__grid > *:nth-child(24) { animation-delay: 690ms; }
+.card-gallery__grid > *:nth-child(25) { animation-delay: 720ms; }
+.card-gallery__grid > *:nth-child(26) { animation-delay: 750ms; }
+.card-gallery__grid > *:nth-child(27) { animation-delay: 780ms; }
+.card-gallery__grid > *:nth-child(28) { animation-delay: 810ms; }
+.card-gallery__grid > *:nth-child(29) { animation-delay: 840ms; }
+.card-gallery__grid > *:nth-child(30) { animation-delay: 870ms; }
+
+@keyframes fadeInStagger {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* Desktop: 6 columns (default above) */
 @media (max-width: 1200px) {
   .card-gallery__grid {
@@ -83,9 +131,9 @@
 
 .card-gallery__skeleton {
   background: #fff;
-  border-radius: var(--border-radius);
+  border-radius: var(--radius-md);
   padding: var(--spacing-sm);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--elevation-1);
   overflow: hidden;
   position: relative;
 }
@@ -100,10 +148,11 @@
   background: linear-gradient(
     90deg,
     transparent,
-    rgba(255, 255, 255, 0.8),
+    rgba(255, 255, 255, 0.9),
     transparent
   );
-  animation: shimmer 1.5s infinite;
+  animation: shimmer 2s infinite ease-in-out;
+  z-index: 1;
 }
 
 @keyframes shimmer {
@@ -118,15 +167,38 @@
 .card-gallery__skeleton-image {
   width: 100%;
   aspect-ratio: 3/4;
-  background: linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%);
-  border-radius: var(--border-radius-sm);
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 0%,
+    #e8e8e8 50%,
+    #f0f0f0 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmerBackground 2s infinite ease-in-out;
+  border-radius: var(--radius-sm);
   margin-bottom: var(--spacing-sm);
+}
+
+@keyframes shimmerBackground {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }
 
 .card-gallery__skeleton-text {
   height: 14px;
-  background: #e8e8e8;
-  border-radius: var(--border-radius-sm);
+  background: linear-gradient(
+    90deg,
+    #e8e8e8 0%,
+    #e0e0e0 50%,
+    #e8e8e8 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmerBackground 2s infinite ease-in-out;
+  border-radius: var(--radius-sm);
   margin-bottom: var(--spacing-xs);
 }
 
@@ -143,8 +215,15 @@
 
 .card-gallery__skeleton-stat {
   height: 12px;
-  background: #e8e8e8;
-  border-radius: var(--border-radius-sm);
+  background: linear-gradient(
+    90deg,
+    #e8e8e8 0%,
+    #e0e0e0 50%,
+    #e8e8e8 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmerBackground 2s infinite ease-in-out;
+  border-radius: var(--radius-sm);
   flex: 1;
 }
 

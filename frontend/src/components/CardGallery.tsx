@@ -10,6 +10,7 @@ interface CardGalleryProps {
   selectedCard: Card | null;
   onAddToDeck: (card: Card) => void;
   loading?: boolean;
+  cardsInDeck?: Set<number>;
 }
 
 const CardGallery: React.FC<CardGalleryProps> = ({
@@ -19,6 +20,7 @@ const CardGallery: React.FC<CardGalleryProps> = ({
   selectedCard,
   onAddToDeck,
   loading = false,
+  cardsInDeck = new Set(),
 }) => {
   // Filter cards based on active filters
   const filteredCards = useMemo(() => {
@@ -95,7 +97,9 @@ const CardGallery: React.FC<CardGalleryProps> = ({
             onClick={() => onCardClick(card)}
             showOptions={selectedCard?.id === card.id}
             onAddToDeck={() => onAddToDeck(card)}
-            inDeck={false}
+            inDeck={cardsInDeck.has(card.id)}
+            draggable={true}
+            sourceType="gallery"
           />
         ))}
       </div>

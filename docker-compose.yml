@@ -71,6 +71,21 @@ services:
       interval: 30s
       start_period: 60s
 
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: clash-frontend
+    environment:
+      REACT_APP_API_BASE_URL: http://localhost:8000
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - clash-network
+    restart: unless-stopped
+
 volumes:
   mysql_data:
     driver: local
