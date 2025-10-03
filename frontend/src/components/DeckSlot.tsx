@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { DeckSlot as DeckSlotType } from '../types';
+import React, { useState } from 'react';
+import { DeckSlot as DeckSlotType, AnimationState } from '../types';
 import '../styles/DeckSlot.css';
 import '../styles/animations.css';
 
@@ -13,6 +13,7 @@ interface DeckSlotProps {
   onSwapCards?: (sourceIndex: number, targetIndex: number) => void;
   canAddEvolution: boolean;
   showOptions: boolean;
+  animationState?: AnimationState[number];
 }
 
 interface DragData {
@@ -31,43 +32,10 @@ const DeckSlot: React.FC<DeckSlotProps> = ({
   onSwapCards,
   canAddEvolution,
   showOptions,
+  animationState,
 }) => {
   const [isDragOver, setIsDragOver] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
-  const [animationState, setAnimationState] = useState<'entering' | 'leaving' | 'idle'>('idle');
-  const [previousCardId, setPreviousCardId] = useState<number | null>(slot.card?.id || null);
-
-  // Detect when a card is added or removed
-  useEffect(() => {
-    const currentCardId = slot.card?.id || null;
-    
-    // Card was added
-    if (currentCardId && !previousCardId) {
-      setAnimationState('entering');
-      const timer = setTimeout(() => setAnimationState('idle'), 300);
-      return () => clearTimeout(timer);
-    }
-    
-    // Card was removed
-    if (!currentCardId && previousCardId) {
-      setAnimationState('leaving');
-      const timer = setTimeout(() => {
-        setAnimationState('idle');
-        setPreviousCardId(null);
-      }, 300);
-      return () => clearTimeout(timer);
-    }
-    
-    // Card was swapped (different card ID)
-    if (currentCardId && previousCardId && currentCardId !== previousCardId) {
-      setAnimationState('entering');
-      const timer = setTimeout(() => setAnimationState('idle'), 300);
-      setPreviousCardId(currentCardId);
-      return () => clearTimeout(timer);
-    }
-    
-    setPreviousCardId(currentCardId);
-  }, [slot.card?.id, previousCardId]);
 
   const handleClick = () => {
     if (slot.card) {
@@ -161,15 +129,29 @@ const DeckSlot: React.FC<DeckSlotProps> = ({
     ? slot.card.image_url_evo 
     : slot.card.image_url;
 
-  const animationClass = animationState === 'entering' 
-    ? 'deck-slot__card--entering' 
-    : animationState === 'leaving' 
-    ? 'deck-slot__card--leaving' 
-    : '';
+  // Use animation state from parent (DeckBuilder) to prevent conflicts
+  // Only apply animation classes when explicitly animating
+  const getSlotClasses = () => {
+    const classes = ['deck-slot', 'deck-slot--filled'];
+    
+    if (isDragging) classes.push('deck-slot--dragging');
+    if (isDragOver) classes.push('deck-slot--drag-over');
+    
+    // Only add animation classes when actively animating
+    if (animationState?.isAnimating) {
+      if (animationState.animationType === 'entering') {
+        classes.push('deck-slot__card--entering');
+      } else if (animationState.animationType === 'leaving') {
+        classes.push('deck-slot__card--leaving');
+      }
+    }
+    
+    return classes.join(' ');
+  };
 
   return (
     <div 
-      className={`deck-slot deck-slot--filled ${isDragging ? 'deck-slot--dragging' : ''} ${isDragOver ? 'deck-slot--drag-over' : ''} ${animationClass}`}
+      className={getSlotClasses()}
       onClick={handleClick}
       draggable={true}
       onDragStart={handleDragStart}

@@ -237,28 +237,29 @@
   transform: scale(0.95);
 }
 
-/* In Deck State */
+/* In Deck State - Fixed to prevent disappearing cards */
 .card-display--in-deck {
-  opacity: 0.5;
+  opacity: 1; /* Keep full opacity to prevent disappearing */
   pointer-events: none;
   position: relative;
+  filter: grayscale(0.3); /* Subtle visual indication instead of opacity */
+  border-color: #4caf50 !important; /* Green border to show it's in deck */
 }
 
 .card-display--in-deck::after {
   content: '✓ In Deck';
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  top: 8px;
+  right: 8px;
   background: rgba(76, 175, 80, 0.95);
   color: white;
-  padding: var(--spacing-sm) var(--spacing-md);
+  padding: 4px 8px;
   border-radius: var(--radius-sm);
   font-weight: 600;
-  font-size: var(--font-size-sm);
+  font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  box-shadow: var(--elevation-3);
+  box-shadow: var(--elevation-2);
   z-index: 10;
   white-space: nowrap;
 }

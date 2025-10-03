@@ -1,21 +1,18 @@
-/* Card Operations Animations */
+/* Card Operations Animations - Fixed for consistent timing */
 
-/* Card Add to Deck Animation */
+/* Card Add Animation - Starts invisible, becomes visible */
 @keyframes cardAddToDeck {
   0% {
     opacity: 0;
-    transform: scale(0.8) translateY(-20px);
-  }
-  60% {
-    transform: scale(1.05);
+    transform: scale(0.9);
   }
   100% {
     opacity: 1;
-    transform: scale(1) translateY(0);
+    transform: scale(1);
   }
 }
 
-/* Card Remove from Deck Animation */
+/* Card Remove Animation */
 @keyframes cardRemoveFromDeck {
   0% {
     opacity: 1;
@@ -23,23 +20,46 @@
   }
   100% {
     opacity: 0;
-    transform: scale(0.8) translateY(20px);
+    transform: scale(0.9);
   }
 }
 
-/* Animation Classes */
-.deck-slot__card--entering {
-  animation: cardAddToDeck 300ms cubic-bezier(0.0, 0.0, 0.2, 1);
+/* Base state for filled slots - ALWAYS visible unless explicitly animating out */
+.deck-slot--filled {
+  opacity: 1 !important;
+  transform: scale(1);
+  transition: none;
 }
 
-.deck-slot__card--leaving {
-  animation: cardRemoveFromDeck 300ms cubic-bezier(0.4, 0.0, 1, 1);
+/* Ensure animations only apply to deck slots, not gallery cards */
+.card-display {
+  opacity: 1 !important;
+  transition: transform 200ms ease, box-shadow 200ms ease, filter 200ms ease;
 }
 
-/* Ensure animations are visible */
-.deck-slot--filled.deck-slot__card--entering,
+/* Override base opacity ONLY during entering animation */
+.deck-slot--filled.deck-slot__card--entering {
+  opacity: 0; /* Start invisible */
+  animation: cardAddToDeck 200ms ease-out forwards;
+}
+
+/* Override base opacity ONLY during leaving animation */
 .deck-slot--filled.deck-slot__card--leaving {
-  animation-fill-mode: both;
+  animation: cardRemoveFromDeck 200ms ease-in forwards;
+}
+
+/* Hover effects for stable slots only */
+.deck-slot--filled:not(.deck-slot__card--entering):not(.deck-slot__card--leaving):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+/* Ensure all child elements are visible by default */
+.deck-slot--filled .deck-slot__image,
+.deck-slot--filled .deck-slot__info,
+.deck-slot--filled .deck-slot__evolution-badge {
+  opacity: 1;
 }
 
 /* Save Button Pulse Animation */

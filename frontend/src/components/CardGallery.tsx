@@ -100,7 +100,7 @@ const CardGallery: React.FC<CardGalleryProps> = ({
       <div className="card-gallery__grid">
         {filteredAndSortedCards.map((card) => (
           <CardDisplay
-            key={card.id}
+            key={`gallery-card-${card.id}`}
             card={card}
             onClick={() => onCardClick(card)}
             showOptions={selectedCard?.id === card.id}

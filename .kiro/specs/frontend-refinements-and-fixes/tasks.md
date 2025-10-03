@@ -304,19 +304,28 @@
   - Integrate sort controls with existing filter system
   - _Requirements: 9.1, 9.2, 9.3, 9.4, 9.5, 9.6, 9.7_
 
-- [ ] 27. Fix saved decks visual contrast
+- [x] 27. Fix saved decks visual contrast
+
+
+
+
 
 
 
 
   - Update `frontend/src/styles/SavedDecks.css` with high contrast colors
   - Set deck names to dark gray (#212121) for visibility
-  - Set elixir cost to blue (#1976d2) and card count to green (#388e3c)
+  - Set elixir cost to blue (#1976d2) and card count to green (#388e3
   - Add proper hover states that maintain text visibility
   - Test color contrast ratios meet accessibility standards
   - _Requirements: 10.1, 10.2, 10.3, 10.4, 10.5_
 
-- [ ] 28. Fix card selection animation glitches
+- [x] 28. Fix card selection animation glitches
+
+
+
+
+
 
 
 

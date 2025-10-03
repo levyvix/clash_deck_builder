@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Card, DeckSlot as DeckSlotType, FilterState, SortConfig, Notification as NotificationType } from '../types';
+import { Card, DeckSlot as DeckSlotType, FilterState, SortConfig, Notification as NotificationType, AnimationState } from '../types';
 import { fetchCards, createDeck, ApiError } from '../services/api';
 import { 
   calculateAverageElixir, 
@@ -45,6 +45,7 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ initialDeck, onDeckSaved }) =
   const [deckName, setDeckName] = useState('');
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [cardsInDeck, setCardsInDeck] = useState<Set<number>>(new Set());
+  const [animationStates, setAnimationStates] = useState<AnimationState>({});
 
   // Fetch cards on component mount
   useEffect(() => {
@@ -177,23 +178,47 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ initialDeck, onDeckSaved }) =
     setNotifications(prev => prev.filter(n => n.id !== id));
   };
 
-  // Add card to deck
-  const addCardToDeck = (card: Card) => {
+
+
+  // Add card with animation - prevents multiple animations on same card
+  const addCardWithAnimation = (card: Card, slotIndex?: number) => {
+    const cardId = card.id;
+    
+    // Skip if already animating to prevent glitches
+    if (animationStates[cardId]?.isAnimating) {
+      console.log(`Skipping animation for card ${cardId} - already animating`);
+      return;
+    }
+    
     // Check if card is already in deck
     if (cardsInDeck.has(card.id)) {
       addNotification('Card already in deck', 'error');
       return;
     }
 
-    const emptySlotIndex = getEmptySlotIndex(currentDeck);
+    // Determine slot index
+    const targetSlotIndex = slotIndex !== undefined ? slotIndex : getEmptySlotIndex(currentDeck);
     
-    if (emptySlotIndex === -1) {
+    if (targetSlotIndex === -1) {
       addNotification('Deck is full. Remove a card first.', 'error');
       return;
     }
 
+    // Check if target slot is occupied (for specific slot placement)
+    if (slotIndex !== undefined && currentDeck[slotIndex].card) {
+      addNotification('Slot is already occupied', 'error');
+      return;
+    }
+
+    // Set animation state FIRST to ensure proper initial state
+    setAnimationStates(prev => ({
+      ...prev,
+      [cardId]: { isAnimating: true, animationType: 'entering' }
+    }));
+    
+    // Add card to deck immediately - React will batch these updates
     const newDeck = [...currentDeck];
-    newDeck[emptySlotIndex] = { card, isEvolution: false };
+    newDeck[targetSlotIndex] = { card, isEvolution: false };
     setCurrentDeck(newDeck);
     
     // Add card ID to cardsInDeck set
@@ -203,6 +228,22 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ initialDeck, onDeckSaved }) =
     
     setSelectedGalleryCard(null);
     addNotification(`${card.name} added to deck`, 'success');
+    
+    // Clear animation state after animation completes
+    setTimeout(() => {
+      setAnimationStates(prev => {
+        const newState = { ...prev };
+        if (newState[cardId]) {
+          newState[cardId] = { isAnimating: false, animationType: null };
+        }
+        return newState;
+      });
+    }, 200); // Match CSS animation duration exactly
+  };
+
+  // Add card to deck
+  const addCardToDeck = (card: Card) => {
+    addCardWithAnimation(card);
   };
 
   // Add card to specific slot (for drag and drop)
@@ -214,28 +255,7 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ initialDeck, onDeckSaved }) =
       return;
     }
 
-    // Check if card is already in deck
-    if (cardsInDeck.has(card.id)) {
-      addNotification('Card already in deck', 'error');
-      return;
-    }
-
-    // Check if slot is empty
-    if (currentDeck[slotIndex].card) {
-      addNotification('Slot is already occupied', 'error');
-      return;
-    }
-
-    const newDeck = [...currentDeck];
-    newDeck[slotIndex] = { card, isEvolution: false };
-    setCurrentDeck(newDeck);
-    
-    // Add card ID to cardsInDeck set
-    const newCardsInDeck = new Set(cardsInDeck);
-    newCardsInDeck.add(card.id);
-    setCardsInDeck(newCardsInDeck);
-    
-    addNotification(`${card.name} added to deck`, 'success');
+    addCardWithAnimation(card, slotIndex);
   };
 
   // Remove card from deck
@@ -245,6 +265,13 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ initialDeck, onDeckSaved }) =
 
     const cardId = slot.card.id;
     const cardName = slot.card.name;
+
+    // Clear any existing animation states for this card
+    setAnimationStates(prev => {
+      const newState = { ...prev };
+      delete newState[cardId];
+      return newState;
+    });
 
     const newDeck = [...currentDeck];
     newDeck[slotIndex] = { card: null, isEvolution: false };
@@ -259,9 +286,22 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ initialDeck, onDeckSaved }) =
     addNotification(`${cardName} removed from deck`, 'success');
   };
 
+
+
   // Swap cards between deck slots
   const swapCards = (sourceIndex: number, targetIndex: number) => {
     if (sourceIndex === targetIndex) return;
+
+    // Clear animation states for both cards involved in the swap to prevent glitches
+    const sourceCard = currentDeck[sourceIndex]?.card;
+    const targetCard = currentDeck[targetIndex]?.card;
+    
+    setAnimationStates(prev => {
+      const newState = { ...prev };
+      if (sourceCard) delete newState[sourceCard.id];
+      if (targetCard) delete newState[targetCard.id];
+      return newState;
+    });
 
     const newDeck = [...currentDeck];
     const temp = newDeck[sourceIndex];
@@ -449,7 +489,7 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ initialDeck, onDeckSaved }) =
           <div className="deck-builder__slots">
             {currentDeck.map((slot, index) => (
               <DeckSlot
-                key={index}
+                key={`slot-${index}-${slot.card?.id || 'empty'}`}
                 slot={slot}
                 slotIndex={index}
                 onCardClick={handleDeckSlotClick}
@@ -459,6 +499,7 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ initialDeck, onDeckSaved }) =
                 onSwapCards={swapCards}
                 canAddEvolution={canAddEvolution(currentDeck)}
                 showOptions={selectedDeckSlot === index}
+                animationState={slot.card ? animationStates[slot.card.id] : undefined}
               />
             ))}
           </div>

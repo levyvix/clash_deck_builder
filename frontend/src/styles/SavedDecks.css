@@ -92,6 +92,24 @@
 .deck-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  border-color: #1976d2;
+}
+
+/* Maintain text visibility on hover */
+.deck-card:hover .deck-card__name {
+  color: #212121; /* Keep dark gray for visibility */
+}
+
+.deck-card:hover .deck-card__stat {
+  color: #424242; /* Keep medium gray for secondary text */
+}
+
+.deck-card:hover .deck-card__stat:first-child strong {
+  color: #1976d2; /* Keep blue for elixir cost */
+}
+
+.deck-card:hover .deck-card__stat:last-child strong {
+  color: #388e3c; /* Keep green for card count */
 }
 
 /* Deck Card Header */
@@ -103,10 +121,11 @@
 .deck-card__name {
   margin: 0;
   font-size: var(--font-size-lg);
-  color: var(--color-text-primary);
+  color: #212121; /* Dark gray for high contrast */
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  font-weight: 600;
 }
 
 /* Rename Input */
@@ -191,11 +210,22 @@
 }
 
 .deck-card__stat {
-  color: var(--color-text-secondary);
+  color: #424242; /* Medium gray for secondary text */
+  font-weight: 500;
 }
 
 .deck-card__stat strong {
-  color: var(--color-text-primary);
+  font-weight: 600;
+}
+
+/* Specific styling for elixir cost - blue color */
+.deck-card__stat:first-child strong {
+  color: #1976d2; /* Blue for elixir cost */
+}
+
+/* Specific styling for card count - green color */
+.deck-card__stat:last-child strong {
+  color: #388e3c; /* Green for card count */
 }
 
 /* Actions */
