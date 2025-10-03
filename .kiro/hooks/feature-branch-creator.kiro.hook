@@ -1,0 +1,20 @@
+{
+  "enabled": true,
+  "name": "Feature Branch Creator",
+  "description": "Automatically creates a new feature branch when working on new features, following the current branch naming patterns found in git history",
+  "version": "1",
+  "when": {
+    "type": "userTriggered",
+    "patterns": [
+      "specs/**/*.md",
+      "frontend/src/**/*.tsx",
+      "frontend/src/**/*.ts",
+      "backend/src/**/*.py",
+      "docs/**/*.md"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "A new feature is being developed based on file changes. Please analyze the git log to understand the current branch naming patterns (e.g., feature/*, feat/*, etc.) and create a new feature branch with an appropriate name based on the files being modified and the existing naming convention. Use git commands to create and switch to the new branch. when switching branches after a task success. run git add . and git commit with a good commit message following best practices."
+  }
+}
