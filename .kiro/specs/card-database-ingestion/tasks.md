@@ -81,7 +81,12 @@
   - Write test for database error handling
   - _Requirements: 4.2, 4.3, 4.4, 4.5_
 
-- [ ] 7. Unit testing for ingestion script
+- [x] 7. Unit testing for ingestion script
+
+
+
+
+
   - Create `backend/tests/unit/test_ingest_cards.py`
   - Write test for `determine_card_type()` with Troop ID range (26000000-26999999)
   - Write test for `determine_card_type()` with Building ID range (27000000-27999999)
@@ -92,7 +97,12 @@
   - Write test for error handling with invalid JSON
   - _Requirements: 1.2, 1.3, 1.6, 2.1, 2.2, 2.3, 2.4_
 
-- [ ] 8. Integration testing
+- [x] 8. Integration testing
+
+
+
+
+
   - Create `backend/tests/integration/test_card_database.py`
   - Write test for full ingestion workflow with test JSON data
   - Write test for card retrieval after ingestion
