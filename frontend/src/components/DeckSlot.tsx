@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { DeckSlot as DeckSlotType, AnimationState } from '../types';
+import { canCardEvolve } from '../services/evolutionService';
 import '../styles/DeckSlot.css';
 import '../styles/animations.css';
 
@@ -14,6 +15,7 @@ interface DeckSlotProps {
   canAddEvolution: boolean;
   showOptions: boolean;
   animationState?: AnimationState[number];
+  isDeckComplete?: boolean; // Add prop to track deck completion
 }
 
 interface DragData {
@@ -33,9 +35,31 @@ const DeckSlot: React.FC<DeckSlotProps> = ({
   canAddEvolution,
   showOptions,
   animationState,
+  isDeckComplete = false,
 }) => {
   const [isDragOver, setIsDragOver] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+
+  // Function to get dynamic CSS classes for deck slots
+  const getDeckSlotClasses = () => {
+    const classes = ['deck-slot'];
+    
+    if (!slot.card) {
+      classes.push('deck-slot--empty');
+    } else {
+      classes.push('deck-slot--filled');
+    }
+    
+    if (isDragOver) {
+      classes.push('deck-slot--drag-over');
+    }
+    
+    if (isDragging) {
+      classes.push('deck-slot--dragging');
+    }
+    
+    return classes.join(' ');
+  };
 
   const handleClick = () => {
     if (slot.card) {
@@ -74,7 +98,9 @@ const DeckSlot: React.FC<DeckSlotProps> = ({
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault(); // Allow drop
-    e.dataTransfer.dropEffect = 'move';
+    if (e.dataTransfer) {
+      e.dataTransfer.dropEffect = 'move';
+    }
     
     setIsDragOver(true);
   };
@@ -113,7 +139,8 @@ const DeckSlot: React.FC<DeckSlotProps> = ({
   if (!slot.card) {
     return (
       <div 
-        className={`deck-slot deck-slot--empty ${isDragOver ? 'deck-slot--drag-over' : ''}`}
+        className={getDeckSlotClasses()}
+        data-testid={`deck-slot-${slotIndex}`}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
@@ -129,13 +156,9 @@ const DeckSlot: React.FC<DeckSlotProps> = ({
     ? slot.card.image_url_evo 
     : slot.card.image_url;
 
-  // Use animation state from parent (DeckBuilder) to prevent conflicts
-  // Only apply animation classes when explicitly animating
-  const getSlotClasses = () => {
-    const classes = ['deck-slot', 'deck-slot--filled'];
-    
-    if (isDragging) classes.push('deck-slot--dragging');
-    if (isDragOver) classes.push('deck-slot--drag-over');
+  // Get animation classes for the card image
+  const getCardAnimationClasses = () => {
+    const classes = ['deck-slot__image'];
     
     // Only add animation classes when actively animating
     if (animationState?.isAnimating) {
@@ -151,7 +174,8 @@ const DeckSlot: React.FC<DeckSlotProps> = ({
 
   return (
     <div 
-      className={getSlotClasses()}
+      className={getDeckSlotClasses()}
+      data-testid={`deck-slot-${slotIndex}`}
       onClick={handleClick}
       draggable={true}
       onDragStart={handleDragStart}
@@ -163,7 +187,7 @@ const DeckSlot: React.FC<DeckSlotProps> = ({
       <img 
         src={imageUrl} 
         alt={slot.card.name}
-        className="deck-slot__image"
+        className={getCardAnimationClasses()}
       />
       
       {slot.isEvolution && (
@@ -184,14 +208,16 @@ const DeckSlot: React.FC<DeckSlotProps> = ({
           >
             Remove from Deck
           </button>
-          <button 
-            className="deck-slot__option-btn deck-slot__option-btn--evolution"
-            onClick={handleToggleEvolution}
-            disabled={!slot.isEvolution && !canAddEvolution}
-            title={!slot.isEvolution && !canAddEvolution ? 'Evolution limit reached (max 2)' : ''}
-          >
-            {slot.isEvolution ? 'Remove Evolution' : 'Mark as Evolution'}
-          </button>
+          {canCardEvolve(slot.card) && (
+            <button 
+              className="deck-slot__option-btn deck-slot__option-btn--evolution"
+              onClick={handleToggleEvolution}
+              disabled={!slot.isEvolution && !canAddEvolution}
+              title={!slot.isEvolution && !canAddEvolution ? 'Evolution limit reached (max 2)' : ''}
+            >
+              {slot.isEvolution ? 'Remove Evolution' : 'Mark as Evolution'}
+            </button>
+          )}
         </div>
       )}
     </div>

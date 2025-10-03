@@ -342,6 +342,10 @@
 
 
 
+
+
+
+
   - Implement replaceCardInSlot function that clears animation states
   - Add getCardOpacity function that ensures full opacity unless explicitly animating
   - Update card rendering to use dynamic opacity calculation
@@ -349,7 +353,12 @@
   - Verify opacity states are properly managed during card swaps
   - _Requirements: 12.1, 12.2, 12.3, 12.4, 12.5_
 
-- [ ] 30. Implement evolution card detection
+- [x] 30. Implement evolution card detection
+
+
+
+
+
 
 
 
@@ -360,8 +369,13 @@
   - Extend Card interface to include can_evolve field if available from API
   - Test that evolution toggle only appears for evolution-capable cards
   - _Requirements: 13.1, 13.2, 13.3, 13.4, 13.5_
+-
 
-- [ ] 31. Implement automatic evolution for first two slots
+- [x] 31. Implement automatic evolution for first two slots
+
+
+
+
 
 
 
@@ -373,7 +387,13 @@
   - Test that cards in positions 1-2 are automatically marked as evolution if capable
   - _Requirements: 14.1, 14.2, 14.3, 14.4, 14.5, 14.6_
 
-- [ ] 32. Add blue outline styling to deck slots
+- [x] 32. Add blue outline styling to deck slots
+
+
+
+
+
+
 
 
 

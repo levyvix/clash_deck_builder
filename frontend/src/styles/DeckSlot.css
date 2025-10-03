@@ -17,8 +17,8 @@
 
 /* Empty Slot Styles */
 .deck-slot--empty {
-  border: 2px dashed #ccc;
-  background-color: #f5f5f5;
+  border: 2px solid #2196f3; /* Blue outline for empty slots */
+  background: linear-gradient(135deg, rgba(33, 150, 243, 0.1), rgba(33, 150, 243, 0.05));
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -29,7 +29,7 @@
 .deck-slot--empty:hover {
   transform: none;
   box-shadow: none;
-  border-color: #999;
+  border-color: #1976d2; /* Darker blue on hover */
 }
 
 /* Dragging State */
@@ -40,19 +40,19 @@
 
 /* Drag Over State */
 .deck-slot--drag-over {
-  border-color: #4CAF50 !important;
+  border-color: #1976d2 !important; /* Darker blue for drag over */
   border-width: 3px !important;
-  background-color: rgba(76, 175, 80, 0.1) !important;
-  box-shadow: 0 0 12px rgba(76, 175, 80, 0.4) !important;
+  background-color: rgba(33, 150, 243, 0.2) !important;
+  box-shadow: 0 0 12px rgba(33, 150, 243, 0.4) !important; /* Blue glow effect */
 }
 
 .deck-slot--drag-over .deck-slot__empty-icon {
-  color: #4CAF50;
+  color: #1976d2; /* Blue color for drag over state */
   transform: scale(1.2);
 }
 
 .deck-slot--drag-over .deck-slot__empty-text {
-  color: #4CAF50;
+  color: #1976d2; /* Blue color for drag over state */
   font-weight: 600;
 }
 
@@ -73,9 +73,22 @@
 /* Filled Slot Styles */
 .deck-slot--filled {
   background-color: #fff;
-  border: 2px solid #ddd;
+  border: 2px solid rgba(33, 150, 243, 0.3); /* Subtle blue outline for filled slots */
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   cursor: grab;
+}
+
+.deck-slot--filled:hover {
+  border-color: #2196f3; /* More prominent blue on hover */
+}
+
+/* Complete deck state - green outline when deck is complete */
+.deck-area--complete .deck-slot--filled {
+  border-color: #4caf50; /* Green outline when deck is complete */
+}
+
+.deck-area--complete .deck-slot--filled:hover {
+  border-color: #388e3c; /* Darker green on hover when complete */
 }
 
 .deck-slot--filled:active {

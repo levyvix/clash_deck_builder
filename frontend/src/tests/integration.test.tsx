@@ -272,6 +272,106 @@ describe('Integration Tests - Task 15', () => {
       
       expect(screen.getByText('⭐')).toBeInTheDocument();
     });
+
+    it('should only show evolution toggle for evolution-capable cards', () => {
+      // Test with evolution-capable card (Knight - ID 26000000)
+      const evolutionCapableCard: Card = {
+        id: 26000000, // Knight - evolution capable
+        name: 'Knight',
+        elixir_cost: 3,
+        rarity: 'Common',
+        type: 'Troop',
+        image_url: 'https://example.com/knight.png',
+        image_url_evo: 'https://example.com/knight_evo.png'
+      };
+
+      const evolutionCapableSlot: DeckSlotType = {
+        card: evolutionCapableCard,
+        isEvolution: false
+      };
+
+      const { rerender } = render(
+        <DeckSlot
+          slot={evolutionCapableSlot}
+          slotIndex={0}
+          onCardClick={jest.fn()}
+          onRemoveCard={jest.fn()}
+          onToggleEvolution={jest.fn()}
+          canAddEvolution={true}
+          showOptions={true} // Show options to see the evolution toggle
+        />
+      );
+
+      // Evolution toggle should be present for evolution-capable card
+      expect(screen.getByText('Mark as Evolution')).toBeInTheDocument();
+
+      // Test with non-evolution-capable card
+      const nonEvolutionCapableCard: Card = {
+        id: 99999999, // Non-existent ID - not evolution capable
+        name: 'Test Spell',
+        elixir_cost: 2,
+        rarity: 'Common',
+        type: 'Spell',
+        image_url: 'https://example.com/spell.png'
+      };
+
+      const nonEvolutionCapableSlot: DeckSlotType = {
+        card: nonEvolutionCapableCard,
+        isEvolution: false
+      };
+
+      rerender(
+        <DeckSlot
+          slot={nonEvolutionCapableSlot}
+          slotIndex={0}
+          onCardClick={jest.fn()}
+          onRemoveCard={jest.fn()}
+          onToggleEvolution={jest.fn()}
+          canAddEvolution={true}
+          showOptions={true} // Show options to check for evolution toggle
+        />
+      );
+
+      // Evolution toggle should NOT be present for non-evolution-capable card
+      expect(screen.queryByText('Mark as Evolution')).not.toBeInTheDocument();
+      expect(screen.queryByText('Remove Evolution')).not.toBeInTheDocument();
+      
+      // But remove button should still be present
+      expect(screen.getByText('Remove from Deck')).toBeInTheDocument();
+    });
+
+    it('should respect API can_evolve field over static list', () => {
+      // Test card with API can_evolve field set to true
+      const apiEvolutionCard: Card = {
+        id: 99999998, // Non-existent in static list
+        name: 'API Evolution Card',
+        elixir_cost: 4,
+        rarity: 'Rare',
+        type: 'Troop',
+        image_url: 'https://example.com/api.png',
+        can_evolve: true // API says it can evolve
+      };
+
+      const apiEvolutionSlot: DeckSlotType = {
+        card: apiEvolutionCard,
+        isEvolution: false
+      };
+
+      render(
+        <DeckSlot
+          slot={apiEvolutionSlot}
+          slotIndex={0}
+          onCardClick={jest.fn()}
+          onRemoveCard={jest.fn()}
+          onToggleEvolution={jest.fn()}
+          canAddEvolution={true}
+          showOptions={true}
+        />
+      );
+
+      // Evolution toggle should be present because API says can_evolve: true
+      expect(screen.getByText('Mark as Evolution')).toBeInTheDocument();
+    });
   });
 
   describe('6. Average Elixir Calculation', () => {

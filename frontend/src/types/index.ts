@@ -11,6 +11,7 @@ export interface Card {
   arena?: string;
   image_url: string;
   image_url_evo?: string;
+  can_evolve?: boolean; // Optional field for evolution capability
 }
 
 export interface DeckSlot {
