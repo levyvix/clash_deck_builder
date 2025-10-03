@@ -53,3 +53,23 @@ class DeckLimitExceededError(Exception):
         self.max_decks = max_decks
         message = f"User {user_id} has reached the maximum limit of {max_decks} decks"
         super().__init__(message)
+
+
+class ClashAPIError(Exception):
+    """Raised when Clash Royale API calls fail."""
+    
+    def __init__(self, message: str, status_code: int = None, original_error: Exception = None):
+        self.message = message
+        self.status_code = status_code
+        self.original_error = original_error
+        super().__init__(self.message)
+
+
+class ValidationError(Exception):
+    """Raised when input validation fails."""
+    
+    def __init__(self, message: str, field: str = None, value: any = None):
+        self.message = message
+        self.field = field
+        self.value = value
+        super().__init__(self.message)

@@ -1,6 +1,6 @@
 # backend/src/models/card.py
 
-from pydantic import BaseModel, validator, Field
+from pydantic import BaseModel, field_validator, Field
 from typing import Optional
 
 class Card(BaseModel):
@@ -13,7 +13,8 @@ class Card(BaseModel):
     image_url: str = Field(..., min_length=1, description="URL to card image")
     image_url_evo: Optional[str] = Field(None, description="URL to evolved card image")
 
-    @validator('rarity')
+    @field_validator('rarity')
+    @classmethod
     def validate_rarity(cls, v):
         """Validate that rarity is one of the allowed values"""
         allowed_rarities = ['Common', 'Rare', 'Epic', 'Legendary', 'Champion']
@@ -21,7 +22,8 @@ class Card(BaseModel):
             raise ValueError(f'Rarity must be one of {allowed_rarities}, got: {v}')
         return v
 
-    @validator('type')
+    @field_validator('type')
+    @classmethod
     def validate_type(cls, v):
         """Validate that type is one of the allowed values"""
         allowed_types = ['Troop', 'Spell', 'Building']
@@ -29,14 +31,16 @@ class Card(BaseModel):
             raise ValueError(f'Type must be one of {allowed_types}, got: {v}')
         return v
 
-    @validator('name')
+    @field_validator('name')
+    @classmethod
     def validate_name(cls, v):
         """Validate card name is not empty and properly formatted"""
         if not v or not v.strip():
             raise ValueError('Card name cannot be empty')
         return v.strip()
 
-    @validator('image_url', 'image_url_evo')
+    @field_validator('image_url', 'image_url_evo')
+    @classmethod
     def validate_image_urls(cls, v):
         """Validate image URLs are properly formatted"""
         if v is not None and not v.strip():

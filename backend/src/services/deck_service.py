@@ -30,7 +30,7 @@ class DeckService:
     def _serialize_cards(self, cards: List[Card]) -> str:
         """Serialize list of cards to JSON string."""
         try:
-            return json.dumps([card.dict() for card in cards])
+            return json.dumps([card.model_dump() for card in cards])
         except (TypeError, ValueError) as e:
             logger.error(f"Failed to serialize cards: {e}")
             raise SerializationError(f"Failed to serialize cards: {e}", "cards")

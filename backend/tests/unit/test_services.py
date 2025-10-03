@@ -17,7 +17,8 @@ def mock_clash_api_service():
 
 @pytest.fixture
 def mock_deck_service():
-    service = DeckService()
+    mock_db_session = MagicMock()
+    service = DeckService(db_session=mock_db_session)
     service._get_db_connection = MagicMock()
     return service
 
@@ -111,17 +112,28 @@ async def test_clash_api_get_cards(mock_clash_api_service):
 
 @pytest.mark.asyncio
 async def test_deck_service_create_deck(mock_deck_service):
-    mock_conn = MagicMock()
-    mock_cursor = MagicMock()
-    mock_deck_service._get_db_connection.return_value = mock_conn
-    mock_conn.cursor.return_value = mock_cursor
-    mock_cursor.lastrowid = 1
+    # Mock the database session methods
+    mock_deck_service.db_session.fetchone.return_value = {'deck_count': 5}  # User has 5 decks (under limit)
+    mock_deck_service.db_session.lastrowid = 1
 
     user = User(id=1)
-    card = Card(id=1, name="Archer", elixir_cost=3, rarity="Common", type="Troop", image_url="http://example.com/archer.png")
-    deck_data = Deck(name="New Deck", cards=[card], evolution_slots=[], average_elixir=3.0)
+    
+    # Create 8 cards as required by deck validation
+    cards = []
+    for i in range(8):
+        card = Card(
+            id=i+1, 
+            name=f"Card{i+1}", 
+            elixir_cost=3, 
+            rarity="Common", 
+            type="Troop", 
+            image_url=f"http://example.com/card{i+1}.png"
+        )
+        cards.append(card)
+    
+    deck_data = Deck(name="New Deck", cards=cards, evolution_slots=[], average_elixir=3.0)
 
     created_deck = await mock_deck_service.create_deck(deck_data, user)
-    mock_cursor.execute.assert_called_once()
-    mock_conn.commit.assert_called_once()
+    mock_deck_service.db_session.execute.assert_called()
     assert created_deck.id == 1
+    assert created_deck.name == "New Deck"

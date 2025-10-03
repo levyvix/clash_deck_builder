@@ -1,6 +1,6 @@
 # backend/src/models/deck.py
 
-from pydantic import BaseModel, validator, Field, root_validator
+from pydantic import BaseModel, field_validator, Field, model_validator
 from typing import List, Optional
 from .card import Card
 
@@ -17,21 +17,24 @@ class Deck(BaseModel):
         None, ge=0, le=10, description="Average elixir cost of the deck"
     )
 
-    @validator("name")
+    @field_validator("name")
+    @classmethod
     def validate_name(cls, v):
         """Validate deck name is not empty and properly formatted"""
         if not v or not v.strip():
             raise ValueError("Deck name cannot be empty")
         return v.strip()
 
-    @validator("cards")
+    @field_validator("cards")
+    @classmethod
     def validate_cards_count(cls, v):
         """Validate that deck has exactly 8 cards"""
         if len(v) != 8:
             raise ValueError(f"Deck must have exactly 8 cards, got {len(v)}")
         return v
 
-    @validator("evolution_slots")
+    @field_validator("evolution_slots")
+    @classmethod
     def validate_evolution_slots(cls, v):
         """Validate that deck has at most 2 evolution slots"""
         if len(v) > 2:
@@ -40,26 +43,23 @@ class Deck(BaseModel):
             )
         return v
 
-    @root_validator
-    def validate_evolution_cards_in_deck(cls, values):
+    @model_validator(mode='after')
+    def validate_evolution_cards_in_deck(self):
         """Validate that evolution slot cards are also in the main deck"""
-        cards = values.get("cards", [])
-        evolution_slots = values.get("evolution_slots", [])
-
-        if not cards or not evolution_slots:
-            return values
+        if not self.cards or not self.evolution_slots:
+            return self
 
         # Get card IDs from main deck
-        main_deck_card_ids = {card.id for card in cards}
+        main_deck_card_ids = {card.id for card in self.cards}
 
         # Check that all evolution slot cards are in the main deck
-        for evo_card in evolution_slots:
+        for evo_card in self.evolution_slots:
             if evo_card.id not in main_deck_card_ids:
                 raise ValueError(
                     f'Evolution slot card "{evo_card.name}" must also be in the main deck'
                 )
 
-        return values
+        return self
 
     def calculate_average_elixir(self) -> float:
         """Calculate the average elixir cost of the deck including evolution slots"""
@@ -79,27 +79,23 @@ class Deck(BaseModel):
 
         return round(total_elixir / total_cards, 2) if total_cards > 0 else 0.0
 
-    @root_validator
-    def auto_calculate_average_elixir(cls, values):
+    @model_validator(mode='after')
+    def auto_calculate_average_elixir(self):
         """Automatically calculate average elixir if not provided"""
-        cards = values.get("cards", [])
-        evolution_slots = values.get("evolution_slots", [])
-        average_elixir = values.get("average_elixir")
-
         # If average_elixir is not provided or is None, calculate it
-        if average_elixir is None and cards:
-            total_elixir = sum(card.elixir_cost for card in cards)
-            total_cards = len(cards)
+        if self.average_elixir is None and self.cards:
+            total_elixir = sum(card.elixir_cost for card in self.cards)
+            total_cards = len(self.cards)
 
             # Add evolution slots elixir cost
-            if evolution_slots:
-                total_elixir += sum(card.elixir_cost for card in evolution_slots)
+            if self.evolution_slots:
+                total_elixir += sum(card.elixir_cost for card in self.evolution_slots)
 
-            values["average_elixir"] = (
+            self.average_elixir = (
                 round(total_elixir / total_cards, 2) if total_cards > 0 else 0.0
             )
 
-        return values
+        return self
 
     def update_average_elixir(self) -> None:
         """Update the average elixir cost of the deck"""
