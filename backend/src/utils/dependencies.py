@@ -6,7 +6,7 @@ from mysql.connector.cursor import MySQLCursor
 
 from .config import settings
 from .database import get_db_session
-from ..services.clash_api_service import ClashAPIService
+from ..services.clash_api_service import ClashRoyaleAPIService
 from ..services.deck_service import DeckService
 
 
@@ -16,9 +16,9 @@ def get_database_session() -> Generator[MySQLCursor, None, None]:
         yield session
 
 
-def get_clash_api_service() -> ClashAPIService:
+def get_clash_api_service() -> ClashRoyaleAPIService:
     """FastAPI dependency for Clash Royale API service."""
-    return ClashAPIService(
+    return ClashRoyaleAPIService(
         api_key=settings.clash_royale_api_key,
         base_url=settings.clash_royale_api_base_url
     )
