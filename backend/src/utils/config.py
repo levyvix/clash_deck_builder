@@ -197,6 +197,8 @@ class Settings(BaseSettings):
         # Load environment files in order of precedence
         env_file = [
             ".env",  # Local environment (highest priority)
+            "../.env",  # One level up (for when running from src/)
+            "../../.env",  # Two levels up
             "env/development.env",  # Environment-specific
             "env/docker.env",  # Docker environment
             "env/production.env",  # Production environment
