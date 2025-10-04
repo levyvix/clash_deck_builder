@@ -343,7 +343,128 @@ npm start
 3. Run linters: `uv run black . && uv run flake8 .` (backend) or verify TypeScript compiles (frontend)
 4. Run tests: `uv run pytest` (backend) and `npm test` (frontend)
 5. Commit and push changes
-6. Create PR to `001-i-would-like` branch
+6. Create PR to `001-i-would-like` branch using GitHub CLI
+
+### Git and Pull Request Workflow
+
+This project uses **GitHub CLI (`gh`)** for managing pull requests and merges.
+
+#### Creating a Pull Request
+```bash
+# Make sure you're on your feature branch and changes are committed
+git status
+
+# Push your branch to remote
+git push -u origin <branch-name>
+
+# Create a PR using gh CLI
+gh pr create --base 001-i-would-like --title "Your PR Title" --body "$(cat <<'EOF'
+## Summary
+- Brief description of changes
+- Key features added
+- Bugs fixed
+
+## Test plan
+- [ ] All tests passing
+- [ ] Manual testing completed
+- [ ] No breaking changes
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+EOF
+)"
+
+# Or use interactive mode (if terminal supports it)
+gh pr create --base 001-i-would-like --web
+```
+
+#### Viewing Pull Requests
+```bash
+# List all PRs
+gh pr list
+
+# View specific PR details
+gh pr view <PR-number>
+
+# View PR in browser
+gh pr view <PR-number> --web
+
+# Check PR status (checks, reviews)
+gh pr checks <PR-number>
+```
+
+#### Reviewing Pull Requests
+```bash
+# Checkout a PR locally for testing
+gh pr checkout <PR-number>
+
+# Add a review comment
+gh pr review <PR-number> --comment --body "Your review comments"
+
+# Approve a PR
+gh pr review <PR-number> --approve --body "LGTM! 🚀"
+
+# Request changes
+gh pr review <PR-number> --request-changes --body "Please address these issues..."
+```
+
+#### Merging Pull Requests
+```bash
+# Merge with merge commit (preserves all commits)
+gh pr merge <PR-number> --merge --body "Merge message"
+
+# Squash and merge (combines all commits into one)
+gh pr merge <PR-number> --squash --body "Squashed commit message"
+
+# Rebase and merge (applies commits on top of base branch)
+gh pr merge <PR-number> --rebase
+
+# Auto-merge when all checks pass
+gh pr merge <PR-number> --auto --squash
+
+# Delete branch after merge
+gh pr merge <PR-number> --squash --delete-branch
+```
+
+#### Common PR Workflows
+```bash
+# Create PR from current branch
+git push -u origin $(git branch --show-current)
+gh pr create --base 001-i-would-like --fill
+
+# Update PR after making changes
+git add .
+git commit -m "Address review comments"
+git push
+
+# Close a PR without merging
+gh pr close <PR-number>
+
+# Reopen a closed PR
+gh pr reopen <PR-number>
+
+# View PR diff
+gh pr diff <PR-number>
+```
+
+#### GitHub CLI Authentication
+```bash
+# Check authentication status
+gh auth status
+
+# Login (if needed)
+gh auth login --web
+
+# Refresh authentication
+gh auth refresh
+```
+
+**Best Practices:**
+- Always create PRs to `001-i-would-like` branch (not main)
+- Include meaningful PR titles and descriptions
+- Add test results and manual testing notes
+- Use `--squash` for feature branches to keep history clean
+- Delete branches after merging to keep repository tidy
+- Review PR checks before merging
 
 ## Key Files to Know
 
