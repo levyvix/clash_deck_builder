@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes, Link, useNavigate, Navigate, useLocation } from 'react-router-dom';
 import { GoogleOAuthProvider } from '@react-oauth/google';
+import { GOOGLE_CLIENT_ID } from './config';
 import DeckBuilder from './components/DeckBuilder';
 import SavedDecks from './components/SavedDecks';
 import ProfileSection from './components/ProfileSection';
@@ -240,14 +241,25 @@ function AppContent() {
 }
 
 function App() {
-  const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
+  const clientId = GOOGLE_CLIENT_ID;
   
-  if (!clientId) {
-    console.error('Google Client ID not configured. Please set REACT_APP_GOOGLE_CLIENT_ID in your environment variables.');
+  if (!clientId || clientId === 'your-google-client-id.apps.googleusercontent.com') {
+    console.warn('Google Client ID not configured. Google OAuth features will be disabled.');
+    console.info('To enable Google OAuth, set REACT_APP_GOOGLE_CLIENT_ID in your environment variables.');
+    console.info('Get your Client ID from: https://console.cloud.google.com/');
+    
     return (
       <div className="app-error">
-        <h1>Configuration Error</h1>
-        <p>Google Client ID not configured. Please check your environment variables.</p>
+        <h1>Setup Required</h1>
+        <p>Google OAuth is not configured yet.</p>
+        <p>To enable authentication features:</p>
+        <ol>
+          <li>Go to <a href="https://console.cloud.google.com/" target="_blank" rel="noopener noreferrer">Google Cloud Console</a></li>
+          <li>Create OAuth 2.0 credentials</li>
+          <li>Add your Client ID to the .env file</li>
+          <li>Restart the application</li>
+        </ol>
+        <p>For detailed instructions, see <code>ENVIRONMENT_SETUP.md</code></p>
       </div>
     );
   }

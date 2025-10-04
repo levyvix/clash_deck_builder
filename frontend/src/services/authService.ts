@@ -1,4 +1,4 @@
-import { API_BASE_URL } from '../config';
+import { API_BASE_URL, GOOGLE_CLIENT_ID } from '../config';
 import { AuthResponse, GoogleUserInfo, User } from '../types';
 
 // Custom error class for authentication errors

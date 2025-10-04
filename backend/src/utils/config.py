@@ -194,7 +194,14 @@ class Settings(BaseSettings):
         return True
 
     class Config:
-        env_file = ".env"
+        # Load environment files in order of precedence
+        env_file = [
+            ".env",  # Local environment (highest priority)
+            "env/development.env",  # Environment-specific
+            "env/docker.env",  # Docker environment
+            "env/production.env",  # Production environment
+            ".env.template"  # Base template (lowest priority)
+        ]
         env_file_encoding = "utf-8"
         case_sensitive = False
         # Allow extra fields for flexibility

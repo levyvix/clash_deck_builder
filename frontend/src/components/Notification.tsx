@@ -17,37 +17,45 @@ const Notification: React.FC<NotificationProps> = ({ notifications, onDismiss })
 
   // Track notification lifecycle states
   useEffect(() => {
-    const newStates = new Map(notificationStates);
-    
-    // Add new notifications in entering state
-    notifications.forEach((notification) => {
-      if (!newStates.has(notification.id)) {
-        newStates.set(notification.id, { id: notification.id, state: 'entering' });
-        
-        // Transition to visible after animation completes
-        setTimeout(() => {
-          setNotificationStates((prev) => {
-            const updated = new Map(prev);
-            const current = updated.get(notification.id);
-            if (current && current.state === 'entering') {
-              updated.set(notification.id, { id: notification.id, state: 'visible' });
-            }
-            return updated;
-          });
-        }, 250);
-      }
-    });
+    setNotificationStates((prevStates) => {
+      const newStates = new Map(prevStates);
+      
+      // Add new notifications in entering state
+      notifications.forEach((notification) => {
+        if (!newStates.has(notification.id)) {
+          newStates.set(notification.id, { id: notification.id, state: 'entering' });
+          
+          // Transition to visible after animation completes
+          setTimeout(() => {
+            setNotificationStates((prev) => {
+              const updated = new Map(prev);
+              const current = updated.get(notification.id);
+              if (current && current.state === 'entering') {
+                updated.set(notification.id, { id: notification.id, state: 'visible' });
+              }
+              return updated;
+            });
+          }, 250);
+        }
+      });
 
-    // Remove states for notifications that no longer exist
-    const currentIds = new Set(notifications.map(n => n.id));
-    Array.from(newStates.keys()).forEach((id) => {
-      if (!currentIds.has(id)) {
-        newStates.delete(id);
-      }
-    });
+      // Remove states for notifications that no longer exist
+      const currentIds = new Set(notifications.map(n => n.id));
+      Array.from(newStates.keys()).forEach((id) => {
+        if (!currentIds.has(id)) {
+          newStates.delete(id);
+        }
+      });
 
-    setNotificationStates(newStates);
-  }, [notifications, notificationStates]);
+      // Only update if there are actual changes
+      if (newStates.size !== prevStates.size || 
+          Array.from(newStates.keys()).some(id => !prevStates.has(id))) {
+        return newStates;
+      }
+      
+      return prevStates;
+    });
+  }, [notifications]);
 
   // Auto-dismiss notifications after 3 seconds
   useEffect(() => {

@@ -62,18 +62,33 @@ database/backups/*.sql.zip
 database/backups/*_backup_*
 database/backups/*_rollback_*
 
-# Environment variables
+# Environment variables - Centralized Configuration
+# Local environment files (contain secrets)
 .env
 .env.local
+.env.development
 .env.docker
-.env.development.local
-.env.test.local
-.env.production.local
+.env.production
+.env.test
+
+# Environment directory - production secrets
+env/production.env
+env/local.env
+env/*.local
+
+# Legacy scattered environment files (to be migrated)
 frontend/.env
 frontend/.env.local
 frontend/.env.docker
 backend/.env
 backend/.env.local
+
+# Environment backups
+env-backup/
+
+# Environment validation outputs
+debug-config.env
+*.env.debug
 
 nul
 backend/src/utils/__pycache__/dependencies.cpython-311.pyc
