@@ -11,12 +11,14 @@ CREATE USER IF NOT EXISTS 'clash_user'@'%' IDENTIFIED BY 'docker_user_password12
 -- Create user for host machine access (for local development)
 -- This allows connections from the Docker host machine
 CREATE USER IF NOT EXISTS 'clash_user'@'172.%.%.%' IDENTIFIED BY 'docker_user_password123';
+CREATE USER IF NOT EXISTS 'clash_user'@'172.20.0.%' IDENTIFIED BY 'docker_user_password123';
 CREATE USER IF NOT EXISTS 'clash_user'@'localhost' IDENTIFIED BY 'docker_user_password123';
 CREATE USER IF NOT EXISTS 'clash_user'@'127.0.0.1' IDENTIFIED BY 'docker_user_password123';
 
 -- Grant all privileges on the application database
 GRANT ALL PRIVILEGES ON clash_deck_builder_dev.* TO 'clash_user'@'%';
 GRANT ALL PRIVILEGES ON clash_deck_builder_dev.* TO 'clash_user'@'172.%.%.%';
+GRANT ALL PRIVILEGES ON clash_deck_builder_dev.* TO 'clash_user'@'172.20.0.%';
 GRANT ALL PRIVILEGES ON clash_deck_builder_dev.* TO 'clash_user'@'localhost';
 GRANT ALL PRIVILEGES ON clash_deck_builder_dev.* TO 'clash_user'@'127.0.0.1';
 

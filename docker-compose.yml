@@ -76,8 +76,12 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     container_name: clash-frontend
+    env_file:
+      - .env.docker
     environment:
       REACT_APP_API_BASE_URL: http://localhost:8000
+      REACT_APP_GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
     ports:
       - "3000:80"
     depends_on:

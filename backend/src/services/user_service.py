@@ -51,11 +51,20 @@ class UserService:
                 
                 session.execute(query, params)
                 
-                # Fetch the created user
-                created_user = self.get_user_by_id(user_id)
-                if not created_user:
+                # Fetch the created user within the same session
+                fetch_query = """
+                    SELECT id, google_id, email, name, avatar, created_at, updated_at
+                    FROM users
+                    WHERE id = %(user_id)s
+                """
+                
+                session.execute(fetch_query, {'user_id': user_id})
+                result = session.fetchone()
+                
+                if not result:
                     raise DatabaseError("Failed to retrieve created user")
                 
+                created_user = User(**result)
                 logger.info(f"Created new user: {created_user.email} (ID: {user_id})")
                 return created_user
                 
