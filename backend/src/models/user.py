@@ -1,6 +1,6 @@
 # backend/src/models/user.py
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, ConfigDict
 from typing import Optional
 from datetime import datetime
 import uuid
@@ -17,9 +17,8 @@ class User(BaseModel):
     avatar: Optional[str] = None
     created_at: datetime
     updated_at: datetime
-    
-    class Config:
-        from_attributes = True
+
+    model_config = ConfigDict(from_attributes=True)
 
 
 class UserCreate(BaseModel):
@@ -77,6 +76,5 @@ class UserResponse(BaseModel):
     name: str
     avatar: Optional[str] = None
     created_at: datetime
-    
-    class Config:
-        from_attributes = True
+
+    model_config = ConfigDict(from_attributes=True)

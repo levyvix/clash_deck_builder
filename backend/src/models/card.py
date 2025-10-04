@@ -1,6 +1,6 @@
 # backend/src/models/card.py
 
-from pydantic import BaseModel, field_validator, Field
+from pydantic import BaseModel, field_validator, Field, ConfigDict
 from typing import Optional
 
 class Card(BaseModel):
@@ -47,11 +47,10 @@ class Card(BaseModel):
             raise ValueError('Image URL cannot be empty string')
         return v.strip() if v else v
 
-    class Config:
-        """Pydantic configuration"""
-        validate_assignment = True
-        use_enum_values = True
-        schema_extra = {
+    model_config = ConfigDict(
+        validate_assignment=True,
+        use_enum_values=True,
+        json_schema_extra={
             "example": {
                 "id": 26000000,
                 "name": "Knight",
@@ -63,3 +62,4 @@ class Card(BaseModel):
                 "image_url_evo": None
             }
         }
+    )

@@ -2,7 +2,7 @@
 
 from typing import List, Optional
 from pydantic import field_validator, computed_field
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 import os
 
 
@@ -195,9 +195,9 @@ class Settings(BaseSettings):
 
         return True
 
-    class Config:
+    model_config = SettingsConfigDict(
         # Load environment files in order of precedence
-        env_file = [
+        env_file=[
             ".env",  # Local environment (highest priority)
             "../.env",  # One level up (for when running from src/)
             "../../.env",  # Two levels up
@@ -205,11 +205,12 @@ class Settings(BaseSettings):
             "env/docker.env",  # Docker environment
             "env/production.env",  # Production environment
             ".env.template",  # Base template (lowest priority)
-        ]
-        env_file_encoding = "utf-8"
-        case_sensitive = False
+        ],
+        env_file_encoding="utf-8",
+        case_sensitive=False,
         # Allow extra fields for flexibility
-        extra = "ignore"
+        extra="ignore"
+    )
 
 
 def get_settings() -> Settings:
