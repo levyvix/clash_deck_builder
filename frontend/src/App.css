@@ -39,6 +39,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 2rem;
 }
 
 .app__title {
@@ -46,6 +47,16 @@ body {
   font-weight: 700;
   color: white;
   margin: 0;
+}
+
+.app__title-link {
+  color: white;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.app__title-link:hover {
+  color: #3498db;
 }
 
 .app__nav-list {
@@ -67,7 +78,8 @@ body {
   font-weight: 500;
   padding: 0.5rem 1rem;
   border-radius: 4px;
-  transition: background-color 0.2s ease;
+  transition: all 0.2s ease;
+  border: 2px solid transparent;
 }
 
 .app__nav-link:hover {
@@ -76,6 +88,88 @@ body {
 
 .app__nav-link:active {
   background-color: rgba(255, 255, 255, 0.2);
+}
+
+.app__nav-link--active {
+  background-color: #3498db;
+  border-color: #3498db;
+}
+
+.app__nav-link--active:hover {
+  background-color: #2980b9;
+  border-color: #2980b9;
+}
+
+/* User Section */
+.app__user-section {
+  display: flex;
+  align-items: center;
+  min-width: 200px;
+  justify-content: flex-end;
+}
+
+.app__user-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+}
+
+.app__user-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* User Navigation */
+.app__user-nav {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.app__user-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.app__user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid #3498db;
+  object-fit: cover;
+}
+
+.app__user-greeting {
+  color: white;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.app__nav-link--profile {
+  background-color: #e74c3c;
+  border: 2px solid #e74c3c;
+}
+
+.app__nav-link--profile:hover {
+  background-color: #c0392b;
+  border-color: #c0392b;
+}
+
+.app__nav-link--profile.app__nav-link--active {
+  background-color: #c0392b;
+  border-color: #c0392b;
+}
+
+/* Sign In Section */
+.app__signin-section {
+  display: flex;
+  align-items: center;
 }
 
 /* Main Content */
@@ -101,11 +195,32 @@ body {
 
   .app__nav-list {
     gap: 1rem;
+    justify-content: center;
   }
 
   .app__nav-link {
     font-size: 0.9rem;
     padding: 0.4rem 0.8rem;
+  }
+
+  .app__user-section {
+    min-width: auto;
+    justify-content: center;
+  }
+
+  .app__user-nav {
+    flex-direction: column;
+    gap: 0.5rem;
+    text-align: center;
+  }
+
+  .app__user-info {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .app__user-greeting {
+    font-size: 0.85rem;
   }
 
   .app__main {
@@ -124,6 +239,7 @@ body {
 
   .app__nav-list {
     gap: 0.5rem;
+    flex-wrap: wrap;
   }
 
   .app__nav-link {
@@ -131,7 +247,80 @@ body {
     padding: 0.3rem 0.6rem;
   }
 
+  .app__user-nav {
+    gap: 0.25rem;
+  }
+
+  .app__user-info {
+    gap: 0.2rem;
+  }
+
+  .app__user-avatar {
+    width: 24px;
+    height: 24px;
+  }
+
+  .app__user-greeting {
+    font-size: 0.8rem;
+  }
+
   .app__main {
     padding: 0.5rem;
   }
+}
+/* Protected Route Styles */
+.protected-route__loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  padding: 2rem;
+}
+
+.protected-route__loading-content {
+  text-align: center;
+  color: #666;
+}
+
+.protected-route__spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #3498db;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.protected-route__unauthenticated {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  padding: 2rem;
+}
+
+.protected-route__signin-prompt {
+  text-align: center;
+  max-width: 400px;
+  padding: 2rem;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.protected-route__signin-prompt h2 {
+  color: #2c3e50;
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+}
+
+.protected-route__signin-prompt p {
+  color: #666;
+  line-height: 1.5;
 }

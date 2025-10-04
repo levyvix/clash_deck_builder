@@ -1,0 +1,137 @@
+/* Profile Guidance Styles */
+
+.profile-guidance {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 24px;
+  color: white;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+}
+
+.profile-guidance__header {
+  margin-bottom: 20px;
+}
+
+.profile-guidance__title {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 12px 0;
+  color: white;
+}
+
+.profile-guidance__progress {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.profile-guidance__progress-bar {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  height: 8px;
+  overflow: hidden;
+}
+
+.profile-guidance__progress-fill {
+  background: linear-gradient(90deg, #4CAF50, #8BC34A);
+  height: 100%;
+  border-radius: 10px;
+  transition: width 0.3s ease;
+}
+
+.profile-guidance__progress-text {
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  white-space: nowrap;
+}
+
+.profile-guidance__tasks {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.profile-guidance__task {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.profile-guidance__task-icon {
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.profile-guidance__task-content {
+  flex: 1;
+}
+
+.profile-guidance__task-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 4px 0;
+  color: white;
+}
+
+.profile-guidance__task-description {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.profile-guidance__actions {
+  display: flex;
+  justify-content: center;
+}
+
+.profile-guidance__help-button {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.profile-guidance__help-button:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-1px);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .profile-guidance {
+    padding: 16px;
+  }
+  
+  .profile-guidance__title {
+    font-size: 16px;
+  }
+  
+  .profile-guidance__task {
+    padding: 12px;
+  }
+  
+  .profile-guidance__task-icon {
+    font-size: 20px;
+  }
+  
+  .profile-guidance__task-title {
+    font-size: 15px;
+  }
+  
+  .profile-guidance__task-description {
+    font-size: 13px;
+  }
+}

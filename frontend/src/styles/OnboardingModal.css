@@ -1,0 +1,319 @@
+/* Onboarding Modal Styles */
+
+.onboarding-modal__overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.onboarding-modal {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 16px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  max-width: 500px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  color: white;
+}
+
+.onboarding-modal__header {
+  padding: 24px 24px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.onboarding-modal__title {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0;
+  color: white;
+  line-height: 1.3;
+}
+
+.onboarding-modal__close {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 18px;
+  color: white;
+  transition: background-color 0.2s ease;
+}
+
+.onboarding-modal__close:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.onboarding-modal__content {
+  padding: 24px;
+}
+
+/* Progress indicator */
+.onboarding-modal__progress {
+  margin-bottom: 24px;
+}
+
+.onboarding-modal__progress-bar {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  height: 8px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.onboarding-modal__progress-fill {
+  background: linear-gradient(90deg, #4CAF50, #8BC34A);
+  height: 100%;
+  border-radius: 10px;
+  transition: width 0.3s ease;
+}
+
+.onboarding-modal__progress-text {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.8);
+  text-align: center;
+  display: block;
+}
+
+/* Profile completion */
+.onboarding-modal__profile-completion {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 24px;
+}
+
+.onboarding-modal__completion-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.onboarding-modal__completion-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: white;
+}
+
+.onboarding-modal__completion-percentage {
+  font-size: 16px;
+  font-weight: 700;
+  color: #4CAF50;
+}
+
+.onboarding-modal__completion-bar {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  height: 6px;
+  overflow: hidden;
+}
+
+.onboarding-modal__completion-fill {
+  background: linear-gradient(90deg, #4CAF50, #8BC34A);
+  height: 100%;
+  border-radius: 6px;
+  transition: width 0.3s ease;
+}
+
+/* Step content */
+.onboarding-modal__step {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.onboarding-modal__step-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  display: block;
+}
+
+.onboarding-modal__step-title {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0 0 12px 0;
+  color: white;
+}
+
+.onboarding-modal__step-description {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.5;
+  margin: 0 0 20px 0;
+}
+
+.onboarding-modal__action-button {
+  background: linear-gradient(135deg, #FF6B6B, #FF8E53);
+  border: none;
+  border-radius: 8px;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.onboarding-modal__action-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(255, 107, 107, 0.3);
+}
+
+/* User info */
+.onboarding-modal__user-info {
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 24px;
+}
+
+.onboarding-modal__user-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  overflow: hidden;
+  margin-right: 16px;
+  background: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.onboarding-modal__avatar-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.onboarding-modal__avatar-placeholder {
+  font-size: 24px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.onboarding-modal__user-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.onboarding-modal__user-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: white;
+  margin-bottom: 4px;
+}
+
+.onboarding-modal__user-email {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* Footer */
+.onboarding-modal__footer {
+  padding: 0 24px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.onboarding-modal__navigation {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.onboarding-modal__nav-button {
+  flex: 1;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.onboarding-modal__nav-button--primary {
+  background: linear-gradient(135deg, #4CAF50, #8BC34A);
+  color: white;
+}
+
+.onboarding-modal__nav-button--primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(76, 175, 80, 0.3);
+}
+
+.onboarding-modal__nav-button--secondary {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.onboarding-modal__nav-button--secondary:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.onboarding-modal__nav-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.onboarding-modal__skip-button {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 14px;
+  cursor: pointer;
+  text-align: center;
+  padding: 8px;
+  transition: color 0.2s ease;
+}
+
+.onboarding-modal__skip-button:hover {
+  color: white;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .onboarding-modal {
+    margin: 10px;
+    max-width: none;
+  }
+  
+  .onboarding-modal__title {
+    font-size: 20px;
+  }
+  
+  .onboarding-modal__step-icon {
+    font-size: 40px;
+  }
+  
+  .onboarding-modal__step-title {
+    font-size: 18px;
+  }
+  
+  .onboarding-modal__navigation {
+    flex-direction: column;
+  }
+  
+  .onboarding-modal__nav-button {
+    flex: none;
+  }
+}

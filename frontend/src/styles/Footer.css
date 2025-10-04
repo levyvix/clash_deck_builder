@@ -1,0 +1,53 @@
+/* Footer Styles */
+
+.footer {
+  background-color: #2c3e50;
+  color: white;
+  border-top: 1px solid #34495e;
+  margin-top: auto;
+}
+
+.footer__container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 1rem 2rem;
+  text-align: center;
+}
+
+.footer__text {
+  font-size: 0.9rem;
+  font-weight: 400;
+  margin: 0;
+  color: #bdc3c7;
+}
+
+.footer__creator {
+  color: #e74c3c;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.footer__creator:hover {
+  color: #c0392b;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .footer__container {
+    padding: 0.75rem 1rem;
+  }
+
+  .footer__text {
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .footer__container {
+    padding: 0.5rem 0.75rem;
+  }
+
+  .footer__text {
+    font-size: 0.8rem;
+  }
+}

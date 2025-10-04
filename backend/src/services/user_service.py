@@ -358,3 +358,44 @@ class UserService:
         except Exception as e:
             logger.error(f"Unexpected error counting users: {e}")
             raise DatabaseError(f"Failed to count users: {e}")
+    
+    def create_or_update_user(self, google_id: str, email: str, name: str) -> User:
+        """
+        Create a new user or update existing user from Google OAuth data.
+        
+        Args:
+            google_id: Google user ID
+            email: User email address
+            name: User display name
+            
+        Returns:
+            User object (existing or newly created)
+            
+        Raises:
+            DatabaseError: If user creation/update fails
+        """
+        try:
+            # Try to get existing user by Google ID
+            existing_user = self.get_user_by_google_id(google_id)
+            
+            if existing_user:
+                # Update existing user with latest info from Google
+                user_update = UserUpdate(name=name)
+                updated_user = self.update_user(existing_user.id, user_update)
+                logger.info(f"Updated existing user: {updated_user.email} (ID: {existing_user.id})")
+                return updated_user
+            else:
+                # Create new user
+                user_create = UserCreate(
+                    google_id=google_id,
+                    email=email,
+                    name=name,
+                    avatar=None  # Will be set later by user
+                )
+                new_user = self.create_user(user_create)
+                logger.info(f"Created new user: {new_user.email} (ID: {new_user.id})")
+                return new_user
+                
+        except Exception as e:
+            logger.error(f"Failed to create or update user for Google ID {google_id}: {e}")
+            raise DatabaseError(f"Failed to create or update user: {e}")

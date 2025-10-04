@@ -1,15 +1,28 @@
 import { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Route, Routes, Link, useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Link, useNavigate, Navigate, useLocation } from 'react-router-dom';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 import DeckBuilder from './components/DeckBuilder';
 import SavedDecks from './components/SavedDecks';
+import ProfileSection from './components/ProfileSection';
 import Notification from './components/Notification';
 import ErrorBoundary from './components/ErrorBoundary';
+import AuthDemo from './components/AuthDemo';
+import ProtectedRoute from './components/ProtectedRoute';
+import Footer from './components/Footer';
+import GoogleSignInButton from './components/GoogleSignInButton';
+import RedirectHandler from './components/RedirectHandler';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { OnboardingProvider } from './contexts/OnboardingContext';
+import OnboardingModal from './components/OnboardingModal';
 import { Deck, DeckSlot, Notification as NotificationType } from './types';
 import { verifyEndpoints } from './services/api';
+import { initializeDeckStorageService } from './services/deckStorageService';
 import './App.css';
 
 function AppContent() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { user, isAuthenticated, isLoading } = useAuth();
   
   // Global state for notifications
   const [notifications, setNotifications] = useState<NotificationType[]>([]);
@@ -21,6 +34,12 @@ function AppContent() {
   
   // State to trigger refresh of saved decks list
   const [refreshSavedDecks, setRefreshSavedDecks] = useState(0);
+
+  // Initialize deck storage service with auth state provider
+  useEffect(() => {
+    initializeDeckStorageService(() => isAuthenticated);
+    console.log('🔧 DeckStorageService initialized with auth provider');
+  }, [isAuthenticated]);
 
   // Verify API endpoints on app initialization (development only)
   useEffect(() => {
@@ -64,18 +83,90 @@ function AppContent() {
 
   return (
     <div className="app">
+      {/* Handle automatic redirects */}
+      <RedirectHandler />
+      
       {/* Navigation */}
       <nav className="app__nav">
         <div className="app__nav-container">
-          <h1 className="app__title">Clash Royale Deck Builder</h1>
+          <h1 className="app__title">
+            <Link to="/" className="app__title-link">
+              Clash Royale Deck Builder
+            </Link>
+          </h1>
+          
+          {/* Main Navigation - Always visible */}
           <ul className="app__nav-list">
             <li className="app__nav-item">
-              <Link to="/" className="app__nav-link">Deck Builder</Link>
+              <Link 
+                to="/" 
+                className={`app__nav-link ${location.pathname === '/' ? 'app__nav-link--active' : ''}`}
+              >
+                Deck Builder
+              </Link>
             </li>
             <li className="app__nav-item">
-              <Link to="/saved-decks" className="app__nav-link">Saved Decks</Link>
+              <Link 
+                to="/saved-decks" 
+                className={`app__nav-link ${location.pathname === '/saved-decks' ? 'app__nav-link--active' : ''}`}
+              >
+                Saved Decks
+              </Link>
             </li>
+            {process.env.NODE_ENV === 'development' && (
+              <li className="app__nav-item">
+                <Link 
+                  to="/auth-demo" 
+                  className={`app__nav-link ${location.pathname === '/auth-demo' ? 'app__nav-link--active' : ''}`}
+                >
+                  Auth Demo
+                </Link>
+              </li>
+            )}
           </ul>
+          
+          {/* User Navigation */}
+          <div className="app__user-section">
+            {isLoading ? (
+              <div className="app__user-loading">
+                <div className="app__user-spinner"></div>
+              </div>
+            ) : isAuthenticated && user ? (
+              <div className="app__user-nav">
+                <div className="app__user-info">
+                  {user.avatar && (
+                    <img 
+                      src={`https://api-assets.clashroyale.com/cards/300/${user.avatar}.png`}
+                      alt={`${user.name}'s avatar`}
+                      className="app__user-avatar"
+                      onError={(e) => {
+                        // Fallback to a default avatar if card image fails
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                  )}
+                  <span className="app__user-greeting">Hello, {user.name}</span>
+                </div>
+                <Link 
+                  to="/profile" 
+                  className={`app__nav-link app__nav-link--profile ${location.pathname === '/profile' ? 'app__nav-link--active' : ''}`}
+                >
+                  Profile
+                </Link>
+              </div>
+            ) : (
+              <div className="app__signin-section">
+                <GoogleSignInButton
+                  onSuccess={() => {
+                    // Authentication will be handled by AuthContext
+                  }}
+                  onError={(error) => {
+                    addNotification(`Sign in failed: ${error}`, 'error');
+                  }}
+                />
+              </div>
+            )}
+          </div>
         </div>
       </nav>
 
@@ -84,6 +175,9 @@ function AppContent() {
         notifications={notifications}
         onDismiss={handleDismissNotification}
       />
+
+      {/* Onboarding Modal */}
+      <OnboardingModal />
 
       {/* Main Content */}
       <main className="app__main">
@@ -112,18 +206,62 @@ function AppContent() {
                 </ErrorBoundary>
               }
             />
+            <Route
+              path="/profile"
+              element={
+                <ErrorBoundary>
+                  <ProtectedRoute>
+                    <ProfileSection />
+                  </ProtectedRoute>
+                </ErrorBoundary>
+              }
+            />
+            {/* Development-only auth demo route */}
+            {process.env.NODE_ENV === 'development' && (
+              <Route
+                path="/auth-demo"
+                element={
+                  <ErrorBoundary>
+                    <AuthDemo />
+                  </ErrorBoundary>
+                }
+              />
+            )}
+            {/* Redirect unknown routes to home */}
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </ErrorBoundary>
       </main>
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 }
 
 function App() {
+  const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
+  
+  if (!clientId) {
+    console.error('Google Client ID not configured. Please set REACT_APP_GOOGLE_CLIENT_ID in your environment variables.');
+    return (
+      <div className="app-error">
+        <h1>Configuration Error</h1>
+        <p>Google Client ID not configured. Please check your environment variables.</p>
+      </div>
+    );
+  }
+
   return (
-    <Router>
-      <AppContent />
-    </Router>
+    <GoogleOAuthProvider clientId={clientId}>
+      <AuthProvider>
+        <OnboardingProvider>
+          <Router>
+            <AppContent />
+          </Router>
+        </OnboardingProvider>
+      </AuthProvider>
+    </GoogleOAuthProvider>
   );
 }
 

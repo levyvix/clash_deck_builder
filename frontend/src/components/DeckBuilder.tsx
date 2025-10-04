@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Card, DeckSlot as DeckSlotType, FilterState, SortConfig, Notification as NotificationType, AnimationState } from '../types';
-import { fetchCards, createDeck, ApiError } from '../services/api';
+import { fetchCards, ApiError } from '../services/api';
 import { 
   calculateAverageElixir, 
   canAddEvolution, 
@@ -8,12 +8,15 @@ import {
   getEmptySlotIndex 
 } from '../services/deckCalculations';
 import { canCardEvolve } from '../services/evolutionService';
+import { deckStorageService, DeckStorageError } from '../services/deckStorageService';
+import { useAuth } from '../contexts/AuthContext';
 import DeckSlot from './DeckSlot';
 import CardGallery from './CardGallery';
 import CardFilters from './CardFilters';
 import SortControls from './SortControls';
 import Notification from './Notification';
 import RemoveDropZone from './RemoveDropZone';
+import WelcomeMessage from './WelcomeMessage';
 import '../styles/DeckBuilder.css';
 
 interface DeckBuilderProps {
@@ -22,6 +25,8 @@ interface DeckBuilderProps {
 }
 
 const DeckBuilder: React.FC<DeckBuilderProps> = ({ initialDeck, onDeckSaved }) => {
+  const { isAuthenticated } = useAuth();
+  
   // Initialize deck with 8 empty slots
   const [currentDeck, setCurrentDeck] = useState<DeckSlotType[]>(
     initialDeck || Array(8).fill(null).map(() => ({ card: null, isEvolution: false }))
@@ -411,21 +416,20 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ initialDeck, onDeckSaved }) =
     try {
       setSavingDeck(true);
       
-      // Prepare deck data for API - backend expects full card objects, not just IDs
+      // Prepare deck data using unified format
       const deckData = {
         name: deckName.trim(),
-        cards: currentDeck.map(slot => slot.card!), // Send full card objects
-        evolution_slots: currentDeck
-          .filter(slot => slot.isEvolution)
-          .map(slot => slot.card!), // Send full card objects
+        slots: currentDeck,
         average_elixir: averageElixir,
       };
 
-      const response = await createDeck(deckData);
+      // Use unified storage service - it will determine storage type based on authentication
+      const savedDeck = await deckStorageService.saveDeck(deckData);
       
-      // Success handling for 201 response
-      console.log('✅ Deck saved successfully, response:', response);
-      addNotification('Deck saved successfully', 'success');
+      // Success handling
+      const storageTypeText = savedDeck.storageType === 'local' ? 'locally' : 'to server';
+      console.log(`✅ Deck saved ${storageTypeText}, response:`, savedDeck);
+      addNotification(`Deck saved ${storageTypeText}`, 'success');
       
       // Close the save dialog
       setShowSaveDialog(false);
@@ -443,22 +447,37 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ initialDeck, onDeckSaved }) =
       
       let errorMessage = 'Failed to save deck. Please try again.';
       
-      if (err instanceof ApiError) {
-        // Handle specific error types
+      if (err instanceof DeckStorageError) {
+        // Handle unified storage errors
+        switch (err.code) {
+          case 'LOCAL_STORAGE_UNAVAILABLE':
+            errorMessage = 'Local storage is not available. Please enable cookies and local storage.';
+            break;
+          case 'LOCAL_STORAGE_QUOTA_EXCEEDED':
+            errorMessage = 'Storage quota exceeded. Please delete some old decks to make space.';
+            break;
+          case 'LOCAL_DECK_LIMIT_EXCEEDED':
+            errorMessage = 'Maximum of 20 decks allowed. Please delete some decks first.';
+            break;
+          case 'SERVER_SAVE_FAILED':
+            errorMessage = isAuthenticated 
+              ? 'Failed to save to server. Please try again or save locally.'
+              : 'Server error. Your deck will be saved locally instead.';
+            break;
+          default:
+            errorMessage = err.message;
+        }
+      } else if (err instanceof ApiError) {
+        // Handle API errors (fallback for direct API calls)
         if (err.isTimeout) {
           errorMessage = 'Request timed out. Please try again.';
         } else if (err.isNetworkError) {
-          errorMessage = 'Cannot connect to server';
-        } else if (err.statusCode === 404) {
-          // Endpoint not found - configuration issue
-          errorMessage = 'Endpoint not found - check API configuration';
+          errorMessage = 'Cannot connect to server. Deck will be saved locally.';
         } else if (err.statusCode === 400) {
-          // Validation error - show specific message from backend
           errorMessage = err.message || 'Invalid deck data. Please check your deck.';
         } else if (err.statusCode && err.statusCode >= 500) {
-          errorMessage = 'Server error, please try again later.';
+          errorMessage = 'Server error. Please try again later.';
         } else {
-          // Use the error message from the API
           errorMessage = err.message;
         }
       }
@@ -534,6 +553,9 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ initialDeck, onDeckSaved }) =
       <Notification notifications={notifications} onDismiss={dismissNotification} />
       
       <div className="deck-builder__container">
+        {/* Welcome Message for New Users */}
+        <WelcomeMessage />
+        
         {/* Deck Section */}
         <div className="deck-builder__deck-section deck-builder__deck-section--sticky">
           <div className="deck-builder__deck-header">

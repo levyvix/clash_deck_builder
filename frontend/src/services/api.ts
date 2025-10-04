@@ -1,6 +1,7 @@
 // frontend/src/services/api.ts
 
 import { API_BASE_URL } from '../config';
+import { tokenStorage } from './authService';
 
 // Debug: Log API base URL on module load
 console.log('🔧 API Service Initialized');
@@ -28,18 +29,31 @@ export class ApiError extends Error {
 }
 
 // Enhanced fetch with timeout and retry logic
-const fetchWithTimeout = async (url: string, options: RequestInit = {}, timeout = API_CONFIG.timeout): Promise<Response> => {
+const fetchWithTimeout = async (
+  url: string, 
+  options: RequestInit & { skipAuth?: boolean } = {}, 
+  timeout = API_CONFIG.timeout
+): Promise<Response> => {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeout);
+  
+  // Add authentication header if token exists and not explicitly skipped
+  const token = tokenStorage.getAccessToken();
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    ...(options.headers as Record<string, string> || {}),
+  };
+  
+  // Only add auth header if not skipped and token exists
+  if (token && !options.skipAuth) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
   
   try {
     const response = await fetch(url, {
       ...options,
       signal: controller.signal,
-      headers: {
-        'Content-Type': 'application/json',
-        ...options.headers,
-      },
+      headers,
     });
     clearTimeout(timeoutId);
     return response;
@@ -130,25 +144,57 @@ export const verifyEndpoints = async (): Promise<void> => {
   console.log('Timestamp:', new Date().toISOString());
   console.log('========================================\n');
 
-  const endpoints = [
-    { name: 'Health Check', method: 'GET', url: `${API_BASE_URL}/health` },
-    { name: 'Fetch Cards', method: 'GET', url: `${API_BASE_URL}/cards/cards` },
-    { name: 'Fetch Decks', method: 'GET', url: `${API_BASE_URL}/decks/decks` },
-    { name: 'Create Deck', method: 'POST', url: `${API_BASE_URL}/decks/decks` },
+  // Define endpoint interface
+  interface EndpointTest {
+    name: string;
+    method: string;
+    url: string;
+    requiresAuth: boolean;
+  }
+
+  // Only test public endpoints that don't require authentication
+  const publicEndpoints: EndpointTest[] = [
+    { name: 'Health Check', method: 'GET', url: `${API_BASE_URL}/health`, requiresAuth: false },
+    { name: 'Fetch Cards', method: 'GET', url: `${API_BASE_URL}/api/cards/cards`, requiresAuth: false },
   ];
+
+  // Test protected endpoints only if user is authenticated
+  const token = tokenStorage.getAccessToken();
+  const protectedEndpoints: EndpointTest[] = [
+    { name: 'Fetch Decks', method: 'GET', url: `${API_BASE_URL}/api/decks/decks`, requiresAuth: true },
+    { name: 'Create Deck', method: 'POST', url: `${API_BASE_URL}/api/decks/decks`, requiresAuth: true },
+  ];
+
+  const endpoints = token ? [...publicEndpoints, ...protectedEndpoints] : publicEndpoints;
+
+  if (!token) {
+    console.log('🔒 Skipping protected endpoints (user not authenticated)');
+    console.log('📝 Protected endpoints will be tested after login\n');
+  }
 
   for (const endpoint of endpoints) {
     try {
       console.log(`\n📡 Testing: ${endpoint.name}`);
       console.log(`   Method: ${endpoint.method}`);
       console.log(`   URL: ${endpoint.url}`);
+      console.log(`   Auth Required: ${endpoint.requiresAuth ? 'Yes' : 'No'}`);
       
       const startTime = performance.now();
-      const response = await fetch(endpoint.url, {
+      
+      // Prepare headers
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+      
+      // Add auth header if endpoint requires authentication and token exists
+      if (endpoint.requiresAuth && token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      
+      const response = await fetchWithTimeout(endpoint.url, {
         method: endpoint.method === 'POST' ? 'OPTIONS' : endpoint.method, // Use OPTIONS for POST to avoid creating data
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
+        skipAuth: !endpoint.requiresAuth, // Skip auth for public endpoints
       });
       const endTime = performance.now();
       const duration = (endTime - startTime).toFixed(2);
@@ -221,9 +267,15 @@ const processCardData = (cards: any[]): any[] => {
 export const fetchCards = async () => {
   return withRetry(async () => {
     try {
-      const url = `${API_BASE_URL}/cards/cards`;
+      const url = `${API_BASE_URL}/api/cards/cards`;
       console.log('🃏 Fetching cards from:', url);
-      const response = await fetchWithTimeout(url);
+      console.log('🔓 Cards endpoint is public (no authentication required)');
+      
+      // For cards, we don't need authentication, so skip auth header
+      const response = await fetchWithTimeout(url, { 
+        method: 'GET',
+        skipAuth: true
+      });
       console.log('✅ Cards response status:', response.status);
       
       const rawData = await handleApiResponse(response);
@@ -235,7 +287,7 @@ export const fetchCards = async () => {
       return processedCards;
     } catch (error) {
       console.error("❌ Error fetching cards:", error);
-      console.error("   URL attempted:", `${API_BASE_URL}/cards/cards`);
+      console.error("   URL attempted:", `${API_BASE_URL}/api/cards/cards`);
       throw error;
     }
   });
@@ -244,13 +296,13 @@ export const fetchCards = async () => {
 export const fetchDecks = async () => {
   return withRetry(async () => {
     try {
-      // Note: Backend has prefix="/decks" and route="/decks", so full path is /decks/decks
-      const url = `${API_BASE_URL}/decks/decks`;
+      // Note: Backend has prefix="/api/decks" and route="/decks", so full path is /api/decks/decks
+      const url = `${API_BASE_URL}/api/decks/decks`;
       console.log('\n🔍 ===== FETCH DECKS REQUEST =====');
       console.log('📍 Full URL:', url);
       console.log('🌐 Method: GET');
       console.log('⏰ Timestamp:', new Date().toISOString());
-      console.log('💡 Note: Using /decks/decks due to backend router prefix');
+      console.log('💡 Note: Using /api/decks/decks due to backend router prefix');
       console.log('=====================================\n');
       
       const response = await fetchWithTimeout(url);
@@ -297,7 +349,7 @@ export const fetchDecks = async () => {
       return transformedDecks;
     } catch (error) {
       console.error('\n❌ ===== FETCH DECKS ERROR =====');
-      console.error('URL attempted:', `${API_BASE_URL}/decks/decks`);
+      console.error('URL attempted:', `${API_BASE_URL}/api/decks/decks`);
       console.error('Error type:', error instanceof ApiError ? 'ApiError' : error instanceof Error ? 'Error' : typeof error);
       console.error('Error details:', error);
       if (error instanceof ApiError) {
@@ -321,13 +373,13 @@ export interface DeckPayload {
 export const createDeck = async (deckData: DeckPayload) => {
   return withRetry(async () => {
     try {
-      // Note: Backend has prefix="/decks" and route="/decks", so full path is /decks/decks
-      const url = `${API_BASE_URL}/decks/decks`;
+      // Note: Backend has prefix="/api/decks" and route="/decks", so full path is /api/decks/decks
+      const url = `${API_BASE_URL}/api/decks/decks`;
       
       // Log the payload before sending
       console.log('\n🔍 ===== CREATE DECK REQUEST =====');
       console.log('📍 URL:', url);
-      console.log('💡 Note: Using /decks/decks due to backend router prefix');
+      console.log('💡 Note: Using /api/decks/decks due to backend router prefix');
       console.log('📦 Payload Structure:');
       console.log('   - name:', deckData.name);
       console.log('   - cards count:', deckData.cards?.length || 0);
@@ -351,7 +403,7 @@ export const createDeck = async (deckData: DeckPayload) => {
       return await handleApiResponse(response);
     } catch (error) {
       console.error('\n❌ ===== CREATE DECK ERROR =====');
-      console.error('URL attempted:', `${API_BASE_URL}/decks/decks`);
+      console.error('URL attempted:', `${API_BASE_URL}/api/decks/decks`);
       console.error('Error details:', error);
       console.error('Payload that failed:', JSON.stringify(deckData, null, 2));
       console.error('================================\n');
@@ -363,10 +415,10 @@ export const createDeck = async (deckData: DeckPayload) => {
 export const updateDeck = async (deckId: number, deckData: any) => {
   return withRetry(async () => {
     try {
-      // Note: Backend has prefix="/decks" and route="/decks/{deck_id}", so full path is /decks/decks/{deck_id}
-      const url = `${API_BASE_URL}/decks/decks/${deckId}`;
+      // Note: Backend has prefix="/api/decks" and route="/decks/{deck_id}", so full path is /api/decks/decks/{deck_id}
+      const url = `${API_BASE_URL}/api/decks/decks/${deckId}`;
       console.log('✏️  Updating deck at:', url);
-      console.log('💡 Note: Using /decks/decks/{id} due to backend router prefix');
+      console.log('💡 Note: Using /api/decks/decks/{id} due to backend router prefix');
       console.log('📦 Payload:', JSON.stringify(deckData, null, 2));
       const response = await fetchWithTimeout(url, {
         method: 'PUT',
@@ -376,7 +428,7 @@ export const updateDeck = async (deckId: number, deckData: any) => {
       return await handleApiResponse(response);
     } catch (error) {
       console.error("❌ Error updating deck:", error);
-      console.error("   URL attempted:", `${API_BASE_URL}/decks/decks/${deckId}`);
+      console.error("   URL attempted:", `${API_BASE_URL}/api/decks/decks/${deckId}`);
       console.error("   Payload:", deckData);
       throw error;
     }
@@ -386,10 +438,10 @@ export const updateDeck = async (deckId: number, deckData: any) => {
 export const deleteDeck = async (deckId: number) => {
   return withRetry(async () => {
     try {
-      // Note: Backend has prefix="/decks" and route="/decks/{deck_id}", so full path is /decks/decks/{deck_id}
-      const url = `${API_BASE_URL}/decks/decks/${deckId}`;
+      // Note: Backend has prefix="/api/decks" and route="/decks/{deck_id}", so full path is /api/decks/decks/{deck_id}
+      const url = `${API_BASE_URL}/api/decks/decks/${deckId}`;
       console.log('🗑️  Deleting deck at:', url);
-      console.log('💡 Note: Using /decks/decks/{id} due to backend router prefix');
+      console.log('💡 Note: Using /api/decks/decks/{id} due to backend router prefix');
       const response = await fetchWithTimeout(url, {
         method: 'DELETE',
       });
@@ -402,7 +454,7 @@ export const deleteDeck = async (deckId: number) => {
       return true;
     } catch (error) {
       console.error("❌ Error deleting deck:", error);
-      console.error("   URL attempted:", `${API_BASE_URL}/decks/decks/${deckId}`);
+      console.error("   URL attempted:", `${API_BASE_URL}/api/decks/decks/${deckId}`);
       throw error;
     }
   });

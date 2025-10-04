@@ -29,15 +29,21 @@ class Settings(BaseSettings):
     google_client_secret: str = "your-google-client-secret"
 
     # JWT configuration
-    jwt_secret: str = (
+    jwt_secret_key: str = (
         "your-jwt-secret-key-that-is-at-least-32-characters-long-for-development"
     )
     jwt_algorithm: str = "HS256"
     jwt_access_token_expire_minutes: int = 15
     jwt_refresh_token_expire_days: int = 30
+    
+    @computed_field
+    @property
+    def jwt_secret(self) -> str:
+        """Alias for jwt_secret_key for backward compatibility."""
+        return self.jwt_secret_key
 
     # CORS configuration
-    cors_origins: str = "http://localhost:3000"
+    cors_origins: str = "http://localhost:3000,http://localhost:8000,https://accounts.google.com"
 
     # Application configuration
     debug: bool = False
@@ -98,7 +104,7 @@ class Settings(BaseSettings):
                 raise ValueError("GOOGLE_CLIENT_SECRET must be set in production")
         return v
 
-    @field_validator("jwt_secret")
+    @field_validator("jwt_secret_key")
     @classmethod
     def validate_jwt_secret(cls, v):
         if (
@@ -108,9 +114,9 @@ class Settings(BaseSettings):
         ):
             env = os.getenv("ENVIRONMENT", "development")
             if env == "production":
-                raise ValueError("JWT_SECRET must be set in production")
+                raise ValueError("JWT_SECRET_KEY must be set in production")
         if len(v) < 32:
-            raise ValueError("JWT_SECRET must be at least 32 characters long")
+            raise ValueError("JWT_SECRET_KEY must be at least 32 characters long")
         return v
 
     @computed_field
@@ -174,13 +180,13 @@ class Settings(BaseSettings):
             ):
                 errors.append("GOOGLE_CLIENT_SECRET must be set in production")
             if (
-                not self.jwt_secret
-                or self.jwt_secret
+                not self.jwt_secret_key
+                or self.jwt_secret_key
                 == "your-jwt-secret-key-that-is-at-least-32-characters-long-for-development"
             ):
-                errors.append("JWT_SECRET must be set in production")
-            elif len(self.jwt_secret) < 32:
-                errors.append("JWT_SECRET must be at least 32 characters long")
+                errors.append("JWT_SECRET_KEY must be set in production")
+            elif len(self.jwt_secret_key) < 32:
+                errors.append("JWT_SECRET_KEY must be at least 32 characters long")
 
         if errors:
             raise ValueError(f"Configuration validation failed: {', '.join(errors)}")

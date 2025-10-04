@@ -8,7 +8,7 @@ import json
 
 from .utils.config import settings
 from .utils.database import initialize_database, close_database, get_database_health
-from .api import cards, decks, auth
+from .api import cards, decks, auth, profile
 from .exceptions.handlers import EXCEPTION_HANDLERS
 
 
@@ -68,6 +68,7 @@ def create_app() -> FastAPI:
     
     # Register API routers
     app.include_router(auth.router, prefix="/api/auth", tags=["authentication"])
+    app.include_router(profile.router, prefix="/api/profile", tags=["profile"])
     app.include_router(cards.router, prefix="/api/cards", tags=["cards"])
     app.include_router(decks.router, prefix="/api/decks", tags=["decks"])
     

@@ -1,0 +1,285 @@
+/* Profile Section Styles */
+.profile-section {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 2rem;
+  background: #1a1a2e;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.profile-section__container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.profile-section__title {
+  color: #ffffff;
+  font-size: 2rem;
+  font-weight: 600;
+  text-align: center;
+  margin: 0;
+  border-bottom: 2px solid #16213e;
+  padding-bottom: 1rem;
+}
+
+/* Avatar Section */
+.profile-section__avatar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.profile-section__avatar-container {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 4px solid #0f3460;
+  background: #16213e;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profile-section__avatar-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-section__avatar-placeholder {
+  font-size: 3rem;
+  color: #e94560;
+}
+
+.profile-section__avatar-button {
+  background: #0f3460;
+  color: #ffffff;
+  border: 2px solid #e94560;
+  border-radius: 8px;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.profile-section__avatar-button:hover:not(:disabled) {
+  background: #e94560;
+  border-color: #e94560;
+  transform: translateY(-2px);
+}
+
+.profile-section__avatar-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* User Information */
+.profile-section__info {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.profile-section__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.profile-section__label {
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.profile-section__value {
+  color: #ffffff;
+  font-size: 1.1rem;
+  padding: 0.75rem;
+  background: #16213e;
+  border-radius: 8px;
+  border: 2px solid transparent;
+}
+
+.profile-section__value--readonly {
+  opacity: 0.8;
+}
+
+/* Name Editing */
+.profile-section__name-display {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.profile-section__edit-button {
+  background: transparent;
+  color: #e94560;
+  border: 1px solid #e94560;
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.profile-section__edit-button:hover:not(:disabled) {
+  background: #e94560;
+  color: #ffffff;
+}
+
+.profile-section__edit-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.profile-section__name-edit {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.profile-section__name-input {
+  color: #ffffff;
+  font-size: 1.1rem;
+  padding: 0.75rem;
+  background: #16213e;
+  border: 2px solid #0f3460;
+  border-radius: 8px;
+  transition: border-color 0.3s ease;
+}
+
+.profile-section__name-input:focus {
+  outline: none;
+  border-color: #e94560;
+}
+
+.profile-section__name-input--error {
+  border-color: #ff6b6b;
+}
+
+.profile-section__name-input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.profile-section__error-message {
+  color: #ff6b6b;
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+}
+
+.profile-section__name-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+/* Buttons */
+.profile-section__button {
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid;
+}
+
+.profile-section__button--primary {
+  background: #e94560;
+  color: #ffffff;
+  border-color: #e94560;
+}
+
+.profile-section__button--primary:hover:not(:disabled) {
+  background: #d63447;
+  border-color: #d63447;
+  transform: translateY(-2px);
+}
+
+.profile-section__button--secondary {
+  background: transparent;
+  color: #ffffff;
+  border-color: #0f3460;
+}
+
+.profile-section__button--secondary:hover:not(:disabled) {
+  background: #0f3460;
+  border-color: #0f3460;
+}
+
+.profile-section__button--danger {
+  background: transparent;
+  color: #ff6b6b;
+  border-color: #ff6b6b;
+}
+
+.profile-section__button--danger:hover:not(:disabled) {
+  background: #ff6b6b;
+  color: #ffffff;
+  transform: translateY(-2px);
+}
+
+.profile-section__button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Actions Section */
+.profile-section__actions {
+  display: flex;
+  justify-content: center;
+  padding-top: 1rem;
+  border-top: 2px solid #16213e;
+}
+
+/* Error State */
+.profile-section__error {
+  text-align: center;
+  color: #ff6b6b;
+  padding: 2rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .profile-section {
+    margin: 1rem;
+    padding: 1.5rem;
+  }
+  
+  .profile-section__title {
+    font-size: 1.5rem;
+  }
+  
+  .profile-section__avatar-container {
+    width: 100px;
+    height: 100px;
+  }
+  
+  .profile-section__name-actions {
+    flex-direction: column;
+  }
+  
+  .profile-section__name-display {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .profile-section {
+    margin: 0.5rem;
+    padding: 1rem;
+  }
+  
+  .profile-section__container {
+    gap: 1.5rem;
+  }
+}

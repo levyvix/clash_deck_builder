@@ -3,11 +3,12 @@
 from fastapi import APIRouter, HTTPException, Depends, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel, Field
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 import logging
 
 from ..services.auth_service import AuthService
 from ..services.user_service import UserService
+from ..services.migration_service import MigrationService
 from ..exceptions.auth_exceptions import (
     AuthenticationError,
     TokenValidationError,
@@ -24,6 +25,7 @@ security = HTTPBearer()
 class GoogleAuthRequest(BaseModel):
     """Request model for Google OAuth authentication."""
     id_token: str = Field(..., description="Google ID token from OAuth flow")
+    migration_data: Optional[Dict[str, Any]] = Field(None, description="Optional anonymous data to migrate")
 
 class AuthResponse(BaseModel):
     """Response model for authentication endpoints."""
@@ -32,6 +34,7 @@ class AuthResponse(BaseModel):
     token_type: str = "bearer"
     expires_in: int
     user: Dict[str, Any]
+    onboarding: Optional[Dict[str, Any]] = None
 
 class RefreshTokenRequest(BaseModel):
     """Request model for token refresh."""
@@ -127,6 +130,7 @@ async def google_oauth_callback(request: GoogleAuthRequest) -> AuthResponse:
     try:
         auth_service = AuthService()
         user_service = UserService()
+        migration_service = MigrationService()
         
         # Verify Google ID token and extract user info
         logger.info("Verifying Google ID token")
@@ -139,6 +143,10 @@ async def google_oauth_callback(request: GoogleAuthRequest) -> AuthResponse:
             email=google_user_info['email'],
             name=google_user_info['name']
         )
+        
+        # Handle onboarding and migration
+        logger.info(f"Processing onboarding for user: {user.email}")
+        onboarding_result = migration_service.handle_user_onboarding(user, request.migration_data)
         
         # Generate JWT tokens
         logger.info(f"Generating tokens for user: {user.email}")
@@ -158,7 +166,8 @@ async def google_oauth_callback(request: GoogleAuthRequest) -> AuthResponse:
                 'avatar': user.avatar,
                 'created_at': user.created_at.isoformat() if user.created_at else None,
                 'updated_at': user.updated_at.isoformat() if user.updated_at else None
-            }
+            },
+            onboarding=onboarding_result
         )
         
         logger.info(f"Successfully authenticated user: {user.email}")
@@ -309,4 +318,45 @@ async def get_current_user_info(current_user: Dict[str, Any] = Depends(get_curre
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error fetching user information"
+        )
+
+@router.get("/onboarding", status_code=status.HTTP_200_OK)
+async def get_onboarding_status(current_user: Dict[str, Any] = Depends(get_current_user)) -> Dict[str, Any]:
+    """
+    Get onboarding status for the current user.
+    
+    This endpoint returns the user's onboarding progress and next steps.
+    
+    Args:
+        current_user: Current authenticated user from token
+        
+    Returns:
+        Dict containing onboarding status and steps
+    """
+    try:
+        logger.debug(f"Fetching onboarding status for: {current_user['email']}")
+        
+        # Get user from database
+        user_service = UserService()
+        user = user_service.get_user_by_id(current_user['user_id'])
+        
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="User not found"
+            )
+        
+        # Get onboarding status
+        migration_service = MigrationService()
+        onboarding_status = migration_service.get_onboarding_status(user)
+        
+        return onboarding_status
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Unexpected error fetching onboarding status: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error fetching onboarding status"
         )

@@ -1,0 +1,96 @@
+/* Welcome Message Styles */
+
+.welcome-message {
+  background: linear-gradient(135deg, #4CAF50 0%, #8BC34A 100%);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+  color: white;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.2);
+  text-align: center;
+}
+
+.welcome-message__content {
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.welcome-message__icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  display: block;
+}
+
+.welcome-message__title {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0 0 12px 0;
+  color: white;
+}
+
+.welcome-message__description {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.5;
+  margin: 0 0 24px 0;
+}
+
+.welcome-message__actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.welcome-message__button {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.welcome-message__button--primary {
+  background: rgba(255, 255, 255, 0.9);
+  color: #4CAF50;
+}
+
+.welcome-message__button--primary:hover {
+  background: white;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(255, 255, 255, 0.3);
+}
+
+.welcome-message__button--secondary {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.welcome-message__button--secondary:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .welcome-message {
+    padding: 20px;
+  }
+  
+  .welcome-message__title {
+    font-size: 20px;
+  }
+  
+  .welcome-message__icon {
+    font-size: 40px;
+  }
+  
+  .welcome-message__actions {
+    flex-direction: column;
+  }
+  
+  .welcome-message__button {
+    width: 100%;
+  }
+}

@@ -6,10 +6,57 @@
   margin: 0 auto;
 }
 
+/* Header with storage summary */
+.saved-decks__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-lg);
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+}
+
 .saved-decks h2 {
   font-size: var(--font-size-xl);
-  margin-bottom: var(--spacing-lg);
+  margin: 0;
   color: var(--color-text-primary);
+}
+
+.saved-decks__storage-summary {
+  display: flex;
+  gap: var(--spacing-sm);
+  align-items: center;
+}
+
+/* Storage indicators */
+.storage-indicator {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.storage-indicator--local {
+  background-color: rgba(76, 175, 80, 0.1);
+  color: #2e7d32;
+  border: 1px solid rgba(76, 175, 80, 0.3);
+}
+
+.storage-indicator--server {
+  background-color: rgba(33, 150, 243, 0.1);
+  color: #1565c0;
+  border: 1px solid rgba(33, 150, 243, 0.3);
+}
+
+/* Storage info in empty state */
+.saved-decks__storage-info {
+  font-size: var(--font-size-sm) !important;
+  color: var(--color-text-secondary) !important;
+  margin-top: var(--spacing-sm) !important;
+  font-style: italic;
 }
 
 /* Loading State */
@@ -89,6 +136,38 @@
   transition: transform 0.2s, box-shadow 0.2s;
 }
 
+/* Storage type indicator on deck card */
+.deck-card__storage-indicator {
+  position: absolute;
+  top: var(--spacing-sm);
+  right: var(--spacing-sm);
+  z-index: 1;
+}
+
+.storage-badge {
+  padding: 2px 6px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.storage-badge--local {
+  background-color: rgba(76, 175, 80, 0.15);
+  color: #2e7d32;
+  border: 1px solid rgba(76, 175, 80, 0.4);
+}
+
+.storage-badge--server {
+  background-color: rgba(33, 150, 243, 0.15);
+  color: #1565c0;
+  border: 1px solid rgba(33, 150, 243, 0.4);
+}
+
 .deck-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
@@ -116,6 +195,7 @@
 .deck-card__header {
   margin-bottom: var(--spacing-md);
   min-height: 32px;
+  margin-top: var(--spacing-sm); /* Add space for storage badge */
 }
 
 .deck-card__name {
@@ -334,6 +414,16 @@
   .deck-card__cards {
     grid-template-columns: repeat(4, 1fr);
   }
+
+  .saved-decks__header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .saved-decks__storage-summary {
+    align-self: stretch;
+    justify-content: center;
+  }
 }
 
 @media (max-width: 480px) {
@@ -343,5 +433,15 @@
 
   .deck-card__cards {
     gap: 4px;
+  }
+
+  .storage-indicator {
+    font-size: 10px;
+    padding: 2px 6px;
+  }
+
+  .storage-badge {
+    font-size: 10px;
+    padding: 1px 4px;
   }
 }

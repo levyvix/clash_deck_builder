@@ -54,3 +54,33 @@ export interface AnimationState {
     animationType: 'entering' | 'leaving' | null;
   };
 }
+
+// Authentication types
+export interface User {
+  id: string;
+  googleId: string;
+  email: string;
+  name: string;
+  avatar: string; // Card ID for avatar
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AuthState {
+  user: User | null;
+  isLoading: boolean;
+  isAuthenticated: boolean;
+}
+
+export interface GoogleUserInfo {
+  sub: string; // Google ID
+  email: string;
+  name: string;
+  picture?: string;
+}
+
+export interface AuthResponse {
+  token: string;
+  user: User;
+  onboarding?: any;
+}

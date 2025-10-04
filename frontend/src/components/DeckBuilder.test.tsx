@@ -4,6 +4,8 @@ import '@testing-library/jest-dom';
 import DeckBuilder from './DeckBuilder';
 import { fetchCards } from '../services/api';
 import { canCardEvolve } from '../services/evolutionService';
+import { AuthProvider } from '../contexts/AuthContext';
+import { OnboardingProvider } from '../contexts/OnboardingContext';
 
 // Mock the API
 jest.mock('../services/api');
@@ -12,6 +14,28 @@ const mockFetchCards = fetchCards as jest.MockedFunction<typeof fetchCards>;
 // Mock the evolution service
 jest.mock('../services/evolutionService');
 const mockCanCardEvolve = canCardEvolve as jest.MockedFunction<typeof canCardEvolve>;
+
+// Mock the auth service
+jest.mock('../services/authService', () => ({
+  validateToken: jest.fn().mockResolvedValue(null),
+}));
+
+// Mock the deck storage service
+jest.mock('../services/deckStorageService', () => ({
+  deckStorageService: {
+    saveDeck: jest.fn(),
+  },
+  initializeDeckStorageService: jest.fn(),
+}));
+
+// Test wrapper component with AuthProvider and OnboardingProvider
+const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <AuthProvider>
+    <OnboardingProvider>
+      {children}
+    </OnboardingProvider>
+  </AuthProvider>
+);
 
 // Mock cards data
 const mockCards = [
@@ -74,7 +98,7 @@ describe('DeckBuilder - Automatic Evolution for First Two Slots', () => {
   });
 
   test('should automatically mark evolution-capable cards in first two slots as evolution', async () => {
-    render(<DeckBuilder />);
+    render(<DeckBuilder />, { wrapper: TestWrapper });
 
     // Wait for cards to load
     await waitFor(() => {
@@ -113,7 +137,7 @@ describe('DeckBuilder - Automatic Evolution for First Two Slots', () => {
   });
 
   test('should not mark non-evolution-capable cards as evolution even in first two slots', async () => {
-    render(<DeckBuilder />);
+    render(<DeckBuilder />, { wrapper: TestWrapper });
 
     // Wait for cards to load
     await waitFor(() => {
@@ -152,7 +176,7 @@ describe('DeckBuilder - Automatic Evolution for First Two Slots', () => {
   });
 
   test('should update evolution states when cards are swapped between slots', async () => {
-    render(<DeckBuilder />);
+    render(<DeckBuilder />, { wrapper: TestWrapper });
 
     // Wait for cards to load
     await waitFor(() => {
@@ -220,7 +244,7 @@ describe('DeckBuilder - Automatic Evolution for First Two Slots', () => {
   });
 
   test('should recalculate evolution states when cards are removed', async () => {
-    render(<DeckBuilder />);
+    render(<DeckBuilder />, { wrapper: TestWrapper });
 
     // Wait for cards to load
     await waitFor(() => {

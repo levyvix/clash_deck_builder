@@ -1,0 +1,178 @@
+/* Protected Route Styles */
+
+.protected-route__loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  padding: var(--spacing-xl);
+}
+
+.protected-route__loading-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-md);
+  text-align: center;
+}
+
+.protected-route__spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--color-border);
+  border-top: 3px solid var(--color-primary);
+  border-radius: var(--border-radius-full);
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.protected-route__loading-content p {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-md);
+  margin: 0;
+}
+
+/* Unauthenticated State */
+.protected-route__unauthenticated {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 500px;
+  padding: var(--spacing-xl);
+  background-color: var(--color-background);
+}
+
+.protected-route__signin-prompt {
+  background-color: var(--color-surface);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--elevation-2);
+  padding: var(--spacing-xxl);
+  text-align: center;
+  max-width: 480px;
+  width: 100%;
+}
+
+.protected-route__signin-prompt h2 {
+  color: var(--color-text-primary);
+  font-size: var(--font-size-xxl);
+  font-weight: var(--font-weight-semibold);
+  margin: 0 0 var(--spacing-md) 0;
+  line-height: var(--line-height-tight);
+}
+
+.protected-route__signin-prompt p {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-normal);
+  margin: 0 0 var(--spacing-xl) 0;
+}
+
+.protected-route__signin-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-lg);
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+  .protected-route__unauthenticated {
+    padding: var(--spacing-lg);
+    min-height: 400px;
+  }
+  
+  .protected-route__signin-prompt {
+    padding: var(--spacing-xl);
+  }
+  
+  .protected-route__signin-prompt h2 {
+    font-size: var(--font-size-xl);
+  }
+  
+  .protected-route__signin-prompt p {
+    font-size: var(--font-size-sm);
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .protected-route__signin-prompt {
+    border: 2px solid var(--color-border);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .protected-route__spinner {
+    animation: none;
+  }
+}
+/* Error S
+tate */
+.protected-route__error {
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: var(--border-radius);
+  padding: var(--spacing-md);
+  margin-top: var(--spacing-md);
+  max-width: 100%;
+}
+
+.protected-route__error-message {
+  color: #dc2626;
+  font-size: var(--font-size-sm);
+  margin: 0;
+  text-align: center;
+  line-height: var(--line-height-normal);
+}
+
+/* Feature Info */
+.protected-route__feature-info {
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-sm);
+  font-style: italic;
+  margin: var(--spacing-sm) 0 var(--spacing-lg) 0;
+}
+
+/* Help Section */
+.protected-route__help {
+  margin-top: var(--spacing-xl);
+  padding-top: var(--spacing-lg);
+  border-top: 1px solid var(--color-border);
+  text-align: left;
+}
+
+.protected-route__help p {
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  margin: 0 0 var(--spacing-sm) 0;
+}
+
+.protected-route__help ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.protected-route__help li {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-normal);
+  padding: var(--spacing-xs) 0;
+  position: relative;
+  padding-left: var(--spacing-lg);
+}
+
+.protected-route__help li::before {
+  content: '✓';
+  color: var(--color-success);
+  font-weight: var(--font-weight-bold);
+  position: absolute;
+  left: 0;
+  top: var(--spacing-xs);
+}

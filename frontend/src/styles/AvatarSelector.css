@@ -1,0 +1,336 @@
+/* Avatar Selector Modal Styles */
+
+.avatar-selector__backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.avatar-selector__modal {
+  background: #1a1a2e;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 800px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  border: 2px solid #16213e;
+}
+
+.avatar-selector__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid #16213e;
+}
+
+.avatar-selector__title {
+  color: #eee6ff;
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.avatar-selector__close-button {
+  background: none;
+  border: none;
+  color: #eee6ff;
+  font-size: 2rem;
+  cursor: pointer;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.avatar-selector__close-button:hover {
+  background-color: rgba(238, 230, 255, 0.1);
+}
+
+.avatar-selector__filters {
+  display: flex;
+  gap: 16px;
+  padding: 20px 24px;
+  border-bottom: 1px solid #16213e;
+  flex-wrap: wrap;
+}
+
+.avatar-selector__search {
+  flex: 1;
+  min-width: 200px;
+}
+
+.avatar-selector__search-input {
+  width: 100%;
+  padding: 10px 12px;
+  background: #16213e;
+  border: 1px solid #0f3460;
+  border-radius: 6px;
+  color: #eee6ff;
+  font-size: 0.9rem;
+  transition: border-color 0.2s ease;
+}
+
+.avatar-selector__search-input:focus {
+  outline: none;
+  border-color: #e94560;
+}
+
+.avatar-selector__search-input::placeholder {
+  color: #a0a0a0;
+}
+
+.avatar-selector__rarity-filter {
+  min-width: 150px;
+}
+
+.avatar-selector__rarity-select {
+  width: 100%;
+  padding: 10px 12px;
+  background: #16213e;
+  border: 1px solid #0f3460;
+  border-radius: 6px;
+  color: #eee6ff;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+
+.avatar-selector__rarity-select:focus {
+  outline: none;
+  border-color: #e94560;
+}
+
+.avatar-selector__content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 24px;
+}
+
+.avatar-selector__loading,
+.avatar-selector__error,
+.avatar-selector__no-results {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  color: #eee6ff;
+  text-align: center;
+}
+
+.avatar-selector__retry-button {
+  margin-top: 12px;
+  padding: 8px 16px;
+  background: #e94560;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.2s ease;
+}
+
+.avatar-selector__retry-button:hover {
+  background: #d63851;
+}
+
+.avatar-selector__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 16px;
+  padding: 8px 0;
+}
+
+.avatar-selector__card {
+  background: #16213e;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  padding: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  position: relative;
+}
+
+.avatar-selector__card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.avatar-selector__card--selected {
+  border-color: #e94560;
+  background: rgba(233, 69, 96, 0.1);
+}
+
+/* Rarity-based styling */
+.avatar-selector__card--common {
+  border-color: #71797e;
+}
+
+.avatar-selector__card--common:hover {
+  border-color: #8a9297;
+}
+
+.avatar-selector__card--rare {
+  border-color: #ff9500;
+}
+
+.avatar-selector__card--rare:hover {
+  border-color: #ffab33;
+}
+
+.avatar-selector__card--epic {
+  border-color: #a347ff;
+}
+
+.avatar-selector__card--epic:hover {
+  border-color: #b366ff;
+}
+
+.avatar-selector__card--legendary {
+  border-color: #ffff00;
+  box-shadow: 0 0 8px rgba(255, 255, 0, 0.3);
+}
+
+.avatar-selector__card--legendary:hover {
+  border-color: #ffff33;
+  box-shadow: 0 0 12px rgba(255, 255, 0, 0.5);
+}
+
+.avatar-selector__card--champion {
+  border-color: #ff6b35;
+  box-shadow: 0 0 8px rgba(255, 107, 53, 0.3);
+}
+
+.avatar-selector__card--champion:hover {
+  border-color: #ff8559;
+  box-shadow: 0 0 12px rgba(255, 107, 53, 0.5);
+}
+
+.avatar-selector__card-image {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+  margin-bottom: 8px;
+}
+
+.avatar-selector__card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+
+.avatar-selector__card-name {
+  color: #eee6ff;
+  font-size: 0.8rem;
+  font-weight: 500;
+  line-height: 1.2;
+  word-break: break-word;
+}
+
+.avatar-selector__card-rarity {
+  font-size: 0.7rem;
+  opacity: 0.8;
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+/* Rarity text colors */
+.avatar-selector__card--common .avatar-selector__card-rarity {
+  color: #71797e;
+}
+
+.avatar-selector__card--rare .avatar-selector__card-rarity {
+  color: #ff9500;
+}
+
+.avatar-selector__card--epic .avatar-selector__card-rarity {
+  color: #a347ff;
+}
+
+.avatar-selector__card--legendary .avatar-selector__card-rarity {
+  color: #ffff00;
+}
+
+.avatar-selector__card--champion .avatar-selector__card-rarity {
+  color: #ff6b35;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .avatar-selector__backdrop {
+    padding: 10px;
+  }
+  
+  .avatar-selector__modal {
+    max-height: 95vh;
+  }
+  
+  .avatar-selector__header {
+    padding: 16px 20px;
+  }
+  
+  .avatar-selector__filters {
+    padding: 16px 20px;
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .avatar-selector__content {
+    padding: 16px 20px;
+  }
+  
+  .avatar-selector__grid {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 12px;
+  }
+  
+  .avatar-selector__card {
+    padding: 8px;
+  }
+  
+  .avatar-selector__card-image {
+    width: 50px;
+    height: 50px;
+  }
+}
+
+@media (max-width: 480px) {
+  .avatar-selector__grid {
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 8px;
+  }
+  
+  .avatar-selector__card-image {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .avatar-selector__card-name {
+    font-size: 0.7rem;
+  }
+  
+  .avatar-selector__card-rarity {
+    font-size: 0.6rem;
+  }
+}

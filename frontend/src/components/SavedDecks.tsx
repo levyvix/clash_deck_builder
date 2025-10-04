@@ -2,7 +2,14 @@
 
 import React, { useState, useEffect } from 'react';
 import { Deck } from '../types';
-import { fetchDecks, updateDeck, deleteDeck, ApiError } from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
+import { 
+  deckStorageService, 
+  initializeDeckStorageService, 
+  UnifiedDeck, 
+  DeckStorageResult, 
+  DeckStorageError
+} from '../services/deckStorageService';
 import '../styles/SavedDecks.css';
 
 interface SavedDecksProps {
@@ -12,16 +19,24 @@ interface SavedDecksProps {
 }
 
 const SavedDecks: React.FC<SavedDecksProps> = ({ onSelectDeck, onNotification, refreshTrigger }) => {
-  const [decks, setDecks] = useState<Deck[]>([]);
+  const { isAuthenticated } = useAuth();
+  const [deckData, setDeckData] = useState<DeckStorageResult>({
+    localDecks: [],
+    serverDecks: [],
+    totalCount: 0,
+    storageType: 'local'
+  });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [editingDeckId, setEditingDeckId] = useState<number | null>(null);
+  const [editingDeckId, setEditingDeckId] = useState<string | number | null>(null);
   const [editingName, setEditingName] = useState('');
-  const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | number | null>(null);
 
+  // Initialize deck storage service when auth state changes
   useEffect(() => {
+    initializeDeckStorageService(() => isAuthenticated);
     loadDecks();
-  }, []);
+  }, [isAuthenticated]); // loadDecks is stable, no need to include
   
   // Refresh decks when refreshTrigger changes
   useEffect(() => {
@@ -29,29 +44,25 @@ const SavedDecks: React.FC<SavedDecksProps> = ({ onSelectDeck, onNotification, r
       console.log('🔄 Refreshing saved decks list due to trigger change');
       loadDecks();
     }
-  }, [refreshTrigger]);
+  }, [refreshTrigger]); // loadDecks is stable, no need to include
 
   const loadDecks = async () => {
     setLoading(true);
     setError(null);
     try {
-      const data = await fetchDecks();
-      setDecks(data);
+      const data = await deckStorageService.getAllDecks();
+      setDeckData(data);
+      console.log(`📊 Loaded ${data.totalCount} decks (${data.localDecks.length} local, ${data.serverDecks.length} server)`);
     } catch (err) {
       console.error('Failed to load decks:', err);
       
       let errorMessage = 'Failed to load decks';
       
-      if (err instanceof ApiError) {
-        if (err.statusCode === 404) {
-          // Specific handling for 404 - endpoint not found
-          errorMessage = 'Endpoint not found. Please verify the API configuration and ensure the backend is running correctly.';
-        } else if (err.isTimeout) {
-          errorMessage = 'Request timed out. Please try again.';
-        } else if (err.isNetworkError) {
-          errorMessage = 'Cannot connect to server. Please check your connection and ensure the backend is running.';
-        } else if (err.statusCode && err.statusCode >= 500) {
-          errorMessage = 'Server error, please try again later.';
+      if (err instanceof DeckStorageError) {
+        if (err.code === 'LOCAL_STORAGE_UNAVAILABLE') {
+          errorMessage = 'Local storage is not available. Please enable cookies and local storage in your browser.';
+        } else if (err.code === 'STORAGE_UNAVAILABLE') {
+          errorMessage = 'Cannot access deck storage. Please check your connection and try again.';
         } else {
           errorMessage = err.message;
         }
@@ -68,15 +79,26 @@ const SavedDecks: React.FC<SavedDecksProps> = ({ onSelectDeck, onNotification, r
     }
   };
 
-  const handleSelectDeck = (deck: Deck) => {
-    onSelectDeck(deck);
+  const handleSelectDeck = (deck: UnifiedDeck) => {
+    // Convert UnifiedDeck back to Deck format for compatibility
+    const deckForCallback: Deck = {
+      id: typeof deck.id === 'string' ? undefined : deck.id, // Only pass numeric IDs
+      name: deck.name,
+      slots: deck.slots,
+      average_elixir: deck.average_elixir,
+      created_at: deck.created_at,
+      updated_at: deck.updated_at,
+    };
+    
+    onSelectDeck(deckForCallback);
     if (onNotification) {
-      onNotification(`Loaded deck: ${deck.name}`, 'success');
+      const storageLabel = deck.storageType === 'local' ? '(Local)' : '(Server)';
+      onNotification(`Loaded deck: ${deck.name} ${storageLabel}`, 'success');
     }
   };
 
-  const handleStartRename = (deck: Deck) => {
-    setEditingDeckId(deck.id!);
+  const handleStartRename = (deck: UnifiedDeck) => {
+    setEditingDeckId(deck.id);
     setEditingName(deck.name);
   };
 
@@ -85,7 +107,7 @@ const SavedDecks: React.FC<SavedDecksProps> = ({ onSelectDeck, onNotification, r
     setEditingName('');
   };
 
-  const handleSaveRename = async (deckId: number) => {
+  const handleSaveRename = async (deckId: string | number) => {
     if (!editingName.trim()) {
       if (onNotification) {
         onNotification('Deck name cannot be empty', 'error');
@@ -94,36 +116,21 @@ const SavedDecks: React.FC<SavedDecksProps> = ({ onSelectDeck, onNotification, r
     }
 
     try {
-      // Find the deck being renamed
-      const deckToUpdate = decks.find(deck => deck.id === deckId);
-      if (!deckToUpdate) {
-        throw new Error('Deck not found');
-      }
+      console.log(`🔄 Renaming deck ${deckId} to "${editingName.trim()}"`);
 
-      // Transform frontend format back to backend format for the API call
-      // Frontend: { slots: DeckSlot[] } -> Backend: { cards: Card[], evolution_slots: Card[] }
-      const cards = deckToUpdate.slots
-        .filter(slot => slot.card !== null)
-        .map(slot => slot.card!);
+      await deckStorageService.updateDeck(deckId, { name: editingName.trim() });
       
-      const evolution_slots = deckToUpdate.slots
-        .filter(slot => slot.card !== null && slot.isEvolution)
-        .map(slot => slot.card!);
-
-      const updatePayload = {
-        id: deckId,
-        name: editingName.trim(),
-        cards: cards,
-        evolution_slots: evolution_slots,
-        average_elixir: deckToUpdate.average_elixir
-      };
-
-      console.log('🔄 Renaming deck - payload:', JSON.stringify(updatePayload, null, 2));
-
-      await updateDeck(deckId, updatePayload);
-      setDecks(decks.map(deck => 
-        deck.id === deckId ? { ...deck, name: editingName.trim() } : deck
-      ));
+      // Update local state
+      setDeckData(prevData => ({
+        ...prevData,
+        localDecks: prevData.localDecks.map(deck => 
+          deck.id === deckId ? { ...deck, name: editingName.trim() } : deck
+        ),
+        serverDecks: prevData.serverDecks.map(deck => 
+          deck.id === deckId ? { ...deck, name: editingName.trim() } : deck
+        ),
+      }));
+      
       setEditingDeckId(null);
       setEditingName('');
       if (onNotification) {
@@ -134,16 +141,10 @@ const SavedDecks: React.FC<SavedDecksProps> = ({ onSelectDeck, onNotification, r
       
       let errorMessage = 'Failed to rename deck';
       
-      if (err instanceof ApiError) {
-        if (err.isTimeout) {
-          errorMessage = 'Request timed out. Please try again.';
-        } else if (err.isNetworkError) {
-          errorMessage = 'Cannot connect to server';
-        } else if (err.statusCode && err.statusCode >= 500) {
-          errorMessage = 'Server error, please try again';
-        } else {
-          errorMessage = err.message;
-        }
+      if (err instanceof DeckStorageError) {
+        errorMessage = err.message;
+      } else if (err instanceof Error) {
+        errorMessage = err.message;
       }
       
       if (onNotification) {
@@ -152,7 +153,7 @@ const SavedDecks: React.FC<SavedDecksProps> = ({ onSelectDeck, onNotification, r
     }
   };
 
-  const handleDeleteClick = (deckId: number) => {
+  const handleDeleteClick = (deckId: string | number) => {
     setDeleteConfirmId(deckId);
   };
 
@@ -160,10 +161,20 @@ const SavedDecks: React.FC<SavedDecksProps> = ({ onSelectDeck, onNotification, r
     setDeleteConfirmId(null);
   };
 
-  const handleConfirmDelete = async (deckId: number) => {
+  const handleConfirmDelete = async (deckId: string | number) => {
     try {
-      await deleteDeck(deckId);
-      setDecks(decks.filter(deck => deck.id !== deckId));
+      console.log(`🗑️ Deleting deck ${deckId}`);
+      
+      await deckStorageService.deleteDeck(deckId);
+      
+      // Update local state
+      setDeckData(prevData => ({
+        ...prevData,
+        localDecks: prevData.localDecks.filter(deck => deck.id !== deckId),
+        serverDecks: prevData.serverDecks.filter(deck => deck.id !== deckId),
+        totalCount: prevData.totalCount - 1,
+      }));
+      
       setDeleteConfirmId(null);
       if (onNotification) {
         onNotification('Deck deleted successfully', 'success');
@@ -173,16 +184,10 @@ const SavedDecks: React.FC<SavedDecksProps> = ({ onSelectDeck, onNotification, r
       
       let errorMessage = 'Failed to delete deck';
       
-      if (err instanceof ApiError) {
-        if (err.isTimeout) {
-          errorMessage = 'Request timed out. Please try again.';
-        } else if (err.isNetworkError) {
-          errorMessage = 'Cannot connect to server';
-        } else if (err.statusCode && err.statusCode >= 500) {
-          errorMessage = 'Server error, please try again';
-        } else {
-          errorMessage = err.message;
-        }
+      if (err instanceof DeckStorageError) {
+        errorMessage = err.message;
+      } else if (err instanceof Error) {
+        errorMessage = err.message;
       }
       
       if (onNotification) {
@@ -217,7 +222,7 @@ const SavedDecks: React.FC<SavedDecksProps> = ({ onSelectDeck, onNotification, r
     );
   }
 
-  if (decks.length === 0) {
+  if (deckData.totalCount === 0) {
     return (
       <div className="saved-decks">
         <h2>Saved Decks</h2>
@@ -226,16 +231,36 @@ const SavedDecks: React.FC<SavedDecksProps> = ({ onSelectDeck, onNotification, r
           <p className="saved-decks__empty-hint">
             Build a deck and save it to see it here!
           </p>
+          {deckData.storageType === 'mixed' && (
+            <p className="saved-decks__storage-info">
+              💾 Local decks are saved in your browser • ☁️ Server decks are saved to your account
+            </p>
+          )}
         </div>
       </div>
     );
   }
 
+  // Combine all decks for display
+  const allDecks = [...deckData.localDecks, ...deckData.serverDecks];
+
   return (
     <div className="saved-decks">
-      <h2>Saved Decks</h2>
+      <div className="saved-decks__header">
+        <h2>Saved Decks</h2>
+        {deckData.storageType === 'mixed' && (
+          <div className="saved-decks__storage-summary">
+            <span className="storage-indicator storage-indicator--local">
+              💾 {deckData.localDecks.length} Local
+            </span>
+            <span className="storage-indicator storage-indicator--server">
+              ☁️ {deckData.serverDecks.length} Server
+            </span>
+          </div>
+        )}
+      </div>
       <div className="saved-decks__grid">
-        {decks.map(deck => (
+        {allDecks.map(deck => (
           <div key={deck.id} className="deck-card">
             {/* Delete Confirmation Modal */}
             {deleteConfirmId === deck.id && (
@@ -244,7 +269,7 @@ const SavedDecks: React.FC<SavedDecksProps> = ({ onSelectDeck, onNotification, r
                   <p>Delete this deck?</p>
                   <div className="deck-card__confirm-actions">
                     <button 
-                      onClick={() => handleConfirmDelete(deck.id!)}
+                      onClick={() => handleConfirmDelete(deck.id)}
                       className="btn btn--danger"
                     >
                       Delete
@@ -260,6 +285,13 @@ const SavedDecks: React.FC<SavedDecksProps> = ({ onSelectDeck, onNotification, r
               </div>
             )}
 
+            {/* Storage Type Indicator */}
+            <div className="deck-card__storage-indicator">
+              <span className={`storage-badge storage-badge--${deck.storageType}`}>
+                {deck.storageType === 'local' ? '💾 Local' : '☁️ Server'}
+              </span>
+            </div>
+
             {/* Deck Name */}
             <div className="deck-card__header">
               {editingDeckId === deck.id ? (
@@ -272,7 +304,7 @@ const SavedDecks: React.FC<SavedDecksProps> = ({ onSelectDeck, onNotification, r
                     autoFocus
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') {
-                        handleSaveRename(deck.id!);
+                        handleSaveRename(deck.id);
                       } else if (e.key === 'Escape') {
                         handleCancelRename();
                       }
@@ -280,7 +312,7 @@ const SavedDecks: React.FC<SavedDecksProps> = ({ onSelectDeck, onNotification, r
                   />
                   <div className="deck-card__rename-actions">
                     <button 
-                      onClick={() => handleSaveRename(deck.id!)}
+                      onClick={() => handleSaveRename(deck.id)}
                       className="btn btn--small btn--success"
                       title="Save"
                     >
@@ -353,7 +385,7 @@ const SavedDecks: React.FC<SavedDecksProps> = ({ onSelectDeck, onNotification, r
                   Rename
                 </button>
                 <button 
-                  onClick={() => handleDeleteClick(deck.id!)}
+                  onClick={() => handleDeleteClick(deck.id)}
                   className="btn btn--danger btn--small"
                   disabled={deleteConfirmId !== null}
                 >
