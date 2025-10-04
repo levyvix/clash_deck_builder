@@ -1,6 +1,6 @@
 # backend/src/models/deck.py
 
-from pydantic import BaseModel, field_validator, Field, model_validator
+from pydantic import BaseModel, field_validator, Field, model_validator, ConfigDict
 from typing import List, Optional
 from .card import Card
 
@@ -101,12 +101,10 @@ class Deck(BaseModel):
         """Update the average elixir cost of the deck"""
         self.average_elixir = self.calculate_average_elixir()
 
-    class Config:
-        """Pydantic configuration"""
-
-        validate_assignment = True
-        use_enum_values = True
-        schema_extra = {
+    model_config = ConfigDict(
+        validate_assignment=True,
+        use_enum_values=True,
+        json_schema_extra={
             "example": {
                 "id": 1,
                 "name": "My Awesome Deck",
@@ -127,3 +125,4 @@ class Deck(BaseModel):
                 "average_elixir": 3.5,
             }
         }
+    )
