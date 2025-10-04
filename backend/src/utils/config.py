@@ -35,7 +35,7 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     jwt_access_token_expire_minutes: int = 15
     jwt_refresh_token_expire_days: int = 30
-    
+
     @computed_field
     @property
     def jwt_secret(self) -> str:
@@ -43,7 +43,9 @@ class Settings(BaseSettings):
         return self.jwt_secret_key
 
     # CORS configuration
-    cors_origins: str = "http://localhost:3000,http://localhost:8000,https://accounts.google.com"
+    cors_origins: str = (
+        "http://localhost:3000,http://localhost:8000,https://accounts.google.com"
+    )
 
     # Application configuration
     debug: bool = False
@@ -202,7 +204,7 @@ class Settings(BaseSettings):
             "env/development.env",  # Environment-specific
             "env/docker.env",  # Docker environment
             "env/production.env",  # Production environment
-            ".env.template"  # Base template (lowest priority)
+            ".env.template",  # Base template (lowest priority)
         ]
         env_file_encoding = "utf-8"
         case_sensitive = False
