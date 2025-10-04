@@ -68,20 +68,34 @@ export const OnboardingProvider: React.FC<OnboardingProviderProps> = ({ children
   const { user, isAuthenticated } = useAuth();
   const [state, setState] = useState<OnboardingState>(initialState);
 
-  // Fetch onboarding status when user is authenticated
+  // Fetch onboarding status when user is authenticated (only on initial auth, not on user updates)
   useEffect(() => {
     if (isAuthenticated && user) {
-      refreshOnboardingStatus();
+      // Check if user has previously dismissed onboarding
+      const onboardingDismissed = localStorage.getItem('onboarding_dismissed') === 'true';
+      if (onboardingDismissed) {
+        // Don't show onboarding if user has dismissed it
+        setState(prevState => ({
+          ...prevState,
+          isNewUser: false,
+          showOnboarding: false,
+        }));
+      } else {
+        refreshOnboardingStatus();
+      }
     } else {
       // Reset onboarding state when user logs out
       setState(initialState);
+      localStorage.removeItem('onboarding_dismissed');
     }
-  }, [isAuthenticated, user]);
+  }, [isAuthenticated]); // Removed 'user' dependency to prevent triggering on profile updates
 
   // Refresh onboarding status from API
   const refreshOnboardingStatus = async (): Promise<void> => {
     try {
       const onboardingData = await getOnboardingStatus();
+      
+      console.log('📋 Onboarding data received:', onboardingData);
       
       setState(prevState => ({
         ...prevState,
@@ -127,7 +141,11 @@ export const OnboardingProvider: React.FC<OnboardingProviderProps> = ({ children
       ...prevState,
       showOnboarding: false,
       currentStepIndex: 0,
+      isNewUser: false,
     }));
+    
+    // Store completion in localStorage
+    localStorage.setItem('onboarding_dismissed', 'true');
   };
 
   // Dismiss onboarding (user can reopen it later)
@@ -135,7 +153,11 @@ export const OnboardingProvider: React.FC<OnboardingProviderProps> = ({ children
     setState(prevState => ({
       ...prevState,
       showOnboarding: false,
+      isNewUser: false, // Mark as no longer a new user
     }));
+    
+    // Store dismissal in localStorage to persist across sessions
+    localStorage.setItem('onboarding_dismissed', 'true');
   };
 
   // Show onboarding modal

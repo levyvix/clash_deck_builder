@@ -75,8 +75,6 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ cards = [] }) => {
       await updateProfile({ name: trimmedName });
       setIsEditingName(false);
       setNameError('');
-      // Refresh onboarding status after profile update
-      await refreshOnboardingStatus();
     } catch (error) {
       setNameError(error instanceof Error ? error.message : 'Failed to update name');
     } finally {
@@ -88,11 +86,12 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ cards = [] }) => {
     setIsUpdating(true);
     try {
       await updateProfile({ avatar: cardId });
-      // Refresh onboarding status after avatar update
-      await refreshOnboardingStatus();
+      // Close the avatar selector on success
+      setIsAvatarSelectorOpen(false);
     } catch (error) {
       console.error('Failed to update avatar:', error);
-      // Could add error notification here
+      // Show user-friendly error message
+      alert('Failed to update avatar. Please try again.');
     } finally {
       setIsUpdating(false);
     }

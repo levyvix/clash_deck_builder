@@ -151,6 +151,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       dispatch({ type: 'UPDATE_USER', payload: updatedUser });
     } catch (error) {
       console.error('Profile update failed:', error);
+      
+      // Don't logout user on profile update errors unless it's an auth error
+      if (error instanceof AuthError && error.statusCode === 401) {
+        console.warn('Authentication failed during profile update, logging out user');
+        dispatch({ type: 'AUTH_FAILURE' });
+      }
+      
       throw error;
     }
   };

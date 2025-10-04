@@ -38,11 +38,12 @@ class ProfileUpdateRequest(BaseModel):
 class ProfileResponse(BaseModel):
     """Response model for profile endpoints."""
     id: str
+    googleId: str
     email: str
     name: str
     avatar: Optional[str] = None
-    created_at: str
-    updated_at: str
+    createdAt: Optional[str] = None
+    updatedAt: Optional[str] = None
 
 @router.get("", response_model=ProfileResponse, status_code=status.HTTP_200_OK)
 async def get_profile(current_user: Dict[str, Any] = Depends(get_current_user)) -> ProfileResponse:
@@ -75,17 +76,19 @@ async def get_profile(current_user: Dict[str, Any] = Depends(get_current_user)) 
                 detail="User profile not found"
             )
         
-        response = ProfileResponse(
-            id=user.id,
-            email=user.email,
-            name=user.name,
-            avatar=user.avatar,
-            created_at=user.created_at.isoformat() if user.created_at else None,
-            updated_at=user.updated_at.isoformat() if user.updated_at else None
-        )
+        # Return user data in the format expected by frontend
+        user_data = {
+            "id": user.id,
+            "googleId": user.google_id,
+            "email": user.email,
+            "name": user.name,
+            "avatar": user.avatar,
+            "createdAt": user.created_at.isoformat() if user.created_at else None,
+            "updatedAt": user.updated_at.isoformat() if user.updated_at else None
+        }
         
         logger.info(f"Successfully retrieved profile for user: {user.email}")
-        return response
+        return user_data
         
     except HTTPException:
         raise
@@ -150,17 +153,19 @@ async def update_profile(
         # Update user in database
         updated_user = user_service.update_user(current_user['user_id'], user_update)
         
-        response = ProfileResponse(
-            id=updated_user.id,
-            email=updated_user.email,
-            name=updated_user.name,
-            avatar=updated_user.avatar,
-            created_at=updated_user.created_at.isoformat() if updated_user.created_at else None,
-            updated_at=updated_user.updated_at.isoformat() if updated_user.updated_at else None
-        )
+        # Return user data in the format expected by frontend
+        user_data = {
+            "id": updated_user.id,
+            "googleId": updated_user.google_id,
+            "email": updated_user.email,
+            "name": updated_user.name,
+            "avatar": updated_user.avatar,
+            "createdAt": updated_user.created_at.isoformat() if updated_user.created_at else None,
+            "updatedAt": updated_user.updated_at.isoformat() if updated_user.updated_at else None
+        }
         
         logger.info(f"Successfully updated profile for user: {updated_user.email}")
-        return response
+        return user_data
         
     except HTTPException:
         raise

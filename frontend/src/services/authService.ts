@@ -190,7 +190,8 @@ export const getCurrentUser = async (): Promise<User> => {
     const data = await handleAuthResponse(response);
     
     console.log('✅ User profile fetched successfully');
-    return data.user;
+    // The backend returns the user data directly, not wrapped in a user property
+    return data;
   } catch (error) {
     console.error('❌ Failed to fetch user profile:', error);
     throw error;
@@ -210,7 +211,8 @@ export const updateUserProfile = async (updates: { name?: string; avatar?: strin
     const data = await handleAuthResponse(response);
     
     console.log('✅ User profile updated successfully');
-    return data.user;
+    // The backend returns the user data directly, not wrapped in a user property
+    return data;
   } catch (error) {
     console.error('❌ Failed to update user profile:', error);
     throw error;
@@ -246,8 +248,9 @@ export const validateToken = async (): Promise<User | null> => {
     if (error instanceof AuthError && error.statusCode === 401) {
       // Token is invalid, try to refresh
       try {
-        const authResponse = await refreshAccessToken();
-        return authResponse.user;
+        await refreshAccessToken();
+        // After refreshing token, try to get user again
+        return await getCurrentUser();
       } catch (refreshError) {
         // Refresh failed, user needs to login again
         tokenStorage.clearTokens();
