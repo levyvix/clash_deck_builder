@@ -8,8 +8,8 @@ import {
   getEmptySlotIndex 
 } from '../services/deckCalculations';
 import { canCardEvolve } from '../services/evolutionService';
-import { deckStorageService, DeckStorageError } from '../services/deckStorageService';
-import { ErrorHandlingService, formatUserMessage } from '../services/errorHandlingService';
+import { deckStorageService } from '../services/deckStorageService';
+import { formatUserMessage } from '../services/errorHandlingService';
 import { useAuth } from '../contexts/AuthContext';
 import DeckSlot from './DeckSlot';
 import CardGallery from './CardGallery';
@@ -113,7 +113,7 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ initialDeck, onDeckSaved }) =
       }
     });
     setCardsInDeck(cardIds);
-  }, []);
+  }, [currentDeck]);
 
   // Calculate average elixir in real-time
   const averageElixir = useMemo(() => {
@@ -447,7 +447,6 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ initialDeck, onDeckSaved }) =
       console.error('Failed to save deck:', err);
       
       // Use enhanced error handling for better user experience
-      const errorInfo = ErrorHandlingService.analyzeError(err);
       const userMessage = formatUserMessage(err, true);
       
       addNotification(userMessage, 'error');

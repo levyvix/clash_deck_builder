@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import { EnhancedError, ErrorHandlingService } from '../services/errorHandlingService';
+import { ErrorHandlingService } from '../services/errorHandlingService';
 import '../styles/ErrorNotification.css';
 
 interface ErrorNotificationProps {

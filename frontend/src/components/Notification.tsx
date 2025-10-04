@@ -47,7 +47,7 @@ const Notification: React.FC<NotificationProps> = ({ notifications, onDismiss })
     });
 
     setNotificationStates(newStates);
-  }, [notifications]);
+  }, [notifications, notificationStates]);
 
   // Auto-dismiss notifications after 3 seconds
   useEffect(() => {

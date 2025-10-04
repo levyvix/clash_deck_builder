@@ -236,8 +236,6 @@ const processCardData = (cards: any[]): any[] => {
     return [];
   }
 
-  const originalCount = cards.length;
-
   // Filter out cards with 0 elixir cost
   const filteredCards = cards.filter(card => {
     // Ensure card has required properties and elixir_cost > 0

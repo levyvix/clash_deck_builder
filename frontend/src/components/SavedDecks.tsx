@@ -1,6 +1,6 @@
 // frontend/src/components/SavedDecks.tsx
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Deck, UnifiedDeck, DeckStorageResult } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import { 
@@ -8,7 +8,7 @@ import {
   initializeDeckStorageService, 
   DeckStorageError
 } from '../services/deckStorageService';
-import { ErrorHandlingService, formatUserMessage } from '../services/errorHandlingService';
+import { formatUserMessage } from '../services/errorHandlingService';
 import ErrorNotification from './ErrorNotification';
 import StorageHealthIndicator from './StorageHealthIndicator';
 import '../styles/SavedDecks.css';
@@ -33,21 +33,7 @@ const SavedDecks: React.FC<SavedDecksProps> = ({ onSelectDeck, onNotification, r
   const [editingName, setEditingName] = useState('');
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | number | null>(null);
 
-  // Initialize deck storage service when auth state changes
-  useEffect(() => {
-    initializeDeckStorageService(() => isAuthenticated);
-    loadDecks();
-  }, [isAuthenticated]); // loadDecks is stable, no need to include
-  
-  // Refresh decks when refreshTrigger changes
-  useEffect(() => {
-    if (refreshTrigger !== undefined && refreshTrigger > 0) {
-      console.log('🔄 Refreshing saved decks list due to trigger change');
-      loadDecks();
-    }
-  }, [refreshTrigger]); // loadDecks is stable, no need to include
-
-  const loadDecks = async () => {
+  const loadDecks = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -67,7 +53,21 @@ const SavedDecks: React.FC<SavedDecksProps> = ({ onSelectDeck, onNotification, r
     } finally {
       setLoading(false);
     }
-  };
+  }, [onNotification]);
+
+  // Initialize deck storage service when auth state changes
+  useEffect(() => {
+    initializeDeckStorageService(() => isAuthenticated);
+    loadDecks();
+  }, [isAuthenticated, loadDecks]);
+  
+  // Refresh decks when refreshTrigger changes
+  useEffect(() => {
+    if (refreshTrigger !== undefined && refreshTrigger > 0) {
+      console.log('🔄 Refreshing saved decks list due to trigger change');
+      loadDecks();
+    }
+  }, [refreshTrigger, loadDecks]);
 
   const handleSelectDeck = (deck: UnifiedDeck) => {
     // Convert UnifiedDeck back to Deck format for compatibility

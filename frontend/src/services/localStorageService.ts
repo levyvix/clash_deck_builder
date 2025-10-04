@@ -5,7 +5,7 @@
  * Handles error scenarios like localStorage unavailability and quota exceeded.
  */
 
-import { Deck, DeckSlot, LocalDeck, DeckInput, DeckUpdate } from '../types';
+import { Deck, LocalDeck, DeckInput, DeckUpdate } from '../types';
 
 // Constants for localStorage management
 const STORAGE_KEY = 'clash_deck_builder_local_decks';

@@ -5,9 +5,9 @@
  * guidance when storage issues are detected.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { deckStorageService } from '../services/deckStorageService';
-import { localStorageService } from '../services/localStorageService';
+
 import { ErrorHandlingService } from '../services/errorHandlingService';
 import '../styles/StorageHealthIndicator.css';
 
@@ -42,16 +42,7 @@ const StorageHealthIndicator: React.FC<StorageHealthIndicatorProps> = ({
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState(false);
 
-  useEffect(() => {
-    checkStorageHealth();
-    
-    // Check health periodically
-    const interval = setInterval(checkStorageHealth, 30000); // Every 30 seconds
-    
-    return () => clearInterval(interval);
-  }, []);
-
-  const checkStorageHealth = async () => {
+  const checkStorageHealth = useCallback(async () => {
     setLoading(true);
     
     try {
@@ -107,7 +98,16 @@ const StorageHealthIndicator: React.FC<StorageHealthIndicatorProps> = ({
     } finally {
       setLoading(false);
     }
-  };
+  }, [onHealthChange]);
+
+  useEffect(() => {
+    checkStorageHealth();
+    
+    // Check health periodically
+    const interval = setInterval(checkStorageHealth, 30000); // Every 30 seconds
+    
+    return () => clearInterval(interval);
+  }, [checkStorageHealth]);
 
   const analyzeLocalStorageHealth = (localStats: any) => {
     if (!localStats.available) {

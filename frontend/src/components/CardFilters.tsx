@@ -24,7 +24,7 @@ const CardFilters: React.FC<CardFiltersProps> = ({
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [nameInput]);
+  }, [nameInput, filters, onFilterChange]);
 
   // Update local state when filters prop changes externally
   useEffect(() => {
