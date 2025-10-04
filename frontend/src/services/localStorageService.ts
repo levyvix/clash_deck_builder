@@ -5,20 +5,12 @@
  * Handles error scenarios like localStorage unavailability and quota exceeded.
  */
 
-import { Deck, DeckSlot } from '../types';
+import { Deck, DeckSlot, LocalDeck, DeckInput, DeckUpdate } from '../types';
 
 // Constants for localStorage management
 const STORAGE_KEY = 'clash_deck_builder_local_decks';
 const MAX_LOCAL_DECKS = 20;
 const STORAGE_VERSION = '1.0';
-
-// Local deck interface extending the base Deck interface
-export interface LocalDeck extends Omit<Deck, 'id'> {
-  id: string; // Format: 'local_${timestamp}_${random}'
-  storageType: 'local';
-  created_at: string;
-  updated_at: string;
-}
 
 // Local storage data structure
 interface LocalStorageData {
@@ -192,7 +184,7 @@ export class LocalStorageService {
   /**
    * Save a new deck to localStorage
    */
-  async saveLocalDeck(deck: Omit<Deck, 'id'>): Promise<LocalDeck> {
+  async saveLocalDeck(deck: DeckInput): Promise<LocalDeck> {
     // Validate input data
     if (!this.validateDeckData(deck)) {
       throw new LocalStorageError('Invalid deck data provided', 'INVALID_DATA');
@@ -254,7 +246,7 @@ export class LocalStorageService {
   /**
    * Update an existing local deck
    */
-  async updateLocalDeck(id: string, updates: Partial<Omit<Deck, 'id'>>): Promise<LocalDeck> {
+  async updateLocalDeck(id: string, updates: DeckUpdate): Promise<LocalDeck> {
     const storageData = this.getStorageData();
     
     const deckIndex = storageData.decks.findIndex(deck => deck.id === id);

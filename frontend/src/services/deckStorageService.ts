@@ -6,26 +6,21 @@
  * Handles mixed storage scenarios where users have both local and server decks.
  */
 
-import { Deck, DeckSlot } from '../types';
-import { localStorageService, LocalDeck, LocalStorageError } from './localStorageService';
+import { 
+  Deck, 
+  DeckSlot, 
+  StorageType, 
+  UnifiedDeck, 
+  LocalDeck, 
+  DeckStorageResult,
+  isLocalDeckId,
+  DeckInput,
+  DeckUpdate,
+  StorageStats
+} from '../types';
+import { localStorageService, LocalStorageError } from './localStorageService';
 import { fetchDecks, createDeck, updateDeck, deleteDeck, DeckPayload, ApiError } from './api';
-
-// Storage type enumeration
-export type StorageType = 'local' | 'server' | 'mixed';
-
-// Enhanced deck interface that supports both storage types
-export interface UnifiedDeck extends Omit<Deck, 'id'> {
-  id: number | string; // Support both numeric (server) and string (local) IDs
-  storageType: 'local' | 'server';
-}
-
-// Result interface for getAllDecks method
-export interface DeckStorageResult {
-  localDecks: UnifiedDeck[];
-  serverDecks: UnifiedDeck[];
-  totalCount: number;
-  storageType: StorageType;
-}
+import { withRetry, withGracefulDegradation, ErrorHandlingService } from './errorHandlingService';
 
 // Custom error class for deck storage operations
 export class DeckStorageError extends Error {
@@ -88,7 +83,7 @@ export class DeckStorageService {
    * Check if a deck ID belongs to local storage
    */
   isLocalDeck(id: string | number): boolean {
-    return typeof id === 'string' && id.startsWith('local_');
+    return isLocalDeckId(id);
   }
 
   /**
@@ -132,7 +127,7 @@ export class DeckStorageService {
   }
 
   /**
-   * Get all decks from both local and server storage
+   * Get all decks from both local and server storage with retry logic
    */
   async getAllDecks(): Promise<DeckStorageResult> {
     const localDecks: UnifiedDeck[] = [];
@@ -140,9 +135,12 @@ export class DeckStorageService {
     let localError: Error | null = null;
     let serverError: Error | null = null;
 
-    // Always try to get local decks (they might exist even for authenticated users)
+    // Always try to get local decks with retry (they might exist even for authenticated users)
     try {
-      const rawLocalDecks = await localStorageService.getLocalDecks();
+      const rawLocalDecks = await withRetry(
+        () => localStorageService.getLocalDecks(),
+        { maxAttempts: 2, baseDelay: 300 }
+      );
       localDecks.push(...rawLocalDecks.map(deck => this.transformLocalDeck(deck)));
       console.log(`📱 Retrieved ${localDecks.length} local decks`);
     } catch (error) {
@@ -150,10 +148,13 @@ export class DeckStorageService {
       console.warn('Failed to retrieve local decks:', localError.message);
     }
 
-    // Try to get server decks if authenticated
+    // Try to get server decks if authenticated with retry
     if (this.isAuthenticated()) {
       try {
-        const rawServerDecks = await fetchDecks();
+        const rawServerDecks = await withRetry(
+          () => fetchDecks(),
+          { maxAttempts: 3, baseDelay: 1000 }
+        );
         serverDecks.push(...rawServerDecks.map((deck: Deck) => this.transformServerDeck(deck)));
         console.log(`☁️ Retrieved ${serverDecks.length} server decks`);
       } catch (error) {
@@ -169,20 +170,42 @@ export class DeckStorageService {
     console.log(`🎯 Total decks: ${totalCount} (${localDecks.length} local, ${serverDecks.length} server)`);
     console.log(`📊 Storage type: ${storageType}`);
 
-    // If both storage types failed and we expected data, throw an error
+    // Enhanced error handling with graceful degradation
     if (localError && serverError && this.isAuthenticated()) {
+      // Both failed for authenticated user - this is critical
       throw new DeckStorageError(
-        'Failed to retrieve decks from both local and server storage',
+        'Cannot access any deck storage. Please check your connection and browser settings.',
         'STORAGE_UNAVAILABLE'
       );
     }
 
     if (localError && !this.isAuthenticated()) {
-      throw new DeckStorageError(
-        'Failed to retrieve local decks and user is not authenticated',
-        'LOCAL_STORAGE_UNAVAILABLE',
-        'local'
-      );
+      // Local storage failed for anonymous user - check if it's a critical error
+      const isCriticalError = (localError instanceof LocalStorageError && 
+          (localError.code === 'STORAGE_UNAVAILABLE' || localError.code === 'QUOTA_EXCEEDED')) ||
+          (localError.message && localError.message.includes('Storage unavailable'));
+      
+      if (isCriticalError) {
+        // These are critical errors that prevent anonymous users from using the app
+        throw new DeckStorageError(
+          localError instanceof LocalStorageError ? localError.message : 'Local storage is not available. Please enable cookies and local storage in your browser.',
+          localError instanceof LocalStorageError ? localError.code : 'LOCAL_STORAGE_UNAVAILABLE',
+          'local'
+        );
+      } else {
+        // For other errors (like data corruption), continue with empty data
+        console.warn('Local storage error for anonymous user, continuing with empty data:', localError.message);
+      }
+    }
+
+    // If only one storage type failed, continue with available data
+    // This provides graceful degradation
+    if (localError && this.isAuthenticated() && serverDecks.length > 0) {
+      console.warn('Local storage unavailable, but server decks are available');
+    }
+
+    if (serverError && this.isAuthenticated() && localDecks.length > 0) {
+      console.warn('Server unavailable, but local decks are available');
     }
 
     return {
@@ -195,19 +218,24 @@ export class DeckStorageService {
 
   /**
    * Save a deck to the appropriate storage based on authentication status
+   * Includes retry logic and graceful degradation
    */
-  async saveDeck(deck: Omit<Deck, 'id'>, forceLocal: boolean = false): Promise<UnifiedDeck> {
+  async saveDeck(deck: DeckInput, forceLocal: boolean = false): Promise<UnifiedDeck> {
     const isAuth = this.isAuthenticated();
     
     // Determine target storage
     const useLocalStorage = !isAuth || forceLocal;
 
     if (useLocalStorage) {
-      try {
-        console.log(`💾 Saving deck "${deck.name}" to local storage`);
-        const savedDeck = await localStorageService.saveLocalDeck(deck);
-        return this.transformLocalDeck(savedDeck);
-      } catch (error) {
+      // For local storage, use retry mechanism
+      return await withRetry(
+        async () => {
+          console.log(`💾 Saving deck "${deck.name}" to local storage`);
+          const savedDeck = await localStorageService.saveLocalDeck(deck);
+          return this.transformLocalDeck(savedDeck);
+        },
+        { maxAttempts: 2, baseDelay: 500 } // Quick retry for local operations
+      ).catch(error => {
         if (error instanceof LocalStorageError) {
           throw new DeckStorageError(
             error.message,
@@ -220,44 +248,58 @@ export class DeckStorageService {
           'LOCAL_SAVE_FAILED',
           'local'
         );
-      }
+      });
     } else {
-      try {
-        console.log(`☁️ Saving deck "${deck.name}" to server`);
-        
-        // Convert slots to server format
-        const { cards, evolution_slots } = this.convertSlotsToServerFormat(deck.slots);
-        
-        const payload: DeckPayload = {
-          name: deck.name,
-          cards,
-          evolution_slots,
-          average_elixir: deck.average_elixir,
-        };
+      // For authenticated users, try server first with fallback to local
+      return await withGracefulDegradation(
+        // Primary: Save to server with retry
+        async () => {
+          return await withRetry(async () => {
+            console.log(`☁️ Saving deck "${deck.name}" to server`);
+            
+            // Convert slots to server format
+            const { cards, evolution_slots } = this.convertSlotsToServerFormat(deck.slots);
+            
+            const payload: DeckPayload = {
+              name: deck.name,
+              cards,
+              evolution_slots,
+              average_elixir: deck.average_elixir,
+            };
 
-        const savedDeck: Deck = await createDeck(payload);
-        return this.transformServerDeck(savedDeck);
-      } catch (error) {
-        if (error instanceof ApiError) {
-          throw new DeckStorageError(
-            error.message,
-            'SERVER_SAVE_FAILED',
-            'server'
-          );
+            const savedDeck: Deck = await createDeck(payload);
+            return this.transformServerDeck(savedDeck);
+          });
+        },
+        // Fallback: Save to local storage
+        async () => {
+          console.log(`💾 Falling back to local storage for deck "${deck.name}"`);
+          const savedDeck = await localStorageService.saveLocalDeck(deck);
+          return this.transformLocalDeck(savedDeck);
+        },
+        {
+          primaryDescription: 'server save',
+          fallbackDescription: 'local storage save',
+          onFallback: (error) => {
+            console.warn('Server save failed, using local storage fallback:', error.message);
+          }
         }
+      ).catch(error => {
+        // If both server and local storage fail, provide appropriate error
+        const errorInfo = ErrorHandlingService.analyzeError(error);
         throw new DeckStorageError(
-          `Failed to save deck to server: ${error instanceof Error ? error.message : 'Unknown error'}`,
-          'SERVER_SAVE_FAILED',
+          errorInfo.message,
+          errorInfo.code,
           'server'
         );
-      }
+      });
     }
   }
 
   /**
    * Update an existing deck
    */
-  async updateDeck(id: string | number, updates: Partial<Omit<Deck, 'id'>>): Promise<UnifiedDeck> {
+  async updateDeck(id: string | number, updates: DeckUpdate): Promise<UnifiedDeck> {
     const isLocal = this.isLocalDeck(id);
 
     if (isLocal) {
@@ -407,20 +449,7 @@ export class DeckStorageService {
   /**
    * Get storage statistics
    */
-  async getStorageStats(): Promise<{
-    local: {
-      deckCount: number;
-      maxDecks: number;
-      storageUsed: number;
-      available: boolean;
-    };
-    server: {
-      deckCount: number;
-      available: boolean;
-    };
-    total: number;
-    storageType: StorageType;
-  }> {
+  async getStorageStats(): Promise<StorageStats> {
     const storageType = await this.getStorageType();
     let localStats = {
       deckCount: 0,

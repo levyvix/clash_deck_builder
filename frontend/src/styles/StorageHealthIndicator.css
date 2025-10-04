@@ -1,0 +1,165 @@
+/**
+ * Storage Health Indicator Styles
+ */
+
+.storage-health-indicator {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+
+.storage-health-indicator--healthy {
+  background: #d4edda;
+  border-color: #c3e6cb;
+  color: #155724;
+}
+
+.storage-health-indicator--warning {
+  background: #fff3cd;
+  border-color: #ffeaa7;
+  color: #856404;
+}
+
+.storage-health-indicator--error {
+  background: #f8d7da;
+  border-color: #f5c6cb;
+  color: #721c24;
+}
+
+.storage-health-indicator--loading {
+  background: #e2e3e5;
+  border-color: #d6d8db;
+  color: #6c757d;
+}
+
+/* Summary */
+.storage-health-indicator__summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.storage-health-indicator__icon {
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.storage-health-indicator__text {
+  flex: 1;
+  font-weight: 500;
+}
+
+.storage-health-indicator__toggle {
+  font-size: 10px;
+  color: #6c757d;
+  transition: transform 0.2s ease;
+}
+
+/* Details */
+.storage-health-indicator__details {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.storage-health-detail {
+  margin-bottom: 16px;
+}
+
+.storage-health-detail:last-child {
+  margin-bottom: 0;
+}
+
+.storage-health-detail__header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.storage-health-detail__icon {
+  font-size: 12px;
+}
+
+.storage-health-detail__title {
+  font-weight: 600;
+  font-size: 12px;
+  color: #495057;
+}
+
+.storage-health-detail__content {
+  margin-left: 18px;
+}
+
+.storage-health-detail__stat {
+  font-size: 12px;
+  color: #6c757d;
+  margin-bottom: 4px;
+}
+
+.storage-health-detail__progress {
+  width: 100%;
+  height: 4px;
+  background: #e9ecef;
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 4px;
+}
+
+.storage-health-detail__progress-bar {
+  height: 100%;
+  transition: width 0.3s ease;
+  border-radius: 2px;
+}
+
+.storage-health-detail__message {
+  font-size: 11px;
+  color: #6c757d;
+  font-style: italic;
+}
+
+.storage-health-detail__message--error {
+  color: #dc3545;
+}
+
+.storage-health-detail__message--warning {
+  color: #fd7e14;
+}
+
+/* Actions */
+.storage-health-detail__actions {
+  margin-top: 12px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.storage-health-detail__action {
+  background: none;
+  border: 1px solid #dee2e6;
+  color: #6c757d;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.storage-health-detail__action:hover {
+  background: #e9ecef;
+  color: #495057;
+}
+
+/* Responsive design */
+@media (max-width: 600px) {
+  .storage-health-indicator {
+    font-size: 12px;
+    padding: 6px 10px;
+  }
+  
+  .storage-health-detail__content {
+    margin-left: 14px;
+  }
+}

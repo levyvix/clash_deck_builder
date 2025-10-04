@@ -23,6 +23,9 @@ jest.mock('../services/deckStorageService', () => ({
   },
   initializeDeckStorageService: jest.fn(),
   DeckStorageError: class MockDeckStorageError extends Error {
+    public code: string;
+    public storageType?: 'local' | 'server';
+    
     constructor(message: string, code: string, storageType?: 'local' | 'server') {
       super(message);
       this.name = 'DeckStorageError';

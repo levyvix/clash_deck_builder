@@ -17,7 +17,7 @@ const RedirectHandler: React.FC = () => {
     }
 
     // Protected routes that require authentication
-    const protectedRoutes = ['/saved-decks', '/profile'];
+    const protectedRoutes = ['/profile'];
     const isProtectedRoute = protectedRoutes.some(route => 
       location.pathname.startsWith(route)
     );

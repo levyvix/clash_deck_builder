@@ -107,9 +107,11 @@ describe('SavedDecks Enhanced Component', () => {
       expect(screen.getByText('Local Test Deck')).toBeInTheDocument();
     });
 
-    // Check for storage summary
-    expect(screen.getByText('💾 1 Local')).toBeInTheDocument();
-    expect(screen.getByText('☁️ 1 Server')).toBeInTheDocument();
+    // Check for storage summary with more specific queries
+    expect(screen.getByText('Local')).toBeInTheDocument();
+    expect(screen.getByText('Server')).toBeInTheDocument();
+    const counts = screen.getAllByText('1');
+    expect(counts).toHaveLength(2); // Count appears twice (once for each storage type)
   });
 
   it('should display storage type indicators on deck cards', async () => {

@@ -9,6 +9,7 @@ import {
 } from '../services/deckCalculations';
 import { canCardEvolve } from '../services/evolutionService';
 import { deckStorageService, DeckStorageError } from '../services/deckStorageService';
+import { ErrorHandlingService, formatUserMessage } from '../services/errorHandlingService';
 import { useAuth } from '../contexts/AuthContext';
 import DeckSlot from './DeckSlot';
 import CardGallery from './CardGallery';
@@ -445,44 +446,11 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ initialDeck, onDeckSaved }) =
     } catch (err) {
       console.error('Failed to save deck:', err);
       
-      let errorMessage = 'Failed to save deck. Please try again.';
+      // Use enhanced error handling for better user experience
+      const errorInfo = ErrorHandlingService.analyzeError(err);
+      const userMessage = formatUserMessage(err, true);
       
-      if (err instanceof DeckStorageError) {
-        // Handle unified storage errors
-        switch (err.code) {
-          case 'LOCAL_STORAGE_UNAVAILABLE':
-            errorMessage = 'Local storage is not available. Please enable cookies and local storage.';
-            break;
-          case 'LOCAL_STORAGE_QUOTA_EXCEEDED':
-            errorMessage = 'Storage quota exceeded. Please delete some old decks to make space.';
-            break;
-          case 'LOCAL_DECK_LIMIT_EXCEEDED':
-            errorMessage = 'Maximum of 20 decks allowed. Please delete some decks first.';
-            break;
-          case 'SERVER_SAVE_FAILED':
-            errorMessage = isAuthenticated 
-              ? 'Failed to save to server. Please try again or save locally.'
-              : 'Server error. Your deck will be saved locally instead.';
-            break;
-          default:
-            errorMessage = err.message;
-        }
-      } else if (err instanceof ApiError) {
-        // Handle API errors (fallback for direct API calls)
-        if (err.isTimeout) {
-          errorMessage = 'Request timed out. Please try again.';
-        } else if (err.isNetworkError) {
-          errorMessage = 'Cannot connect to server. Deck will be saved locally.';
-        } else if (err.statusCode === 400) {
-          errorMessage = err.message || 'Invalid deck data. Please check your deck.';
-        } else if (err.statusCode && err.statusCode >= 500) {
-          errorMessage = 'Server error. Please try again later.';
-        } else {
-          errorMessage = err.message;
-        }
-      }
-      
-      addNotification(errorMessage, 'error');
+      addNotification(userMessage, 'error');
     } finally {
       setSavingDeck(false);
     }
@@ -612,6 +580,20 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ initialDeck, onDeckSaved }) =
             <div className="deck-builder__dialog-overlay" onClick={() => setShowSaveDialog(false)}>
               <div className="deck-builder__dialog" onClick={(e) => e.stopPropagation()}>
                 <h3 className="deck-builder__dialog-title">Save Deck</h3>
+                
+                {/* Storage Type Indicator */}
+                <div className="deck-builder__storage-info">
+                  <span className={`storage-indicator storage-indicator--medium storage-indicator--${isAuthenticated ? 'server' : 'local'}`}>
+                    {isAuthenticated ? 'Saving to Server' : 'Saving Locally'}
+                  </span>
+                  <p className="deck-builder__storage-description">
+                    {isAuthenticated 
+                      ? 'This deck will be saved to your account and synced across devices.'
+                      : 'This deck will be saved in your browser. Sign in to save to your account.'
+                    }
+                  </p>
+                </div>
+                
                 <input
                   type="text"
                   className="deck-builder__dialog-input"

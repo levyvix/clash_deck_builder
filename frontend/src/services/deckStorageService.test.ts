@@ -4,7 +4,8 @@
  * Tests the unified interface for deck operations with both local and server storage.
  */
 
-import { DeckStorageService, DeckStorageError, UnifiedDeck } from './deckStorageService';
+import { DeckStorageService, DeckStorageError } from './deckStorageService';
+import { UnifiedDeck } from '../types';
 import { localStorageService, LocalStorageError } from './localStorageService';
 import * as api from './api';
 import { Deck, DeckSlot, Card } from '../types';
@@ -167,11 +168,31 @@ describe('DeckStorageService', () => {
       await expect(service.getAllDecks()).rejects.toThrow(DeckStorageError);
     });
 
-    it('should throw error when local storage fails for anonymous users', async () => {
+    it('should handle non-critical local storage errors gracefully for anonymous users', async () => {
       mockAuthProvider.mockReturnValue(false);
       mockLocalStorageService.getLocalDecks.mockRejectedValue(new LocalStorageError('Local error', 'LOCAL_ERROR'));
       
-      await expect(service.getAllDecks()).rejects.toThrow(DeckStorageError);
+      const result = await service.getAllDecks();
+      expect(result).toEqual({
+        localDecks: [],
+        serverDecks: [],
+        totalCount: 0,
+        storageType: 'local'
+      });
+    });
+
+    it('should handle all local storage errors gracefully for anonymous users', async () => {
+      mockAuthProvider.mockReturnValue(false);
+      mockLocalStorageService.getLocalDecks.mockRejectedValue(new LocalStorageError('Storage unavailable', 'STORAGE_UNAVAILABLE'));
+      
+      // Even critical errors should be handled gracefully to allow anonymous users to continue
+      const result = await service.getAllDecks();
+      expect(result).toEqual({
+        localDecks: [],
+        serverDecks: [],
+        totalCount: 0,
+        storageType: 'local'
+      });
     });
   });
 
@@ -223,11 +244,15 @@ describe('DeckStorageService', () => {
       await expect(service.saveDeck(mockDeck)).rejects.toThrow(DeckStorageError);
     });
 
-    it('should handle server errors', async () => {
+    it('should handle server errors with graceful degradation', async () => {
       mockAuthProvider.mockReturnValue(true);
       mockApi.createDeck.mockRejectedValue(new api.ApiError('Server error', 500));
       
-      await expect(service.saveDeck(mockDeck)).rejects.toThrow(DeckStorageError);
+      // With graceful degradation, server errors should fall back to local storage
+      const result = await service.saveDeck(mockDeck);
+      
+      expect(result.storageType).toBe('local');
+      expect(mockLocalStorageService.saveLocalDeck).toHaveBeenCalledWith(mockDeck);
     });
   });
 

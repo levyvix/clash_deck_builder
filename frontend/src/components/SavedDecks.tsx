@@ -1,15 +1,16 @@
 // frontend/src/components/SavedDecks.tsx
 
 import React, { useState, useEffect } from 'react';
-import { Deck } from '../types';
+import { Deck, UnifiedDeck, DeckStorageResult } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import { 
   deckStorageService, 
   initializeDeckStorageService, 
-  UnifiedDeck, 
-  DeckStorageResult, 
   DeckStorageError
 } from '../services/deckStorageService';
+import { ErrorHandlingService, formatUserMessage } from '../services/errorHandlingService';
+import ErrorNotification from './ErrorNotification';
+import StorageHealthIndicator from './StorageHealthIndicator';
 import '../styles/SavedDecks.css';
 
 interface SavedDecksProps {
@@ -27,7 +28,7 @@ const SavedDecks: React.FC<SavedDecksProps> = ({ onSelectDeck, onNotification, r
     storageType: 'local'
   });
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<unknown | null>(null);
   const [editingDeckId, setEditingDeckId] = useState<string | number | null>(null);
   const [editingName, setEditingName] = useState('');
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | number | null>(null);
@@ -56,23 +57,12 @@ const SavedDecks: React.FC<SavedDecksProps> = ({ onSelectDeck, onNotification, r
     } catch (err) {
       console.error('Failed to load decks:', err);
       
-      let errorMessage = 'Failed to load decks';
+      setError(err);
       
-      if (err instanceof DeckStorageError) {
-        if (err.code === 'LOCAL_STORAGE_UNAVAILABLE') {
-          errorMessage = 'Local storage is not available. Please enable cookies and local storage in your browser.';
-        } else if (err.code === 'STORAGE_UNAVAILABLE') {
-          errorMessage = 'Cannot access deck storage. Please check your connection and try again.';
-        } else {
-          errorMessage = err.message;
-        }
-      } else if (err instanceof Error) {
-        errorMessage = err.message;
-      }
-      
-      setError(errorMessage);
+      // Use enhanced error handling for user notification
+      const userMessage = formatUserMessage(err, false);
       if (onNotification) {
-        onNotification(errorMessage, 'error');
+        onNotification(userMessage, 'error');
       }
     } finally {
       setLoading(false);
@@ -213,10 +203,12 @@ const SavedDecks: React.FC<SavedDecksProps> = ({ onSelectDeck, onNotification, r
       <div className="saved-decks">
         <h2>Saved Decks</h2>
         <div className="saved-decks__error">
-          <p>{error}</p>
-          <button onClick={loadDecks} className="btn btn--primary">
-            Retry
-          </button>
+          <ErrorNotification
+            error={error}
+            onRetry={loadDecks}
+            onDismiss={() => setError(null)}
+            showTechnicalDetails={true}
+          />
         </div>
       </div>
     );
@@ -248,13 +240,25 @@ const SavedDecks: React.FC<SavedDecksProps> = ({ onSelectDeck, onNotification, r
     <div className="saved-decks">
       <div className="saved-decks__header">
         <h2>Saved Decks</h2>
+        
+        {/* Storage Health Indicator */}
+        <StorageHealthIndicator 
+          showDetails={true}
+          onHealthChange={(health) => {
+            // Optionally handle health changes for additional notifications
+            if (health.overall === 'error') {
+              console.warn('Storage health is critical:', health);
+            }
+          }}
+        />
+        
         {deckData.storageType === 'mixed' && (
-          <div className="saved-decks__storage-summary">
-            <span className="storage-indicator storage-indicator--local">
-              💾 {deckData.localDecks.length} Local
+          <div className="saved-decks__storage-summary storage-summary">
+            <span className="storage-indicator storage-indicator--medium storage-indicator--local">
+              Local <span className="storage-summary__count">{deckData.localDecks.length}</span>
             </span>
-            <span className="storage-indicator storage-indicator--server">
-              ☁️ {deckData.serverDecks.length} Server
+            <span className="storage-indicator storage-indicator--medium storage-indicator--server">
+              Server <span className="storage-summary__count">{deckData.serverDecks.length}</span>
             </span>
           </div>
         )}

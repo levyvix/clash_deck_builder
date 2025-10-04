@@ -2,11 +2,8 @@
  * Integration tests for enhanced SavedDecks component with mixed storage support
  */
 
-import React from 'react';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import SavedDecks from './SavedDecks';
-import { initializeDeckStorageService } from '../services/deckStorageService';
-import { Deck } from '../types';
 
 // Mock the deck storage service
 jest.mock('../services/deckStorageService', () => ({
@@ -91,12 +88,13 @@ describe('SavedDecks Enhanced Component', () => {
         );
 
         await waitFor(() => {
-            expect(screen.getByText('Saved Decks')).toBeInTheDocument();
+            expect(screen.getByText('Local Test Deck')).toBeInTheDocument();
+            expect(screen.getByText('Server Test Deck')).toBeInTheDocument();
         });
 
-        // Check for storage summary
-        expect(screen.getByText('💾 1 Local')).toBeInTheDocument();
-        expect(screen.getByText('☁️ 1 Server')).toBeInTheDocument();
+        // Check for storage summary with new format
+        expect(screen.getByText('Local')).toBeInTheDocument();
+        expect(screen.getByText('Server')).toBeInTheDocument();
     });
 
     it('should display storage type indicators on deck cards', async () => {
@@ -108,12 +106,10 @@ describe('SavedDecks Enhanced Component', () => {
         });
 
         render(
-            <TestWrapper>
-                <SavedDecks
-                    onSelectDeck={mockOnSelectDeck}
-                    onNotification={mockOnNotification}
-                />
-            </TestWrapper>
+            <SavedDecks
+                onSelectDeck={mockOnSelectDeck}
+                onNotification={mockOnNotification}
+            />
         );
 
         await waitFor(() => {
@@ -138,12 +134,10 @@ describe('SavedDecks Enhanced Component', () => {
         });
 
         render(
-            <TestWrapper>
-                <SavedDecks
-                    onSelectDeck={mockOnSelectDeck}
-                    onNotification={mockOnNotification}
-                />
-            </TestWrapper>
+            <SavedDecks
+                onSelectDeck={mockOnSelectDeck}
+                onNotification={mockOnNotification}
+            />
         );
 
         await waitFor(() => {
@@ -181,12 +175,10 @@ describe('SavedDecks Enhanced Component', () => {
         });
 
         render(
-            <TestWrapper>
-                <SavedDecks
-                    onSelectDeck={mockOnSelectDeck}
-                    onNotification={mockOnNotification}
-                />
-            </TestWrapper>
+            <SavedDecks
+                onSelectDeck={mockOnSelectDeck}
+                onNotification={mockOnNotification}
+            />
         );
 
         await waitFor(() => {
@@ -229,12 +221,10 @@ describe('SavedDecks Enhanced Component', () => {
         mockDeckStorageService.deleteDeck.mockResolvedValue(undefined);
 
         render(
-            <TestWrapper>
-                <SavedDecks
-                    onSelectDeck={mockOnSelectDeck}
-                    onNotification={mockOnNotification}
-                />
-            </TestWrapper>
+            <SavedDecks
+                onSelectDeck={mockOnSelectDeck}
+                onNotification={mockOnNotification}
+            />
         );
 
         await waitFor(() => {
@@ -245,9 +235,10 @@ describe('SavedDecks Enhanced Component', () => {
         const deleteButton = screen.getByText('Delete');
         fireEvent.click(deleteButton);
 
-        // Confirm deletion
-        const confirmButton = screen.getByRole('button', { name: 'Delete' });
-        fireEvent.click(confirmButton);
+        // Confirm deletion - get the confirmation dialog delete button (not the disabled one)
+        const confirmButtons = screen.getAllByRole('button', { name: 'Delete' });
+        const confirmButton = confirmButtons.find(button => !(button as HTMLButtonElement).disabled);
+        fireEvent.click(confirmButton!);
 
         await waitFor(() => {
             expect(mockDeckStorageService.deleteDeck).toHaveBeenCalledWith('local_123456789_abc');
@@ -268,12 +259,10 @@ describe('SavedDecks Enhanced Component', () => {
         });
 
         render(
-            <TestWrapper>
-                <SavedDecks
-                    onSelectDeck={mockOnSelectDeck}
-                    onNotification={mockOnNotification}
-                />
-            </TestWrapper>
+            <SavedDecks
+                onSelectDeck={mockOnSelectDeck}
+                onNotification={mockOnNotification}
+            />
         );
 
         await waitFor(() => {
@@ -294,12 +283,10 @@ describe('SavedDecks Enhanced Component', () => {
         mockDeckStorageService.getAllDecks.mockRejectedValue(mockError);
 
         render(
-            <TestWrapper>
-                <SavedDecks
-                    onSelectDeck={mockOnSelectDeck}
-                    onNotification={mockOnNotification}
-                />
-            </TestWrapper>
+            <SavedDecks
+                onSelectDeck={mockOnSelectDeck}
+                onNotification={mockOnNotification}
+            />
         );
 
         await waitFor(() => {

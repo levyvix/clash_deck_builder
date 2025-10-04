@@ -37,18 +37,36 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
+  transition: all var(--transition-fast);
+  position: relative;
 }
 
 .storage-indicator--local {
-  background-color: rgba(76, 175, 80, 0.1);
-  color: #2e7d32;
-  border: 1px solid rgba(76, 175, 80, 0.3);
+  background-color: rgba(76, 175, 80, 0.12);
+  color: #1b5e20;
+  border: 1px solid rgba(76, 175, 80, 0.4);
+  box-shadow: 0 1px 3px rgba(76, 175, 80, 0.1);
+}
+
+.storage-indicator--local:hover {
+  background-color: rgba(76, 175, 80, 0.16);
+  border-color: rgba(76, 175, 80, 0.5);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(76, 175, 80, 0.15);
 }
 
 .storage-indicator--server {
-  background-color: rgba(33, 150, 243, 0.1);
-  color: #1565c0;
-  border: 1px solid rgba(33, 150, 243, 0.3);
+  background-color: rgba(33, 150, 243, 0.12);
+  color: #0d47a1;
+  border: 1px solid rgba(33, 150, 243, 0.4);
+  box-shadow: 0 1px 3px rgba(33, 150, 243, 0.1);
+}
+
+.storage-indicator--server:hover {
+  background-color: rgba(33, 150, 243, 0.16);
+  border-color: rgba(33, 150, 243, 0.5);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(33, 150, 243, 0.15);
 }
 
 /* Storage info in empty state */
@@ -145,27 +163,44 @@
 }
 
 .storage-badge {
-  padding: 2px 6px;
-  border-radius: 12px;
-  font-size: 11px;
-  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 14px;
+  font-size: 10px;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.8px;
   display: inline-flex;
   align-items: center;
-  gap: 2px;
+  gap: 3px;
+  transition: all var(--transition-fast);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(4px);
 }
 
 .storage-badge--local {
-  background-color: rgba(76, 175, 80, 0.15);
-  color: #2e7d32;
-  border: 1px solid rgba(76, 175, 80, 0.4);
+  background: linear-gradient(135deg, rgba(76, 175, 80, 0.9), rgba(56, 142, 60, 0.9));
+  color: white;
+  border: 1px solid rgba(76, 175, 80, 0.6);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.storage-badge--local:hover {
+  background: linear-gradient(135deg, rgba(76, 175, 80, 1), rgba(56, 142, 60, 1));
+  transform: scale(1.05);
+  box-shadow: 0 2px 4px rgba(76, 175, 80, 0.3);
 }
 
 .storage-badge--server {
-  background-color: rgba(33, 150, 243, 0.15);
-  color: #1565c0;
-  border: 1px solid rgba(33, 150, 243, 0.4);
+  background: linear-gradient(135deg, rgba(33, 150, 243, 0.9), rgba(25, 118, 210, 0.9));
+  color: white;
+  border: 1px solid rgba(33, 150, 243, 0.6);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.storage-badge--server:hover {
+  background: linear-gradient(135deg, rgba(33, 150, 243, 1), rgba(25, 118, 210, 1));
+  transform: scale(1.05);
+  box-shadow: 0 2px 4px rgba(33, 150, 243, 0.3);
 }
 
 .deck-card:hover {
@@ -438,10 +473,32 @@
   .storage-indicator {
     font-size: 10px;
     padding: 2px 6px;
+    gap: 2px;
   }
 
   .storage-badge {
-    font-size: 10px;
-    padding: 1px 4px;
+    font-size: 8px;
+    padding: 2px 5px;
+    gap: 2px;
+    letter-spacing: 0.5px;
+    border-radius: 10px;
+  }
+
+  /* Adjust storage summary for mobile */
+  .saved-decks__storage-summary {
+    flex-direction: column;
+    gap: var(--spacing-xs);
+  }
+
+  /* Make storage info more compact on mobile */
+  .saved-decks__storage-info {
+    font-size: 11px !important;
+    text-align: center;
+  }
+
+  /* Adjust deck card storage indicator positioning */
+  .deck-card__storage-indicator {
+    top: 4px;
+    right: 4px;
   }
 }
