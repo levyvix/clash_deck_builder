@@ -92,9 +92,9 @@
 /* Sticky Deck Container */
 .deck-builder__deck-section--sticky {
   position: sticky;
-  top: 20px;
+  top: 144px; /* Nav height (120px) + spacing (24px) to clear nav bar */
   z-index: 10;
-  max-height: calc(100vh - 40px);
+  max-height: calc(100vh - 168px); /* Viewport - nav height - top/bottom spacing */
   overflow-y: auto;
 }
 
