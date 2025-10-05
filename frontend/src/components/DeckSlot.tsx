@@ -198,14 +198,14 @@ const DeckSlot: React.FC<DeckSlotProps> = ({
 
       {showOptions && (
         <div className="deck-slot__options">
-          <button 
+          <button
             className="deck-slot__option-btn deck-slot__option-btn--remove"
             onClick={handleRemove}
           >
             Remove from Deck
           </button>
           {canCardEvolve(slot.card) && (
-            <button 
+            <button
               className="deck-slot__option-btn deck-slot__option-btn--evolution"
               onClick={handleToggleEvolution}
               disabled={!slot.isEvolution && !canAddEvolution}

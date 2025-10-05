@@ -97,7 +97,7 @@ export const EVOLUTION_CAPABLE_CARDS = new Set<number>([
 
 /**
  * Check if a card is capable of evolution.
- * 
+ *
  * @param card - The card to check for evolution capability
  * @returns true if the card can evolve, false otherwise
  */
@@ -106,7 +106,12 @@ export const canCardEvolve = (card: Card): boolean => {
   if (card.can_evolve !== undefined) {
     return card.can_evolve;
   }
-  
+
+  // Check if card has evolution image URL (presence indicates evolution capability)
+  if (card.image_url_evo) {
+    return true;
+  }
+
   // Fallback to static list if API doesn't provide evolution capability data
   return EVOLUTION_CAPABLE_CARDS.has(card.id);
 };
