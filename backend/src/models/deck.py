@@ -10,12 +10,8 @@ class Deck(BaseModel):
     name: str = Field(..., min_length=1, max_length=100, description="Deck name")
     user_id: Optional[str] = Field(None, description="User who owns this deck")
     cards: List[Card] = Field(..., description="List of cards in the deck")
-    evolution_slots: List[Card] = Field(
-        default_factory=list, description="Evolution card slots"
-    )
-    average_elixir: Optional[float] = Field(
-        None, ge=0, le=10, description="Average elixir cost of the deck"
-    )
+    evolution_slots: List[Card] = Field(default_factory=list, description="Evolution card slots")
+    average_elixir: Optional[float] = Field(None, ge=0, le=10, description="Average elixir cost of the deck")
 
     @field_validator("name")
     @classmethod
@@ -38,12 +34,10 @@ class Deck(BaseModel):
     def validate_evolution_slots(cls, v):
         """Validate that deck has at most 2 evolution slots"""
         if len(v) > 2:
-            raise ValueError(
-                f"Deck cannot have more than 2 evolution slots, got {len(v)}"
-            )
+            raise ValueError(f"Deck cannot have more than 2 evolution slots, got {len(v)}")
         return v
 
-    @model_validator(mode='after')
+    @model_validator(mode="after")
     def validate_evolution_cards_in_deck(self):
         """Validate that evolution slot cards are also in the main deck"""
         if not self.cards or not self.evolution_slots:
@@ -55,9 +49,7 @@ class Deck(BaseModel):
         # Check that all evolution slot cards are in the main deck
         for evo_card in self.evolution_slots:
             if evo_card.id not in main_deck_card_ids:
-                raise ValueError(
-                    f'Evolution slot card "{evo_card.name}" must also be in the main deck'
-                )
+                raise ValueError(f'Evolution slot card "{evo_card.name}" must also be in the main deck')
 
         return self
 
@@ -79,7 +71,7 @@ class Deck(BaseModel):
 
         return round(total_elixir / total_cards, 2) if total_cards > 0 else 0.0
 
-    @model_validator(mode='after')
+    @model_validator(mode="after")
     def auto_calculate_average_elixir(self):
         """Automatically calculate average elixir if not provided"""
         # If average_elixir is not provided or is None, calculate it
@@ -91,9 +83,7 @@ class Deck(BaseModel):
             if self.evolution_slots:
                 total_elixir += sum(card.elixir_cost for card in self.evolution_slots)
 
-            self.average_elixir = (
-                round(total_elixir / total_cards, 2) if total_cards > 0 else 0.0
-            )
+            self.average_elixir = round(total_elixir / total_cards, 2) if total_cards > 0 else 0.0
 
         return self
 
@@ -124,5 +114,5 @@ class Deck(BaseModel):
                 "evolution_slots": [],
                 "average_elixir": 3.5,
             }
-        }
+        },
     )

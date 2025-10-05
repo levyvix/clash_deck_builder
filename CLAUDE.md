@@ -49,6 +49,8 @@ uv run black . && uv run flake8 .   # Format and lint
 cd frontend
 npm install                  # Install dependencies
 npm start                    # Start dev server (port 3000)
+npm run start:local         # Start with .env.local config
+npm run start:docker        # Start with .env.docker config
 npm test                     # Run tests in watch mode
 npm run test:run            # Run tests once
 npm run build               # Production build
@@ -78,16 +80,20 @@ docker-compose ps
 
 ### Database Operations
 ```bash
-# Run migrations
+# Run migrations (migrations are standalone, not part of backend package)
 cd database/migrations
 python migrate.py
 
 # Ingest card data from Clash Royale API
 cd backend
-uv run python src/scripts/ingest_cards.py
+uv run src/scripts/ingest_cards.py
 
 # Connect to database
 docker-compose exec database mysql -u clash_user -p clash_deck_builder
+
+# Manual database access
+docker-compose exec database mysql -u root -p  # Root access
+docker-compose exec database mysql -u clash_user -p clash_deck_builder  # User access
 ```
 
 ## Architecture
@@ -338,12 +344,14 @@ npm start
 ```
 
 ### Making Changes
-1. Create feature branch from `001-i-would-like`
+1. Create feature branch from `001-i-would-like` (main development branch)
 2. Make changes and test locally
 3. Run linters: `uv run black . && uv run flake8 .` (backend) or verify TypeScript compiles (frontend)
 4. Run tests: `uv run pytest` (backend) and `npm test` (frontend)
 5. Commit and push changes
 6. Create PR to `001-i-would-like` branch
+
+**Note**: The main development branch is `001-i-would-like`, not `main`. This follows the spec-based branching strategy used by this project.
 
 ## Key Files to Know
 
@@ -356,6 +364,25 @@ npm start
 - `docker-compose.yml` - Container orchestration configuration
 - `.env.docker` - Docker environment variables
 
+## Project Management
+
+### Kiro Integration
+This project uses Kiro for project management and workflow automation:
+- **Specs**: Located in `.kiro/specs/` - feature specifications and task tracking
+- **Steering docs**: Located in `.kiro/steering/` - product, technical, and project guidelines
+- **Hooks**: Located in `.kiro/hooks/` - automated workflows (e.g., feature branch creation)
+
+Key steering documents:
+- `.kiro/steering/product.md` - Product vision and requirements
+- `.kiro/steering/tech.md` - Technology stack and standards
+- `.kiro/steering/project-guide.md` - Development workflow guidelines
+
+### Branch Strategy
+- **Main development branch**: `001-i-would-like` (not `main`)
+- Feature branches created from `001-i-would-like`
+- PRs merge back into `001-i-would-like`
+- Follows spec-based branching pattern from `.kiro/specs/`
+
 ## Notes for AI Assistants
 
 - Always use `uv` for Python package management, never `pip` directly
@@ -366,3 +393,18 @@ npm start
 - All API routes are prefixed with `/api/`
 - Evolution slots are a critical feature - always maintain the distinction between regular cards and evolution cards
 - Anonymous users can build decks without authentication using localStorage
+- Database migrations are standalone scripts (use `python migrate.py`), not part of the backend package
+
+## External Integrations
+
+### Clash Royale API
+- Card data ingestion via `backend/src/scripts/ingest_cards.py`
+- API client in `backend/src/services/clash_api_service.py`
+- Requires `CLASH_ROYALE_API_KEY` environment variable
+- Card data stored in MySQL `cards` table
+
+### Google OAuth
+- Frontend: `@react-oauth/google` package
+- Backend: Google Auth library for token validation
+- JWT tokens for session management
+- User data stored in MySQL `users` table

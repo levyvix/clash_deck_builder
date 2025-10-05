@@ -19,10 +19,7 @@ def get_database_session() -> Generator[MySQLCursor, None, None]:
 
 def get_clash_api_service() -> ClashRoyaleAPIService:
     """FastAPI dependency for Clash Royale API service."""
-    return ClashRoyaleAPIService(
-        api_key=settings.clash_royale_api_key,
-        base_url=settings.clash_royale_api_base_url
-    )
+    return ClashRoyaleAPIService(api_key=settings.clash_royale_api_key, base_url=settings.clash_royale_api_base_url)
 
 
 def get_deck_service(db_session: MySQLCursor = Depends(get_database_session)) -> DeckService:

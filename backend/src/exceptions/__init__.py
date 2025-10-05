@@ -7,7 +7,7 @@ from mysql.connector import Error as MySQLError
 
 class DatabaseError(Exception):
     """Raised when database operations fail."""
-    
+
     def __init__(self, message: str, original_error: Exception = None):
         self.message = message
         self.original_error = original_error
@@ -16,7 +16,7 @@ class DatabaseError(Exception):
 
 class DeckNotFoundError(Exception):
     """Raised when a deck is not found."""
-    
+
     def __init__(self, deck_id: int, user_id: str = None):
         self.deck_id = deck_id
         self.user_id = user_id
@@ -29,7 +29,7 @@ class DeckNotFoundError(Exception):
 
 class DeckValidationError(Exception):
     """Raised when deck validation fails."""
-    
+
     def __init__(self, message: str, field: str = None):
         self.message = message
         self.field = field
@@ -38,7 +38,7 @@ class DeckValidationError(Exception):
 
 class SerializationError(Exception):
     """Raised when JSON serialization/deserialization fails."""
-    
+
     def __init__(self, message: str, data_type: str = None):
         self.message = message
         self.data_type = data_type
@@ -47,7 +47,7 @@ class SerializationError(Exception):
 
 class DeckLimitExceededError(Exception):
     """Raised when user tries to create more than the maximum allowed decks."""
-    
+
     def __init__(self, user_id: str, max_decks: int = 20):
         self.user_id = user_id
         self.max_decks = max_decks
@@ -57,7 +57,7 @@ class DeckLimitExceededError(Exception):
 
 class ClashAPIError(Exception):
     """Raised when Clash Royale API calls fail."""
-    
+
     def __init__(self, message: str, status_code: int = None, original_error: Exception = None):
         self.message = message
         self.status_code = status_code
@@ -67,7 +67,7 @@ class ClashAPIError(Exception):
 
 class ValidationError(Exception):
     """Raised when input validation fails."""
-    
+
     def __init__(self, message: str, field: str = None, value: any = None):
         self.message = message
         self.field = field

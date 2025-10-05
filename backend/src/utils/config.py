@@ -29,9 +29,7 @@ class Settings(BaseSettings):
     google_client_secret: str = "your-google-client-secret"
 
     # JWT configuration
-    jwt_secret_key: str = (
-        "your-jwt-secret-key-that-is-at-least-32-characters-long-for-development"
-    )
+    jwt_secret_key: str = "your-jwt-secret-key-that-is-at-least-32-characters-long-for-development"
     jwt_algorithm: str = "HS256"
     jwt_access_token_expire_minutes: int = 15
     jwt_refresh_token_expire_days: int = 30
@@ -43,9 +41,7 @@ class Settings(BaseSettings):
         return self.jwt_secret_key
 
     # CORS configuration
-    cors_origins: str = (
-        "http://localhost:3000,http://localhost:8000,https://accounts.google.com"
-    )
+    cors_origins: str = "http://localhost:3000,http://localhost:8000,https://accounts.google.com"
 
     # Application configuration
     debug: bool = False
@@ -73,9 +69,7 @@ class Settings(BaseSettings):
             # Only allow default password in development
             env = os.getenv("ENVIRONMENT", "development")
             if env == "production":
-                raise ValueError(
-                    "DB_PASSWORD must be set to a secure value in production"
-                )
+                raise ValueError("DB_PASSWORD must be set to a secure value in production")
         return v
 
     @field_validator("clash_royale_api_key")
@@ -109,11 +103,7 @@ class Settings(BaseSettings):
     @field_validator("jwt_secret_key")
     @classmethod
     def validate_jwt_secret(cls, v):
-        if (
-            not v
-            or v
-            == "your-jwt-secret-key-that-is-at-least-32-characters-long-for-development"
-        ):
+        if not v or v == "your-jwt-secret-key-that-is-at-least-32-characters-long-for-development":
             env = os.getenv("ENVIRONMENT", "development")
             if env == "production":
                 raise ValueError("JWT_SECRET_KEY must be set in production")
@@ -126,11 +116,7 @@ class Settings(BaseSettings):
     def cors_origins_list(self) -> List[str]:
         """Parse CORS origins from string to list."""
         if isinstance(self.cors_origins, str):
-            return [
-                origin.strip()
-                for origin in self.cors_origins.split(",")
-                if origin.strip()
-            ]
+            return [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]
         return [self.cors_origins] if self.cors_origins else []
 
     def get_database_config(self) -> dict:
@@ -164,27 +150,19 @@ class Settings(BaseSettings):
 
         # Check API key in production
         if self.environment == "production" and (
-            not self.clash_royale_api_key
-            or self.clash_royale_api_key == "your-api-key-here"
+            not self.clash_royale_api_key or self.clash_royale_api_key == "your-api-key-here"
         ):
             errors.append("CLASH_ROYALE_API_KEY must be set in production")
 
         # Check Google OAuth configuration in production
         if self.environment == "production":
-            if (
-                not self.google_client_id
-                or self.google_client_id == "your-google-client-id"
-            ):
+            if not self.google_client_id or self.google_client_id == "your-google-client-id":
                 errors.append("GOOGLE_CLIENT_ID must be set in production")
-            if (
-                not self.google_client_secret
-                or self.google_client_secret == "your-google-client-secret"
-            ):
+            if not self.google_client_secret or self.google_client_secret == "your-google-client-secret":
                 errors.append("GOOGLE_CLIENT_SECRET must be set in production")
             if (
                 not self.jwt_secret_key
-                or self.jwt_secret_key
-                == "your-jwt-secret-key-that-is-at-least-32-characters-long-for-development"
+                or self.jwt_secret_key == "your-jwt-secret-key-that-is-at-least-32-characters-long-for-development"
             ):
                 errors.append("JWT_SECRET_KEY must be set in production")
             elif len(self.jwt_secret_key) < 32:
@@ -209,7 +187,7 @@ class Settings(BaseSettings):
         env_file_encoding="utf-8",
         case_sensitive=False,
         # Allow extra fields for flexibility
-        extra="ignore"
+        extra="ignore",
     )
 
 
