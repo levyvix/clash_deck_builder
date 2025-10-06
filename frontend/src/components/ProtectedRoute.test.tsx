@@ -1,5 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 import ProtectedRoute from './ProtectedRoute';
 import { AuthProvider } from '../contexts/AuthContext';
 import * as authService from '../services/authService';
@@ -11,14 +12,16 @@ const mockedAuthService = authService as jest.Mocked<typeof authService>;
 // Mock child component
 const TestChild: React.FC = () => <div>Protected Content</div>;
 
-// Helper to render ProtectedRoute with AuthProvider
+// Helper to render ProtectedRoute with all required providers
 const renderProtectedRoute = (children: React.ReactNode, fallback?: React.ReactNode) => {
   return render(
-    <AuthProvider>
-      <ProtectedRoute fallback={fallback}>
-        {children}
-      </ProtectedRoute>
-    </AuthProvider>
+    <GoogleOAuthProvider clientId="test-client-id.apps.googleusercontent.com">
+      <AuthProvider>
+        <ProtectedRoute fallback={fallback}>
+          {children}
+        </ProtectedRoute>
+      </AuthProvider>
+    </GoogleOAuthProvider>
   );
 };
 

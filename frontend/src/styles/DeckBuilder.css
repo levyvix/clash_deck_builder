@@ -151,6 +151,31 @@
 .deck-builder__actions {
   display: flex;
   justify-content: center;
+  gap: var(--spacing-sm, 8px);
+}
+
+.deck-builder__new-deck-button {
+  padding: var(--spacing-md, 16px) var(--spacing-lg, 24px);
+  background-color: transparent;
+  color: var(--color-primary, #4a90e2);
+  border: 2px solid var(--color-primary, #4a90e2);
+  border-radius: var(--radius-md);
+  font-size: 16px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.02857em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.deck-builder__new-deck-button:hover {
+  background-color: rgba(74, 144, 226, 0.08);
+  transform: translateY(-1px);
+}
+
+.deck-builder__new-deck-button:active {
+  transform: translateY(0);
+  background-color: rgba(74, 144, 226, 0.16);
 }
 
 .deck-builder__save-button {
@@ -267,6 +292,17 @@
 .deck-builder__dialog-input:focus {
   outline: none;
   border-color: var(--color-primary, #4a90e2);
+}
+
+.deck-builder__update-hint {
+  margin: var(--spacing-sm, 8px) 0 0 0;
+  padding: var(--spacing-sm, 8px);
+  background-color: #e3f2fd;
+  border: 1px solid #bbdefb;
+  border-radius: 4px;
+  color: #1976d2;
+  font-size: var(--font-size-sm, 14px);
+  text-align: center;
 }
 
 .deck-builder__dialog-actions {

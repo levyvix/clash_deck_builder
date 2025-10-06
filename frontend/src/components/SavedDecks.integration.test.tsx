@@ -290,7 +290,7 @@ describe('SavedDecks Enhanced Component', () => {
         );
 
         await waitFor(() => {
-            expect(screen.getByText(/Local storage is not available/)).toBeInTheDocument();
+            expect(screen.getByText(/Cannot save decks locally because browser storage is disabled/)).toBeInTheDocument();
         });
 
         expect(mockOnNotification).toHaveBeenCalledWith(

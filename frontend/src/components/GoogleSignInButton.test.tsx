@@ -1,5 +1,6 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 import GoogleSignInButton from './GoogleSignInButton';
 import { AuthProvider } from '../contexts/AuthContext';
 import * as authService from '../services/authService';
@@ -17,12 +18,14 @@ const mockGoogleAccounts = {
   },
 };
 
-// Helper to render GoogleSignInButton with AuthProvider
+// Helper to render GoogleSignInButton with all required providers
 const renderGoogleSignInButton = (props = {}) => {
   return render(
-    <AuthProvider>
-      <GoogleSignInButton {...props} />
-    </AuthProvider>
+    <GoogleOAuthProvider clientId="test-client-id.apps.googleusercontent.com">
+      <AuthProvider>
+        <GoogleSignInButton {...props} />
+      </AuthProvider>
+    </GoogleOAuthProvider>
   );
 };
 
@@ -50,11 +53,14 @@ describe('GoogleSignInButton', () => {
     delete process.env.REACT_APP_GOOGLE_CLIENT_ID;
   });
 
-  it('should render GoogleSignInButton component', () => {
+  it('should render GoogleSignInButton component', async () => {
     renderGoogleSignInButton();
     
-    // Component should render without crashing
-    expect(screen.getByRole('generic')).toBeInTheDocument();
+    // Component should render without crashing - look for the button container
+    await waitFor(() => {
+      const container = document.querySelector('.google-signin-button');
+      expect(container).toBeInTheDocument();
+    });
   });
 
   it('should show loading state when auth context is loading', () => {
@@ -69,9 +75,10 @@ describe('GoogleSignInButton', () => {
   it('should render button container when not loading', async () => {
     renderGoogleSignInButton();
     
-    // Wait for auth context to resolve
-    await screen.findByText('Loading...');
-    
-    expect(screen.getByText('Loading...')).toBeInTheDocument();
+    // Wait for auth context to resolve and button to appear
+    await waitFor(() => {
+      const container = document.querySelector('.google-signin-button');
+      expect(container).toBeInTheDocument();
+    });
   });
 });

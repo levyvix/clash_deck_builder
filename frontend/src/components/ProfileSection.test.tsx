@@ -2,6 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import ProfileSection from './ProfileSection';
 import { AuthProvider } from '../contexts/AuthContext';
+import { OnboardingProvider } from '../contexts/OnboardingContext';
 import { User, Card } from '../types/index';
 
 // Mock the auth service
@@ -42,7 +43,7 @@ const mockCards: Card[] = [
 ];
 
 // Mock AuthContext
-const mockAuthContext = {
+let mockAuthContext = {
   user: mockUser,
   isLoading: false,
   isAuthenticated: true,
@@ -52,16 +53,29 @@ const mockAuthContext = {
   refreshUser: jest.fn(),
 };
 
+const mockUseAuth = jest.fn(() => mockAuthContext);
+
 jest.mock('../contexts/AuthContext', () => ({
-  ...jest.requireActual('../contexts/AuthContext'),
+  AuthProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   useAuth: () => mockAuthContext,
+}));
+
+jest.mock('../contexts/OnboardingContext', () => ({
+  OnboardingProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  useOnboarding: () => ({
+    isOnboardingComplete: true,
+    currentStep: null,
+    completeOnboarding: jest.fn(),
+    resetOnboarding: jest.fn(),
+    refreshOnboardingStatus: jest.fn(),
+  }),
 }));
 
 const renderWithProviders = (component: React.ReactElement) => {
   return render(
-    <AuthProvider>
+    <OnboardingProvider>
       {component}
-    </AuthProvider>
+    </OnboardingProvider>
   );
 };
 
@@ -92,7 +106,7 @@ describe('ProfileSection', () => {
     const userWithoutAvatar = { ...mockUser, avatar: '999' };
     const contextWithoutAvatar = { ...mockAuthContext, user: userWithoutAvatar };
     
-    jest.mocked(require('../contexts/AuthContext').useAuth).mockReturnValue(contextWithoutAvatar);
+    mockUseAuth.mockReturnValueOnce(contextWithoutAvatar);
     
     renderWithProviders(<ProfileSection cards={mockCards} />);
     
@@ -208,7 +222,7 @@ describe('ProfileSection', () => {
   it('renders error state when no user is available', () => {
     const contextWithoutUser = { ...mockAuthContext, user: null, isAuthenticated: false };
     
-    jest.mocked(require('../contexts/AuthContext').useAuth).mockReturnValue(contextWithoutUser);
+    mockUseAuth.mockReturnValueOnce(contextWithoutUser);
     
     renderWithProviders(<ProfileSection cards={mockCards} />);
     

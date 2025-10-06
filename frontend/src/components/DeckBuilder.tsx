@@ -22,10 +22,11 @@ import '../styles/DeckBuilder.css';
 
 interface DeckBuilderProps {
   initialDeck?: DeckSlotType[];
+  loadedDeckInfo?: { id: string | number; name: string }; // Track loaded deck metadata
   onDeckSaved?: () => void;
 }
 
-const DeckBuilder: React.FC<DeckBuilderProps> = ({ initialDeck, onDeckSaved }) => {
+const DeckBuilder: React.FC<DeckBuilderProps> = ({ initialDeck, loadedDeckInfo, onDeckSaved }) => {
   const { isAuthenticated } = useAuth();
   
   // Initialize deck with 8 empty slots
@@ -51,6 +52,7 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ initialDeck, onDeckSaved }) =
   const [savingDeck, setSavingDeck] = useState(false);
   const [deckName, setDeckName] = useState('');
   const [showSaveDialog, setShowSaveDialog] = useState(false);
+  const [currentLoadedDeck, setCurrentLoadedDeck] = useState<{ id: string | number; name: string } | null>(null);
   const [cardsInDeck, setCardsInDeck] = useState<Set<number>>(new Set());
   const [animationStates, setAnimationStates] = useState<AnimationState>({});
 
@@ -103,6 +105,11 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ initialDeck, onDeckSaved }) =
       setCardsInDeck(cardIds);
     }
   }, [initialDeck]);
+
+  // Update loaded deck info when prop changes
+  useEffect(() => {
+    setCurrentLoadedDeck(loadedDeckInfo || null);
+  }, [loadedDeckInfo]);
 
   // Initialize cardsInDeck set from currentDeck on mount
   useEffect(() => {
@@ -203,6 +210,14 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ initialDeck, onDeckSaved }) =
   };
 
 
+
+  // Clear loaded deck info when user starts building a new deck
+  const clearLoadedDeckInfo = () => {
+    if (currentLoadedDeck) {
+      console.log('🔄 Clearing loaded deck info - user is building a new deck');
+      setCurrentLoadedDeck(null);
+    }
+  };
 
   // Add card with animation - prevents multiple animations on same card
   const addCardWithAnimation = (card: Card, slotIndex?: number) => {
@@ -417,27 +432,52 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ initialDeck, onDeckSaved }) =
     try {
       setSavingDeck(true);
       
-      // Prepare deck data using unified format
-      const deckData = {
-        name: deckName.trim(),
-        slots: currentDeck,
-        average_elixir: averageElixir,
-      };
-
-      // Use unified storage service - it will determine storage type based on authentication
-      const savedDeck = await deckStorageService.saveDeck(deckData);
+      // Check if we're updating an existing deck (same name as loaded deck)
+      const isUpdatingExisting = currentLoadedDeck && deckName.trim() === currentLoadedDeck.name;
       
-      // Success handling
-      const storageTypeText = savedDeck.storageType === 'local' ? 'locally' : 'to server';
-      console.log(`✅ Deck saved ${storageTypeText}, response:`, savedDeck);
-      addNotification(`Deck saved ${storageTypeText}`, 'success');
+      if (isUpdatingExisting) {
+        // Update existing deck
+        console.log(`🔄 Updating existing deck "${currentLoadedDeck.name}" (ID: ${currentLoadedDeck.id})`);
+        
+        const updateData = {
+          name: deckName.trim(),
+          slots: currentDeck,
+          average_elixir: averageElixir,
+        };
+
+        const updatedDeck = await deckStorageService.updateDeck(currentLoadedDeck.id, updateData);
+        
+        // Success handling for update
+        const storageTypeText = updatedDeck.storageType === 'local' ? 'locally' : 'on server';
+        console.log(`✅ Deck updated ${storageTypeText}, response:`, updatedDeck);
+        addNotification(`Deck updated ${storageTypeText}`, 'success');
+        
+        // Update the current loaded deck info to reflect any changes
+        setCurrentLoadedDeck({ id: updatedDeck.id, name: updatedDeck.name });
+      } else {
+        // Create new deck
+        console.log(`💾 Creating new deck "${deckName.trim()}"`);
+        
+        const deckData = {
+          name: deckName.trim(),
+          slots: currentDeck,
+          average_elixir: averageElixir,
+        };
+
+        const savedDeck = await deckStorageService.saveDeck(deckData);
+        
+        // Success handling for new deck
+        const storageTypeText = savedDeck.storageType === 'local' ? 'locally' : 'to server';
+        console.log(`✅ Deck saved ${storageTypeText}, response:`, savedDeck);
+        addNotification(`Deck saved ${storageTypeText}`, 'success');
+        
+        // Update loaded deck info to track this as the current deck
+        setCurrentLoadedDeck({ id: savedDeck.id, name: savedDeck.name });
+      }
       
       // Close the save dialog
       setShowSaveDialog(false);
       setDeckName('');
-      
-      // Keep the current deck (don't clear it) so user can continue building or modify
-      // This provides better UX as they can see what they just saved
       
       // Refresh saved decks list if callback provided
       if (onDeckSaved) {
@@ -483,6 +523,12 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ initialDeck, onDeckSaved }) =
       addNotification('Deck must have 8 cards to save', 'error');
       return;
     }
+    
+    // Pre-populate with loaded deck name if available
+    if (currentLoadedDeck) {
+      setDeckName(currentLoadedDeck.name);
+    }
+    
     setShowSaveDialog(true);
   };
 
@@ -526,7 +572,9 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ initialDeck, onDeckSaved }) =
         {/* Deck Section */}
         <div className="deck-builder__deck-section deck-builder__deck-section--sticky">
           <div className="deck-builder__deck-header">
-            <h2 className="deck-builder__title">Build Your Deck</h2>
+            <h2 className="deck-builder__title">
+              {currentLoadedDeck ? `Editing: ${currentLoadedDeck.name}` : 'Build Your Deck'}
+            </h2>
             <div className="deck-builder__stats">
               <div className="deck-builder__stat">
                 <span className="deck-builder__stat-label">Cards:</span>
@@ -562,15 +610,30 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ initialDeck, onDeckSaved }) =
           {/* Remove Drop Zone */}
           <RemoveDropZone onRemoveCard={removeCardFromDeck} />
 
-          {/* Save Deck Button */}
+          {/* Deck Actions */}
           <div className="deck-builder__actions">
+            {currentLoadedDeck && (
+              <button
+                className="deck-builder__new-deck-button"
+                onClick={() => {
+                  // Clear the deck and loaded deck info
+                  setCurrentDeck(Array(8).fill(null).map(() => ({ card: null, isEvolution: false })));
+                  setCardsInDeck(new Set());
+                  clearLoadedDeckInfo();
+                  addNotification('Started new deck', 'info');
+                }}
+                title="Start building a new deck"
+              >
+                New Deck
+              </button>
+            )}
             <button
               className={`deck-builder__save-button ${deckComplete ? 'save-button--ready' : ''}`}
               onClick={handleSaveClick}
               disabled={!deckComplete}
               title={!deckComplete ? 'Add 8 cards to save deck' : 'Save deck'}
             >
-              Save Deck
+              {currentLoadedDeck ? 'Update Deck' : 'Save Deck'}
             </button>
           </div>
 
@@ -596,12 +659,17 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ initialDeck, onDeckSaved }) =
                 <input
                   type="text"
                   className="deck-builder__dialog-input"
-                  placeholder="Enter deck name..."
+                  placeholder={currentLoadedDeck ? currentLoadedDeck.name : "Enter deck name..."}
                   value={deckName}
                   onChange={(e) => setDeckName(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && saveDeck()}
                   autoFocus
                 />
+                {currentLoadedDeck && deckName === currentLoadedDeck.name && (
+                  <p className="deck-builder__update-hint">
+                    💡 Saving with the same name will update the existing deck
+                  </p>
+                )}
                 <div className="deck-builder__dialog-actions">
                   <button
                     className="deck-builder__dialog-button deck-builder__dialog-button--cancel"

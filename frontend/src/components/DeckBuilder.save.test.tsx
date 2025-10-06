@@ -256,7 +256,7 @@ describe('DeckBuilder - Local Storage Integration', () => {
 
     // Verify error notification is shown
     await waitFor(() => {
-      expect(screen.getByText(/Storage quota exceeded/)).toBeInTheDocument();
+      expect(screen.getByText(/There was a problem saving your deck/)).toBeInTheDocument();
     });
   });
 });

@@ -118,6 +118,72 @@ cp ../.env.local .env
 uv run uvicorn main:app --reload
 ```
 
+## Testing
+
+### Backend Tests
+```bash
+cd backend
+
+# Run all tests
+uv run pytest
+
+# Run specific test categories
+uv run pytest tests/unit              # Unit tests
+uv run pytest tests/integration       # Integration tests
+uv run pytest tests/contract          # Contract tests
+
+# Run with coverage
+uv run pytest --cov=src --cov-report=html
+
+# Run specific test file
+uv run pytest tests/unit/test_card_service.py
+```
+
+### Frontend Tests
+```bash
+cd frontend
+
+# Run all tests (interactive watch mode)
+npm test
+
+# Run tests once
+npm run test:run
+
+# Run tests with coverage
+npm test -- --coverage
+
+# Run specific test file
+npm test -- DeckBuilder.test.tsx
+```
+
+### E2E Tests
+```bash
+# Quick API health verification (no browser required)
+python3 verify-essential-features.py
+
+# Or using curl
+curl http://localhost:8000/health | jq
+curl http://localhost:8000/api/cards/cards | jq | head -50
+
+# Playwright E2E tests (full test suite)
+# Note: Browser tests may timeout in WSL2 environments
+npx playwright test
+
+# Run only API tests (works in all environments)
+npx playwright test --grep "API Health"
+
+# Run with UI for debugging
+npx playwright test --ui
+
+# View test report
+npx playwright show-report
+```
+
+**Prerequisites for E2E tests:**
+- Backend and database running in Docker: `docker-compose up -d backend database`
+- Frontend running locally: `cd frontend && npm start`
+- See [E2E_TEST_SUMMARY.md](E2E_TEST_SUMMARY.md) for detailed test documentation
+
 ## Development Commands
 
 ### Quick Commands

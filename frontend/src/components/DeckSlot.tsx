@@ -196,6 +196,13 @@ const DeckSlot: React.FC<DeckSlotProps> = ({
         <div className="deck-slot__elixir">{slot.card.elixir_cost}</div>
       </div>
 
+      {/* Evolution Badge */}
+      {slot.isEvolution && (
+        <div className="deck-slot__evolution-badge">
+          EVO
+        </div>
+      )}
+
       {showOptions && (
         <div className="deck-slot__options">
           <button

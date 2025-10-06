@@ -33,6 +33,9 @@ function AppContent() {
     Array(8).fill(null).map(() => ({ card: null, isEvolution: false }))
   );
   
+  // Track loaded deck metadata for update functionality
+  const [loadedDeckInfo, setLoadedDeckInfo] = useState<{ id: string | number; name: string } | null>(null);
+  
   // State to trigger refresh of saved decks list
   const [refreshSavedDecks, setRefreshSavedDecks] = useState(0);
 
@@ -72,6 +75,16 @@ function AppContent() {
   // Load deck into builder from saved decks
   const loadDeckIntoBuilder = (deck: Deck) => {
     setCurrentDeck(deck.slots);
+    // Set loaded deck info for update functionality
+    if (deck.id) {
+      setLoadedDeckInfo({ 
+        id: deck.id,
+        name: deck.name 
+      });
+    } else {
+      // Clear loaded deck info if no ID (shouldn't happen with proper deck data)
+      setLoadedDeckInfo(null);
+    }
     navigate('/');
     addNotification(`Loaded deck: ${deck.name}`, 'success');
   };
@@ -190,6 +203,7 @@ function AppContent() {
                 <ErrorBoundary>
                   <DeckBuilder 
                     initialDeck={currentDeck}
+                    loadedDeckInfo={loadedDeckInfo}
                     onDeckSaved={handleDeckSaved}
                   />
                 </ErrorBoundary>

@@ -2,7 +2,6 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import ProfileSection from './ProfileSection';
-import { AuthProvider } from '../contexts/AuthContext';
 import { fetchCards } from '../services/api';
 import * as authService from '../services/authService';
 
@@ -56,6 +55,32 @@ const mockUser = {
   updatedAt: '2023-01-01T00:00:00Z'
 };
 
+// Mock AuthContext
+const mockAuthContext = {
+  user: mockUser,
+  isLoading: false,
+  isAuthenticated: true,
+  login: jest.fn(),
+  logout: jest.fn(),
+  updateProfile: jest.fn(),
+  refreshUser: jest.fn(),
+};
+
+jest.mock('../contexts/AuthContext', () => ({
+  AuthProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  useAuth: () => mockAuthContext,
+}));
+
+jest.mock('../contexts/OnboardingContext', () => ({
+  OnboardingProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  useOnboarding: () => ({
+    isOnboardingComplete: true,
+    currentStep: null,
+    completeOnboarding: jest.fn(),
+    resetOnboarding: jest.fn(),
+  }),
+}));
+
 describe('AvatarSelector Integration with ProfileSection', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -82,11 +107,7 @@ describe('AvatarSelector Integration with ProfileSection', () => {
   });
 
   const renderWithAuth = (component: React.ReactElement) => {
-    return render(
-      <AuthProvider>
-        {component}
-      </AuthProvider>
-    );
+    return render(component);
   };
 
   it('should open avatar selector when change avatar button is clicked', async () => {

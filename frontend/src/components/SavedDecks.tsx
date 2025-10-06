@@ -72,7 +72,7 @@ const SavedDecks: React.FC<SavedDecksProps> = ({ onSelectDeck, onNotification, r
   const handleSelectDeck = (deck: UnifiedDeck) => {
     // Convert UnifiedDeck back to Deck format for compatibility
     const deckForCallback: Deck = {
-      id: typeof deck.id === 'string' ? undefined : deck.id, // Only pass numeric IDs
+      id: deck.id, // Keep the original ID (string or number) for proper tracking
       name: deck.name,
       slots: deck.slots,
       average_elixir: deck.average_elixir,
