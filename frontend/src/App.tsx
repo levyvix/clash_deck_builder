@@ -34,7 +34,7 @@ function AppContent() {
   );
   
   // Track loaded deck metadata for update functionality
-  const [loadedDeckInfo, setLoadedDeckInfo] = useState<{ id: string | number; name: string } | null>(null);
+  const [loadedDeckInfo, setLoadedDeckInfo] = useState<{ id: string | number; name: string } | undefined>(undefined);
   
   // State to trigger refresh of saved decks list
   const [refreshSavedDecks, setRefreshSavedDecks] = useState(0);
@@ -83,7 +83,7 @@ function AppContent() {
       });
     } else {
       // Clear loaded deck info if no ID (shouldn't happen with proper deck data)
-      setLoadedDeckInfo(null);
+      setLoadedDeckInfo(undefined);
     }
     navigate('/');
     addNotification(`Loaded deck: ${deck.name}`, 'success');

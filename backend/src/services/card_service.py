@@ -7,6 +7,7 @@ from mysql.connector.cursor import MySQLCursor
 
 from ..models.card import Card
 from ..exceptions import DatabaseError
+from ..utils.cache import cards_cache
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +21,9 @@ class CardService:
 
     async def get_all_cards(self) -> List[Card]:
         """
-        Retrieve all cards from the database.
+        Retrieve all cards from the database with caching.
+
+        Uses in-memory cache with 24-hour TTL since card data rarely changes.
 
         Returns:
             List[Card]: List of all cards in the database
@@ -28,11 +31,19 @@ class CardService:
         Raises:
             DatabaseError: If database query fails
         """
+        # Check cache first
+        cache_key = "all_cards"
+        cached_cards = cards_cache.get(cache_key)
+        if cached_cards is not None:
+            logger.info(f"Returning {len(cached_cards)} cards from cache")
+            return cached_cards
+
+        # Cache miss - fetch from database
         try:
             self.db_session.execute(
-                """SELECT id, name, elixir_cost, rarity, type, arena, 
-                          image_url, image_url_evo 
-                   FROM cards 
+                """SELECT id, name, elixir_cost, rarity, type, arena,
+                          image_url, image_url_evo
+                   FROM cards
                    ORDER BY id"""
             )
             rows = self.db_session.fetchall()
@@ -46,7 +57,11 @@ class CardService:
                     logger.warning(f"Skipping card {row.get('id')} due to validation error: {e}")
                     continue
 
-            logger.debug(f"Retrieved {len(cards)} cards from database")
+            logger.info(f"Retrieved {len(cards)} cards from database and cached")
+
+            # Store in cache
+            cards_cache.set(cache_key, cards)
+
             return cards
 
         except MySQLError as e:
@@ -58,7 +73,7 @@ class CardService:
 
     async def get_card_by_id(self, card_id: int) -> Optional[Card]:
         """
-        Retrieve a single card by ID.
+        Retrieve a single card by ID with caching.
 
         Args:
             card_id: The unique identifier of the card
@@ -69,11 +84,19 @@ class CardService:
         Raises:
             DatabaseError: If database query fails
         """
+        # Check cache first
+        cache_key = f"card:{card_id}"
+        cached_card = cards_cache.get(cache_key)
+        if cached_card is not None:
+            logger.debug(f"Returning card {card_id} from cache")
+            return cached_card
+
+        # Cache miss - fetch from database
         try:
             self.db_session.execute(
-                """SELECT id, name, elixir_cost, rarity, type, arena, 
-                          image_url, image_url_evo 
-                   FROM cards 
+                """SELECT id, name, elixir_cost, rarity, type, arena,
+                          image_url, image_url_evo
+                   FROM cards
                    WHERE id = %s""",
                 (card_id,),
             )
@@ -84,7 +107,11 @@ class CardService:
                 return None
 
             card = self._transform_db_row_to_card(row)
-            logger.debug(f"Retrieved card {card_id} from database")
+            logger.debug(f"Retrieved card {card_id} from database and cached")
+
+            # Store in cache
+            cards_cache.set(cache_key, card)
+
             return card
 
         except MySQLError as e:
@@ -96,6 +123,15 @@ class CardService:
         except Exception as e:
             logger.error(f"Unexpected error retrieving card {card_id}: {e}")
             raise DatabaseError(f"Unexpected error retrieving card {card_id}: {e}", e)
+
+    def invalidate_cache(self) -> None:
+        """Invalidate all card caches. Call this when card data is updated."""
+        cards_cache.clear()
+        logger.info("Card cache invalidated")
+
+    def get_cache_stats(self) -> dict:
+        """Get cache statistics for monitoring."""
+        return cards_cache.get_stats()
 
     def _transform_db_row_to_card(self, row: dict) -> Card:
         """

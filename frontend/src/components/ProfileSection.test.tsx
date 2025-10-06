@@ -220,12 +220,24 @@ describe('ProfileSection', () => {
   });
 
   it('renders error state when no user is available', () => {
-    const contextWithoutUser = { ...mockAuthContext, user: null, isAuthenticated: false };
-    
+    const contextWithoutUser = {
+      ...mockAuthContext,
+      user: {
+        id: '',
+        googleId: '',
+        email: '',
+        name: '',
+        avatar: '',
+        createdAt: '',
+        updatedAt: ''
+      } as User,
+      isAuthenticated: false
+    };
+
     mockUseAuth.mockReturnValueOnce(contextWithoutUser);
-    
+
     renderWithProviders(<ProfileSection cards={mockCards} />);
-    
+
     expect(screen.getByText('No user information available. Please sign in again.')).toBeInTheDocument();
   });
 });

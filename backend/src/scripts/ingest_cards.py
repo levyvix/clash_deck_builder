@@ -17,6 +17,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from src.utils.database import db_manager, DatabaseError
 from src.utils.config import get_settings
+from src.utils.cache import cards_cache
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
@@ -298,6 +299,12 @@ def main():
         # Ingest cards into database
         logger.info("Ingesting cards into database...")
         inserted, updated, errors = ingest_cards(transformed_cards)
+
+        # Invalidate cache after successful ingestion
+        if inserted > 0 or updated > 0:
+            logger.info("Invalidating card cache...")
+            cards_cache.clear()
+            logger.info("Card cache invalidated successfully")
 
         # Summary
         logger.info("=" * 60)

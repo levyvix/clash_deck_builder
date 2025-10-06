@@ -248,6 +248,18 @@ const processCardData = (cards: any[]): any[] => {
 };
 
 export const fetchCards = async () => {
+  // Import cache functions dynamically to avoid circular dependencies
+  const { getCachedCards, cacheCards } = await import('./cardCacheService');
+
+  // Check cache first
+  const cachedCards = getCachedCards();
+  if (cachedCards !== null) {
+    console.log(`🚀 CACHE HIT: Returning ${cachedCards.length} cards from localStorage (no API call needed)`);
+    return cachedCards;
+  }
+
+  // Cache miss - fetch from API
+  console.log('📭 CACHE MISS: Fetching cards from API...');
   return withRetry(async () => {
     try {
       const url = `${API_BASE_URL}/api/cards/cards`;
@@ -262,6 +274,10 @@ export const fetchCards = async () => {
 
       // Process and filter the card data
       const processedCards = processCardData(rawData);
+
+      // Cache the processed cards
+      cacheCards(processedCards);
+      console.log(`💾 Cards cached to localStorage for 24 hours`);
 
       return processedCards;
     } catch (error) {
