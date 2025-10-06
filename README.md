@@ -165,24 +165,82 @@ python3 verify-essential-features.py
 curl http://localhost:8000/health | jq
 curl http://localhost:8000/api/cards/cards | jq | head -50
 
-# Playwright E2E tests (full test suite)
-# Note: Browser tests may timeout in WSL2 environments
+# Playwright E2E tests - Essential deck operations (recommended)
+npx playwright test e2e-deck-basic
+
+# Playwright E2E tests - All essential features
+npx playwright test e2e-essential
+
+# Playwright E2E tests - Comprehensive deck operations
+npx playwright test e2e-deck-operations
+
+# Run all E2E tests
 npx playwright test
 
-# Run only API tests (works in all environments)
-npx playwright test --grep "API Health"
+# Run specific test suite
+npx playwright test --grep "Deck Building"
+npx playwright test --grep "API Integration"
 
 # Run with UI for debugging
 npx playwright test --ui
 
 # View test report
 npx playwright show-report
+
+# Run tests in headed mode (see browser)
+npx playwright test --headed
 ```
 
 **Prerequisites for E2E tests:**
 - Backend and database running in Docker: `docker-compose up -d backend database`
 - Frontend running locally: `cd frontend && npm start`
+- Playwright installed: `npm install -D @playwright/test && npx playwright install chromium`
 - See [E2E_TEST_SUMMARY.md](E2E_TEST_SUMMARY.md) for detailed test documentation
+
+### Run All Tests
+
+**Automated (Recommended):**
+```bash
+# Ensure services are running first
+docker-compose up -d backend database
+cd frontend && npm start  # In separate terminal
+
+# Run all tests with single command
+./run-all-tests.sh        # Linux/macOS
+.\run-all-tests.ps1       # Windows/PowerShell
+```
+
+**Manual (Step-by-step):**
+```bash
+# 1. Start services (in separate terminal or background)
+docker-compose up -d backend database
+cd frontend && npm start
+
+# 2. Run all backend tests
+cd backend
+uv run pytest --cov=src --cov-report=html
+
+# 3. Run all frontend tests
+cd ../frontend
+npm run test:run -- --coverage
+
+# 4. Run E2E tests
+cd ..
+npx playwright test e2e-deck-basic
+npx playwright test e2e-essential
+
+# View coverage reports
+# Backend: open backend/htmlcov/index.html
+# Frontend: open frontend/coverage/lcov-report/index.html
+```
+
+**Quick test verification:**
+```bash
+# Verify all services and run smoke tests
+cd backend && uv run pytest tests/contract/ && cd ..
+cd frontend && npm run test:run && cd ..
+npx playwright test e2e-deck-basic --reporter=line
+```
 
 ## Development Commands
 

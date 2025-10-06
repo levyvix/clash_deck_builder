@@ -90,5 +90,23 @@ env-backup/
 debug-config.env
 *.env.debug
 
+# Node modules
+node_modules/
+frontend/node_modules/
+
+# Test results
+test-results/
+frontend/test-results/
+playwright-report/
+frontend/playwright-report/
+
+# Coverage
+coverage/
+frontend/coverage/
+htmlcov/
+backend/htmlcov/
+.nyc_output/
+*.lcov
+
 nul
 backend/src/utils/__pycache__/dependencies.cpython-311.pyc
