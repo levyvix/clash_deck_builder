@@ -1,0 +1,11 @@
+apiVersion: 1
+
+providers:
+  - name: 'Clash Royale'
+    orgId: 1
+    folder: 'Clash Royale'
+    type: file
+    disableDeletion: false
+    editable: true
+    options:
+      path: /etc/grafana/provisioning/dashboards

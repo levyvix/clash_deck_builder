@@ -2,6 +2,11 @@
 
 The Clash Royale Deck Builder backend provides a RESTful API for managing users, decks, and card data.
 
+## Documentation
+
+- [Detailed API Reference](reference.md) - Complete endpoint documentation with examples
+- [Interactive Documentation](#interactive-documentation) - Try the API in your browser
+
 ## Base URL
 
 **Development**: `http://localhost:8000`
