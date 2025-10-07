@@ -344,14 +344,12 @@ npm start
 ```
 
 ### Making Changes
-1. Create feature branch from `001-i-would-like` (main development branch)
+1. Make branch from main.
 2. Make changes and test locally
 3. Run linters: `uv run black . && uv run flake8 .` (backend) or verify TypeScript compiles (frontend)
 4. Run tests: `uv run pytest` (backend) and `npm test` (frontend)
 5. Commit and push changes
-6. Create PR to `001-i-would-like` branch
-
-**Note**: The main development branch is `001-i-would-like`, not `main`. This follows the spec-based branching strategy used by this project.
+6. Create PR to `main` branch
 
 ## Key Files to Know
 
@@ -377,11 +375,6 @@ Key steering documents:
 - `.kiro/steering/tech.md` - Technology stack and standards
 - `.kiro/steering/project-guide.md` - Development workflow guidelines
 
-### Branch Strategy
-- **Main development branch**: `001-i-would-like` (not `main`)
-- Feature branches created from `001-i-would-like`
-- PRs merge back into `001-i-would-like`
-- Follows spec-based branching pattern from `.kiro/specs/`
 
 ## Notes for AI Assistants
 

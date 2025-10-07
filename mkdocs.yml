@@ -1,0 +1,95 @@
+site_name: Clash Royale Deck Builder
+site_description: Documentation for the Clash Royale Deck Builder web application
+site_author: Clash Deck Builder Team
+repo_url: https://github.com/yourusername/clash_deck_builder
+
+dev_addr: '127.0.0.1:8001'
+
+theme:
+  name: material
+  palette:
+    # Light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: deep purple
+      accent: purple
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    # Dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: deep purple
+      accent: purple
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.code.annotate
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.details
+  - admonition
+  - tables
+  - attr_list
+  - md_in_html
+  - toc:
+      permalink: true
+
+plugins:
+  - search
+
+nav:
+  - Home: index.md
+  - Getting Started:
+      - Quick Start: getting-started/quickstart.md
+      - Environment Setup: getting-started/environment-setup.md
+      - Development Workflow: getting-started/workflow.md
+  - Architecture:
+      - Overview: architecture/overview.md
+      - Backend: architecture/backend.md
+      - Frontend: architecture/frontend.md
+      - Database: architecture/database.md
+  - Development:
+      - Backend Development: development/backend.md
+      - Frontend Development: development/frontend.md
+      - Testing: development/testing.md
+      - Docker: development/docker.md
+  - API Reference:
+      - Overview: api/overview.md
+      - Authentication: api/authentication.md
+      - Profile: api/profile.md
+      - Cards: api/cards.md
+      - Decks: api/decks.md
+  - Features:
+      - Deck Management: features/deck-management.md
+      - Evolution Cards: features/evolution-cards.md
+      - Anonymous Mode: features/anonymous-mode.md
+      - Google OAuth: features/google-oauth.md
+  - Operations:
+      - Database Migrations: operations/migrations.md
+      - Deployment: operations/deployment.md
+      - Troubleshooting: operations/troubleshooting.md

@@ -410,7 +410,30 @@ clash_deck_builder/
 └── DEVELOPMENT.md       # Detailed development guide
 ```
 
-## API Documentation
+## Documentation
+
+### Project Documentation
+Comprehensive documentation is available using MkDocs:
+
+```bash
+# Install documentation dependencies (first time only)
+uv sync --group docs
+
+# Serve documentation locally
+uv run mkdocs serve
+
+# Access at http://127.0.0.1:8001
+```
+
+The documentation includes:
+- Getting Started guides
+- Architecture overview
+- Development workflows
+- API reference
+- Feature documentation
+- Troubleshooting guides
+
+### API Documentation
 
 When the backend is running, you can access:
 - **API Documentation**: http://localhost:8000/docs (Swagger UI)

@@ -110,3 +110,6 @@ backend/htmlcov/
 
 nul
 backend/src/utils/__pycache__/dependencies.cpython-311.pyc
+
+# MkDocs build output
+site/
