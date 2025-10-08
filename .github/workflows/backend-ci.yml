@@ -1,0 +1,121 @@
+name: Backend CI
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend-ci.yml'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend-ci.yml'
+
+jobs:
+  test:
+    name: Test Backend Core Functionality
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root_password
+          MYSQL_DATABASE: clash_deck_builder_test
+          MYSQL_USER: clash_user
+          MYSQL_PASSWORD: test_password
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    env:
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_NAME: clash_deck_builder_test
+      DB_USER: clash_user
+      DB_PASSWORD: test_password
+      DB_ROOT_PASSWORD: root_password
+      JWT_SECRET_KEY: test-secret-key-for-ci-minimum-32-characters-long
+      JWT_ACCESS_TOKEN_EXPIRE_MINUTES: 15
+      JWT_REFRESH_TOKEN_EXPIRE_DAYS: 7
+      GOOGLE_CLIENT_ID: test-client-id
+      GOOGLE_CLIENT_SECRET: test-client-secret
+      CORS_ORIGINS: http://localhost:3000
+      ENVIRONMENT: test
+      DEBUG: false
+      LOG_LEVEL: info
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install UV
+        run: |
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+
+      - name: Verify UV installation
+        run: uv --version
+
+      - name: Install dependencies
+        working-directory: backend
+        run: |
+          uv sync
+
+      - name: Wait for MySQL
+        run: |
+          for i in {1..30}; do
+            if mysqladmin ping -h 127.0.0.1 -u root -proot_password &> /dev/null; then
+              echo "MySQL is ready"
+              break
+            fi
+            echo "Waiting for MySQL... ($i/30)"
+            sleep 2
+          done
+
+      - name: Set up test database schema
+        working-directory: backend
+        run: |
+          mysql -h 127.0.0.1 -u root -proot_password clash_deck_builder_test < ../database/init/01-schema.sql
+          mysql -h 127.0.0.1 -u root -proot_password clash_deck_builder_test < ../database/init/02-indexes.sql
+
+      - name: Run unit tests
+        working-directory: backend
+        run: |
+          uv run pytest tests/unit/ -v --tb=short
+
+      - name: Run contract tests
+        working-directory: backend
+        run: |
+          uv run pytest tests/contract/ -v --tb=short
+
+      - name: Run core integration tests
+        working-directory: backend
+        run: |
+          uv run pytest tests/integration/test_database_connection.py -v --tb=short
+          uv run pytest tests/integration/test_card_database.py -v --tb=short
+          uv run pytest tests/integration/test_deck_operations.py -v --tb=short
+
+      - name: Generate test report
+        if: always()
+        working-directory: backend
+        run: |
+          uv run pytest tests/unit/ tests/contract/ --tb=short --junit-xml=test-results.xml
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: backend/test-results.xml
+          retention-days: 30
