@@ -73,23 +73,35 @@ nav:
       - Backend: architecture/backend.md
       - Frontend: architecture/frontend.md
       - Database: architecture/database.md
+      - System Architecture: architecture/system-architecture.md
+      - Database Schema: architecture/database-schema.md
   - Development:
       - Backend Development: development/backend.md
       - Frontend Development: development/frontend.md
       - Testing: development/testing.md
       - Docker: development/docker.md
+      - Error Handling: development/error-handling.md
   - API Reference:
       - Overview: api/overview.md
       - Authentication: api/authentication.md
       - Profile: api/profile.md
       - Cards: api/cards.md
       - Decks: api/decks.md
+      - Reference: api/reference.md
+      - Versioning: api/versioning.md
+      - Rate Limiting: api/rate-limiting.md
   - Features:
       - Deck Management: features/deck-management.md
       - Evolution Cards: features/evolution-cards.md
       - Anonymous Mode: features/anonymous-mode.md
       - Google OAuth: features/google-oauth.md
+      - Deck Builder: features/deck-builder.md
   - Operations:
       - Database Migrations: operations/migrations.md
       - Deployment: operations/deployment.md
       - Troubleshooting: operations/troubleshooting.md
+      - Monitoring and Logging: operations/monitoring-logging.md
+  - Security:
+      - Best Practices: security/best-practices.md
+  - Performance:
+      - Optimization: performance/optimization.md

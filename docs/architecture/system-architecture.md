@@ -6,13 +6,13 @@ This document provides an overview of the Clash Royale Deck Builder's system arc
 
 ```mermaid
 graph TD
-    A[Frontend] <-->|HTTPS| B[API Gateway]
-    B <--> C[Auth Service]
-    B <--> D[Deck Service]
-    B <--> E[Card Service]
+    A[Frontend] <-->|HTTPS| B[Backend (FastAPI)]
+    B <--> C[Auth Logic]
+    B <--> D[Deck Logic]
+    B <--> E[Card Logic]
     D <--> F[(MySQL Database)]
     E <--> G[Clash Royale API]
-    E <--> H[Redis Cache]
+    E <--> H[In-Memory Cache]
 ```
 
 ## Core Components
@@ -23,40 +23,43 @@ graph TD
   - React 19.2+
   - TypeScript
   - React Router DOM
-  - Redux for state management
-  - Styled Components
+  - React Context API for global state
 
 ### 2. Backend Services (FastAPI)
 
-#### API Gateway
-- **Purpose**: Entry point for all client requests
+#### Backend (FastAPI Application)
+- **Purpose**: Centralized entry point for all API requests and business logic execution.
 - **Responsibilities**:
-  - Request routing
-  - Authentication/Authorization
-  - Rate limiting
-  - Request/Response validation
+  - **API Routing**: Directs incoming requests to appropriate handlers.
+  - **Authentication/Authorization**: Handles user login, JWT validation, and access control.
+  - **Data Validation**: Ensures integrity of incoming request data.
+  - **Business Logic Execution**: Orchestrates operations related to decks, cards, and user profiles.
+  - **Database Interaction**: Manages all data persistence operations with MySQL.
+  - **External API Integration**: Communicates with Clash Royale API and Google OAuth services.
 
-#### Auth Service
-- **Purpose**: Handle user authentication and authorization
-- **Features**:
-  - Google OAuth integration
-  - JWT token generation/validation
-  - User session management
+This single backend application logically separates concerns into the following internal services:
 
-#### Deck Service
-- **Purpose**: Manage deck-related operations
+##### Auth Logic
+- **Purpose**: Manages user authentication and authorization.
 - **Features**:
-  - CRUD operations for decks
-  - Deck validation
-  - Average elixir calculation
-  - Evolution card management
+  - Google OAuth integration for user sign-in.
+  - JWT token generation, validation, and refresh.
+  - User session management via JWT.
 
-#### Card Service
-- **Purpose**: Provide card data and metadata
+##### Deck Logic
+- **Purpose**: Handles all operations related to user decks.
 - **Features**:
-  - Card data retrieval
-  - Caching layer
-  - Card filtering and search
+  - Create, Read, Update, Delete (CRUD) operations for decks.
+  - Enforces deck size (8 cards) and evolution slot limits (max 2).
+  - Calculates average elixir cost for decks.
+  - Validates card IDs and evolution slots.
+
+##### Card Logic
+- **Purpose**: Provides access to Clash Royale card data.
+- **Features**:
+  - Retrieves card data from the database.
+  - Implements an in-memory caching layer for performance.
+  - Supports client-side filtering and search based on card attributes.
 
 ## Data Flow
 
