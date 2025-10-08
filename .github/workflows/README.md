@@ -10,10 +10,8 @@ Automated testing of core backend functionality on every push or pull request to
 ### What It Tests
 1. **Unit Tests** - Business logic in services, utilities, and models
 2. **Contract Tests** - API endpoint contracts and response formats
-3. **Core Integration Tests**:
-   - Database connection and operations
-   - Card database functionality
-   - Deck CRUD operations
+
+**Note**: Integration tests are NOT run in CI because they require a full Docker environment with database. Run integration tests locally with `docker-compose -f docker-compose.test.yml up -d`
 
 ### Triggers
 - Push to `main` or `develop` branches (only when backend files change)
@@ -22,33 +20,22 @@ Automated testing of core backend functionality on every push or pull request to
 ### Infrastructure
 - **Python**: 3.11
 - **Package Manager**: UV (not pip)
-- **Database**: MySQL 8.0 service container
 - **Test Framework**: pytest
+- **Database**: Not required (unit and contract tests use mocks)
 
 ### Workflow Steps
 1. Checkout code
 2. Set up Python 3.11
 3. Install UV package manager
 4. Install Python dependencies with `uv sync`
-5. Wait for MySQL service to be healthy
-6. Set up test database schema
-7. Run unit tests
-8. Run contract tests
-9. Run core integration tests
-10. Generate JUnit XML test report
-11. Upload test results as artifacts
+5. Run unit tests
+6. Run contract tests
+7. Generate JUnit XML test report
+8. Upload test results as artifacts
 
 ### Required GitHub Secrets
 
 No secrets are required for this workflow. Card data is ingested from JSON files, not the Clash Royale API.
-
-### Test Database Configuration
-
-The workflow automatically creates a MySQL test database with:
-- Database: `clash_deck_builder_test`
-- User: `clash_user`
-- Password: `test_password`
-- Root Password: `root_password`
 
 ### Viewing Results
 
@@ -59,33 +46,26 @@ The workflow automatically creates a MySQL test database with:
 ### Running the Same Tests Locally
 
 ```bash
-# Start test database
-docker-compose -f docker-compose.test.yml up -d
-
-# Run unit tests
 cd backend
+
+# Run unit tests (no database needed)
 uv run pytest tests/unit/ -v
 
-# Run contract tests
+# Run contract tests (no database needed)
 uv run pytest tests/contract/ -v
 
-# Run core integration tests
-uv run pytest tests/integration/test_database_connection.py -v
-uv run pytest tests/integration/test_card_database.py -v
-uv run pytest tests/integration/test_deck_operations.py -v
+# Run integration tests (requires Docker database)
+docker-compose -f ../docker-compose.test.yml up -d
+uv run pytest tests/integration/ -v
 ```
 
 ### Performance
 
-- **Typical run time**: 3-5 minutes
+- **Typical run time**: 1-2 minutes
 - **Path filtering**: Only runs when backend code changes
-- **MySQL health checks**: Ensures database is ready before tests run
+- **Fast execution**: No database setup needed for unit/contract tests
 
 ### Troubleshooting
-
-**MySQL connection failures**:
-- The workflow waits up to 60 seconds for MySQL to be ready
-- Check the "Wait for MySQL" step logs
 
 **Dependency installation issues**:
 - Verify `pyproject.toml` is valid

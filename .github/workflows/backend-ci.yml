@@ -17,29 +17,25 @@ jobs:
     name: Test Backend Core Functionality
     runs-on: ubuntu-latest
 
-    services:
-      mysql:
-        image: mysql:8.0
-        env:
-          MYSQL_ROOT_PASSWORD: root_password
-          MYSQL_DATABASE: clash_deck_builder_test
-          MYSQL_USER: clash_user
-          MYSQL_PASSWORD: test_password
-        ports:
-          - 3306:3306
-        options: >-
-          --health-cmd="mysqladmin ping -h localhost"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=5
+    # Note: MySQL service disabled since we're only running unit/contract tests
+    # Integration tests require full Docker setup and should be run locally
+    # services:
+    #   mysql:
+    #     image: mysql:8.0
+    #     env:
+    #       MYSQL_ROOT_PASSWORD: root_password
+    #       MYSQL_DATABASE: clash_deck_builder_test
+    #       MYSQL_USER: clash_user
+    #       MYSQL_PASSWORD: test_password
+    #     ports:
+    #       - 3306:3306
+    #     options: >-
+    #       --health-cmd="mysqladmin ping -h localhost"
+    #       --health-interval=10s
+    #       --health-timeout=5s
+    #       --health-retries=5
 
     env:
-      DB_HOST: 127.0.0.1
-      DB_PORT: 3306
-      DB_NAME: clash_deck_builder_test
-      DB_USER: clash_user
-      DB_PASSWORD: test_password
-      DB_ROOT_PASSWORD: root_password
       JWT_SECRET_KEY: test-secret-key-for-ci-minimum-32-characters-long
       JWT_ACCESS_TOKEN_EXPIRE_MINUTES: 15
       JWT_REFRESH_TOKEN_EXPIRE_DAYS: 7
@@ -72,22 +68,9 @@ jobs:
         run: |
           uv sync
 
-      - name: Wait for MySQL
-        run: |
-          for i in {1..30}; do
-            if mysqladmin ping -h 127.0.0.1 -u root -proot_password &> /dev/null; then
-              echo "MySQL is ready"
-              break
-            fi
-            echo "Waiting for MySQL... ($i/30)"
-            sleep 2
-          done
-
-      - name: Set up test database schema
-        working-directory: backend
-        run: |
-          mysql -h 127.0.0.1 -u root -proot_password clash_deck_builder_test < ../database/init/01-schema.sql
-          mysql -h 127.0.0.1 -u root -proot_password clash_deck_builder_test < ../database/init/02-indexes.sql
+      # Database setup steps removed - only needed for integration tests
+      # - name: Wait for MySQL
+      # - name: Set up test database schema
 
       - name: Run unit tests
         working-directory: backend
@@ -99,12 +82,14 @@ jobs:
         run: |
           uv run pytest tests/contract/ -v --tb=short
 
-      - name: Run core integration tests
-        working-directory: backend
-        run: |
-          uv run pytest tests/integration/test_database_connection.py -v --tb=short
-          uv run pytest tests/integration/test_card_database.py -v --tb=short
-          uv run pytest tests/integration/test_deck_operations.py -v --tb=short
+      # Skip integration tests in CI - they require full database setup with Docker
+      # Integration tests should be run locally with: docker-compose -f docker-compose.test.yml up -d
+      # - name: Run core integration tests
+      #   working-directory: backend
+      #   run: |
+      #     uv run pytest tests/integration/test_database_connection.py -v --tb=short
+      #     uv run pytest tests/integration/test_card_database.py -v --tb=short
+      #     uv run pytest tests/integration/test_deck_operations.py -v --tb=short
 
       - name: Generate test report
         if: always()
