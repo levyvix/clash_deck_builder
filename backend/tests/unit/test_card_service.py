@@ -93,39 +93,46 @@ async def test_get_all_cards_success(card_service, mock_db_session, sample_card_
 
 
 @pytest.mark.asyncio
-async def test_get_all_cards_empty_database(card_service, mock_db_session):
+@patch('src.services.card_service.cards_cache')
+async def test_get_all_cards_empty_database(mock_cache, card_service, mock_db_session):
     """Test get_all_cards() with empty database."""
     # Arrange
+    mock_cache.get.return_value = None  # Cache miss
     mock_db_session.fetchall.return_value = []
-    
+
     # Act
     cards = await card_service.get_all_cards()
-    
+
     # Assert
     assert cards == []
     assert isinstance(cards, list)
     mock_db_session.execute.assert_called_once()
     mock_db_session.fetchall.assert_called_once()
+    mock_cache.set.assert_called_once_with("all_cards", [])
 
 
 @pytest.mark.asyncio
-async def test_get_all_cards_database_error(card_service, mock_db_session):
+@patch('src.services.card_service.cards_cache')
+async def test_get_all_cards_database_error(mock_cache, card_service, mock_db_session):
     """Test database error handling in get_all_cards()."""
     # Arrange
+    mock_cache.get.return_value = None  # Cache miss
     mock_db_session.execute.side_effect = MySQLError("Connection lost")
-    
+
     # Act & Assert
     with pytest.raises(DatabaseError) as exc_info:
         await card_service.get_all_cards()
-    
+
     assert "Failed to retrieve cards from database" in str(exc_info.value)
     assert exc_info.value.original_error is not None
 
 
 @pytest.mark.asyncio
-async def test_get_all_cards_skips_invalid_cards(card_service, mock_db_session):
+@patch('src.services.card_service.cards_cache')
+async def test_get_all_cards_skips_invalid_cards(mock_cache, card_service, mock_db_session):
     """Test that get_all_cards() skips cards with validation errors."""
     # Arrange
+    mock_cache.get.return_value = None  # Cache miss
     invalid_rows = [
         {
             "id": 26000000,
@@ -149,10 +156,10 @@ async def test_get_all_cards_skips_invalid_cards(card_service, mock_db_session):
         }
     ]
     mock_db_session.fetchall.return_value = invalid_rows
-    
+
     # Act
     cards = await card_service.get_all_cards()
-    
+
     # Assert - should only return the valid card
     assert len(cards) == 1
     assert cards[0].name == "Knight"
@@ -317,14 +324,16 @@ async def test_get_card_by_id_not_found(card_service, mock_db_session):
 
 
 @pytest.mark.asyncio
-async def test_get_card_by_id_database_error(card_service, mock_db_session):
+@patch('src.services.card_service.cards_cache')
+async def test_get_card_by_id_database_error(mock_cache, card_service, mock_db_session):
     """Test database error handling in get_card_by_id()."""
     # Arrange
+    mock_cache.get.return_value = None  # Cache miss
     mock_db_session.execute.side_effect = MySQLError("Connection lost")
-    
+
     # Act & Assert
     with pytest.raises(DatabaseError) as exc_info:
         await card_service.get_card_by_id(26000000)
-    
+
     assert "Failed to retrieve card" in str(exc_info.value)
     assert exc_info.value.original_error is not None

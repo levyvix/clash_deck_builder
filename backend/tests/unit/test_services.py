@@ -116,7 +116,15 @@ async def test_deck_service_create_deck(mock_deck_service):
     mock_deck_service.db_session.fetchone.return_value = {'deck_count': 5}  # User has 5 decks (under limit)
     mock_deck_service.db_session.lastrowid = 1
 
-    user = User(id=1)
+    from datetime import datetime
+    user = User(
+        id="test-user-id",
+        google_id="google-123",
+        email="test@example.com",
+        name="Test User",
+        created_at=datetime.now(),
+        updated_at=datetime.now()
+    )
     
     # Create 8 cards as required by deck validation
     cards = []
