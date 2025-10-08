@@ -46,6 +46,7 @@ jobs:
 
     - name: Install dependencies
       run: |
+        cd backend
         uv sync
     
     - name: Run tests
@@ -53,6 +54,7 @@ jobs:
         DATABASE_URL: ${{ env.DATABASE_URL }}
         TEST_DATABASE_URL: ${{ env.TEST_DATABASE_URL }}
       run: |
+        cd backend
         uv run pytest -v --cov=./ --cov-report=xml
     
     - name: Upload coverage to Codecov
