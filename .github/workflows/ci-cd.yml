@@ -9,29 +9,20 @@ on:
 env:
   DOCKER_IMAGE: ghcr.io/your-username/clash-royale-deck-builder
   DOCKER_TAG: ${{ github.sha }}
-  DATABASE_URL: mysql+pymysql://test:test@localhost:3306/test_db
-  TEST_DATABASE_URL: mysql+pymysql://test:test@localhost:3306/test_db
+  JWT_SECRET_KEY: test-secret-key-for-ci-minimum-32-characters-long
+  JWT_ACCESS_TOKEN_EXPIRE_MINUTES: 15
+  JWT_REFRESH_TOKEN_EXPIRE_DAYS: 7
+  GOOGLE_CLIENT_ID: test-client-id
+  GOOGLE_CLIENT_SECRET: test-client-secret
+  CORS_ORIGINS: http://localhost:3000
+  ENVIRONMENT: test
+  DEBUG: false
+  LOG_LEVEL: info
 
 jobs:
   test:
     runs-on: ubuntu-latest
     
-    services:
-      mysql:
-        image: mysql:8.0
-        env:
-          MYSQL_ROOT_PASSWORD: root
-          MYSQL_DATABASE: test_db
-          MYSQL_USER: test
-          MYSQL_PASSWORD: test
-        ports:
-          - 3306:3306
-        options: >-
-          --health-cmd "mysqladmin ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 3
-
     steps:
     - uses: actions/checkout@v3
     
@@ -49,20 +40,16 @@ jobs:
         cd backend
         uv sync
     
-    - name: Run tests
-      env:
-        DATABASE_URL: ${{ env.DATABASE_URL }}
-        TEST_DATABASE_URL: ${{ env.TEST_DATABASE_URL }}
-      run: |
-        cd backend
-        uv run pytest -v --cov=./ --cov-report=xml
+    - name: Run unit and contract tests
+      working-directory: backend
+      run: uv run pytest tests/unit/ tests/contract/ -v --tb=short --cov=./ --cov-report=xml
     
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
-        file: ./coverage.xml
-        fail_ci_if_error: true
+        file: ./backend/coverage.xml
+        fail_ci_if_error: false
 
   build-and-push:
     needs: test

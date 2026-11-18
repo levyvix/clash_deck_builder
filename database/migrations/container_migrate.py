@@ -76,10 +76,7 @@ def run_container_migrations():
             
             # Test database connection first
             logger.info("🔍 Testing database connection...")
-            with runner._get_connection() as conn:
-                cursor = conn.cursor()
-                cursor.execute("SELECT 1")
-                cursor.fetchone()
+            runner.check_connection()
             logger.info("✅ Database connection successful")
             
             # Run migrations

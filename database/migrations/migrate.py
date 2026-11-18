@@ -71,6 +71,13 @@ class MigrationRunner:
         except MySQLError as e:
             logger.error(f"Failed to connect to database: {e}")
             raise MigrationError(f"Database connection failed: {e}")
+
+    def check_connection(self) -> None:
+        """Verify the configured database is reachable."""
+        with self._get_connection() as connection:
+            cursor = connection.cursor()
+            cursor.execute("SELECT 1")
+            cursor.fetchone()
     
     def _ensure_migrations_table(self, cursor):
         """Create migrations tracking table if it doesn't exist"""
